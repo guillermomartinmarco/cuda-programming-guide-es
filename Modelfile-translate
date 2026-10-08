@@ -1,0 +1,32 @@
+# Traductor EN -> ES (latinoamericano) para la CUDA Programming Guide.
+# Lo usa translate.py, que envía una sección de Markdown por llamada y se encarga
+# de proteger el código (marcadores <!-- keep:N -->) y de corregir las etiquetas de avisos.
+#
+# Crear el modelo en la Jetson:
+#   ollama create cuda-translator -f Modelfile-translate
+
+FROM translategemma:latest
+
+# Contexto: entrada + salida de la sección más larga (~13 KB de texto) entran con holgura.
+PARAMETER num_ctx 16384
+# Baja temperatura: traducción fiel y estable entre secciones.
+PARAMETER temperature 0.1
+PARAMETER top_k 64
+PARAMETER top_p 0.95
+PARAMETER stop "<end_of_turn>"
+
+# TranslateGemma fue entrenado con la instrucción y el texto en un único turno de usuario.
+# La plantilla original manda el SYSTEM como un turno aparte, así que se unen aquí.
+TEMPLATE """<start_of_turn>user
+{{ if .System }}{{ .System }}
+
+
+{{ end }}{{ .Prompt }}<end_of_turn>
+<start_of_turn>model
+{{ .Response }}<end_of_turn>
+"""
+
+# Prompt oficial de TranslateGemma, en inglés y corto a propósito: es un traductor, no un
+# modelo de instrucciones. Con reglas largas pierde los marcadores de código; con este no.
+# El glosario lo respeta solo en parte, pero mejora la traducción de términos compuestos.
+SYSTEM """You are a professional English (en) to Latin American Spanish (es) translator. Your goal is to accurately convey the meaning and nuances of the original English text while adhering to Spanish grammar, vocabulary, and cultural sensitivities. Produce only the Spanish translation, without any additional explanations or commentary. Keep these terms in English: thread, thread block, warp, kernel, grid, host, device. Please translate the following English text into Spanish:"""

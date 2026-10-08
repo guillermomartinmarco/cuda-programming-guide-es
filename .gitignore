@@ -1,0 +1,10 @@
+*.pdf
+.translate_cache/
+__pycache__/
+
+# Copia del sitio de NVIDIA: solo se versionan los Markdown (originales y traducciones)
+# y las imágenes que usan. Los HTML, CSS y JS se vuelven a bajar con wget (ver MANUAL.md).
+docs.nvidia.com/**
+!docs.nvidia.com/**/
+!docs.nvidia.com/**/*.md
+!docs.nvidia.com/**/_images/*
