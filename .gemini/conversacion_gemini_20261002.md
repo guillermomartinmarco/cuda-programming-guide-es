@@ -1,7 +1,7 @@
 # Usar Ollama para Traducir
 
 > **Yo:**
-> Cómo puedo usar el modelo `translategemma` de **Ollama** para traducir libros?
+> ¿Cómo puedo usar el modelo `translategemma` de **Ollama** para traducir libros?
 
 Para traducir libros completos manteniendo el formato original de forma local y sin pagar, **puedes usar [Ollama](https://ollama.com) con el modelo [TranslateGemma](https://ollama.com/library/translategemma) junto con una interfaz o herramienta especializada como TranslateBooksWithLLMs.** [1, 2]
 
@@ -45,7 +45,7 @@ Te puedo orientar sobre si te conviene usar el modelo TranslateGemma de **4B**, 
 [3] [https://selecttranslate.com](https://selecttranslate.com/es/docs/service/ollama)
 
 > **Yo:**
-> Estoy corriendo el modelo en mi computadora, yo voy transcribiendo el libro en capitulos en .md. Es el libro **Guía de Programación de CUDA** de NVIDIA. Estoy haciendolo con VS Code. Existe la posibilidad de suministrarle un _system prompt_?
+> Estoy corriendo el modelo en mi computadora, yo voy transcribiendo el libro en capitulos en `.md`. Es el libro **Guía de Programación de CUDA** de NVIDIA. Estoy haciéndolo con VS Code. ¿Existe la posibilidad de suministrarle un _system prompt_?
 
 **Sí, existe la posibilidad de suministrarle un system prompt** a [Ollama](https://www.google.com/search?q=ollama&kgmid=/g/11ldlzv8sz), y de hecho es lo más recomendable para mantener el vocabulario técnico exacto de un libro tan especializado como la [Guía de Programación de CUDA](https://www.google.com/search?q=gu%C3%ADa+de+programaci%C3%B3n+de+cuda&kgmid=/g/12cq5428z) de NVIDIA. [1]
 
@@ -139,7 +139,7 @@ Al migrar este flujo exacto a **Ollama con TranslateGemma**, puedes automatizar 
 
 En tu `Modelfile`, el `SYSTEM PROMPT` debe incluir instrucciones específicas para el estándar de Markdown que usas en GitHub (especialmente para proteger los diagramas de **Mermaid** y las rutas de tus imágenes tipo `f001.png`):
 
-```dockerfile
+````dockerfile
 FROM translategemma:4b # O la versión que elijas (12b, 27b)
 
 PARAMETER temperature 0.1
@@ -157,7 +157,7 @@ Reglas estrictas de formato y traducción:
 6. Traduce al español latinoamericano el texto explicativo con un tono profesional y técnico.
 7. Devuelve ÚNICAMENTE el código Markdown traducido. No agregues introducciones, notas de autor ni saludos.
 """
-```
+````
 
 ## 2. Cómo integrarlo en tu día a día en VS Code
 
@@ -167,9 +167,9 @@ Para no perder la comodidad de ir editando sección por sección como hacías co
 
 Si no quieres usar la terminal para todo, instala la extensión **Continue** o **Llama Coder** en VS Code.
 
-   1. Conéctala a tu Ollama local.
-   2. Selecciona el texto en inglés que acabas de extraer del PDF (aquí no hay límite de 1500 caracteres, puedes seleccionar subsecciones enteras de 10,000 o 20,000 caracteres de una sola vez).
-   3. Presiona el atajo de la extensión (ej. `Ctrl + Shift + L` en Continue) y escribe un comando rápido como: `"/traducir"` (si ya configuraste el modelo personalizado) o simplemente pídele que reemplace el texto seleccionado aplicando tus reglas.
+1. Conéctala a tu Ollama local.
+2. Selecciona el texto en inglés que acabas de extraer del PDF (aquí no hay límite de 1500 caracteres, puedes seleccionar subsecciones enteras de 10,000 o 20,000 caracteres de una sola vez).
+3. Presiona el atajo de la extensión (ej. `Ctrl + Shift + L` en Continue) y escribe un comando rápido como: `"/traducir"` (si ya configuraste el modelo personalizado) o simplemente pídele que reemplace el texto seleccionado aplicando tus reglas.
 
 ### Opción B: Automatizar la traducción por capítulos completos (Terminal)
 
@@ -190,21 +190,21 @@ Te puedo ayudar con la configuración exacta de la extensión de VS Code o con u
 > Acabo de probarlo, mirá los tests que te paso en los adjuntos.
 >
 > ```bash
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
-> ╰─$ ollama run cuda-translator < test_en.md > test_es.md          
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
+> ╰─$ ollama run cuda-translator < test_en.md > test_es.md
 > Added image './img/f008.png'
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
-> ╰─$ 
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
+> ╰─$
 > ```
 >
-> No sé que quiso hacer leyendo la imagen. Observá los caracteres que metio en el test_es.md. Me parece que voy a tener que eliminar el "submodelo", ajustar el `Modelfile` y crearlo de nuevo. Qué decis?
+> No sé que quiso hacer leyendo la imagen. Observá los caracteres que metió en el `test_es.md`. Me parece que voy a tener que eliminar el "submodelo", ajustar el `Modelfile` y crearlo de nuevo. ¿Qué decís?
 
 **Tenés toda la razón, hay que destruirlo y volverlo a crear.** Lo que pasó ahí es una mezcla de dos problemas típicos de Ollama cuando procesa archivos por lote.
 
 ## ¿Qué pasó exactamente?
 
-   1. **El malentendido de la imagen (Added image):** Ollama escaneó el texto plano de tu Markdown, leyó la sintaxis `![](./img/f008.png)` e interpretó erróneamente que le estabas inyectando una imagen real para un modelo multimodal (como un modelo de visión). Intentó cargarla localmente, rompió la ruta de salida en el Markdown generado y por eso te dejó el enlace vacío: `> ![Figura 8]()`.
-   2. **Los caracteres extraños (`[1D [K`, `[8D [K`):** Esos caracteres son **secuencias de escape ANSI**. Ocurren porque el comando `ollama run` está diseñado para ser interactivo en la terminal (va mostrando animaciones de carga, efectos de escritura y saltos de línea interactivos). Al redirigir la salida con `>`, Ollama imprimió esos códigos de control de la consola directamente dentro de tu archivo `.md`.
+1. **El malentendido de la imagen (Added image):** Ollama escaneó el texto plano de tu Markdown, leyó la sintaxis `![](./img/f008.png)` e interpretó erróneamente que le estabas inyectando una imagen real para un modelo multimodal (como un modelo de visión). Intentó cargarla localmente, rompió la ruta de salida en el Markdown generado y por eso te dejó el enlace vacío: `> ![Figura 8]()`.
+2. **Los caracteres extraños (`[1D [K`, `[8D [K`):** Esos caracteres son **secuencias de escape ANSI**. Ocurren porque el comando `ollama run` está diseñado para ser interactivo en la terminal (va mostrando animaciones de carga, efectos de escritura y saltos de línea interactivos). Al redirigir la salida con `>`, Ollama imprimió esos códigos de control de la consola directamente dentro de tu archivo `.md`.
 
 ## La Solución Correcta
 
@@ -222,7 +222,7 @@ ollama rm cuda-translator
 
 Modificá tu archivo `Modelfile` en VS Code agregando un par de reglas extra en el `SYSTEM` prompt para blindar la sintaxis de las imágenes:
 
-```dockerfile
+````dockerfile
 FROM translategemma:4b
 
 PARAMETER temperature 0.1
@@ -240,7 +240,7 @@ Reglas estrictas de formato y traducción:
 5. Traduce al español latinoamericano el texto explicativo con un tono profesional y técnico.
 6. Devuelve ÚNICAMENTE el código Markdown traducido. No agregues introducciones, notas de autor ni saludos.
 """
-```
+````
 
 _(Nota: Añadí `"Tile"` a la lista de palabras retenidas en inglés, ya que en el mundo de CUDA se suele dejar así o el mismo texto aclara "modelo de programación en tiles")._
 Vuelve a compilarlo en tu terminal:
@@ -269,33 +269,33 @@ Probá recrearlo y ejecutarlo con el comando `cat`. Si te sigue fallando la ruta
 - ¿Logró conservar la ruta intacta de la imagen `> ![Figure 8](./img/f008.png)`?
 
 > > **Yo:**
-> Se ve que no entiende, me sigue agregando la imagen y generando los caracteres de escape:
+> > Se ve que no entiende, me sigue agregando la imagen y generando los caracteres de escape:
 >
 > ```bash
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
 > ╰─$ ollama rm cuda-translator
 > deleted 'cuda-translator'
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
 > ╰─$ ollama list
-> NAME                     ID              SIZE      MODIFIED          
-> translategemma:latest    c49d986b0764    3.3 GB    About an hour ago    
-> gemma4:31b-cloud         ef09f235533c    -         12 days ago          
-> glm-5.3-flash:cloud      3e780905abc0    -         12 days ago          
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
+> NAME                     ID              SIZE      MODIFIED
+> translategemma:latest    c49d986b0764    3.3 GB    About an hour ago
+> gemma4:31b-cloud         ef09f235533c    -         12 days ago
+> glm-5.3-flash:cloud      3e780905abc0    -         12 days ago
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
 > ╰─$ ollama create cuda-translator -f ./Modelfile
-> gathering model components 
-> using existing layer sha256:bdbf939b402e2f88fbe3e918beb777813009335756b4c17be7fe008dfe4815d4 
-> using existing layer sha256:e0a42594d802e5d31cdc786deb4823edb8adff66094d49de8fffe976d753e348 
-> using existing layer sha256:3e2c24001f9ef57bf7ec959a3658fbb49cdad113cdf394c264da9d16f9bdd132 
-> creating new layer sha256:0c28c9fef6cddbd4be3120a34389918e8184fa41fab9867b8a6cec4ba16fdbff 
-> creating new layer sha256:16786f72092bd87213a033d6d0992415f4c43510d3d5b752faca08b2f7c2caf2 
-> writing manifest 
-> success 
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
+> gathering model components
+> using existing layer sha256:bdbf939b402e2f88fbe3e918beb777813009335756b4c17be7fe008dfe4815d4
+> using existing layer sha256:e0a42594d802e5d31cdc786deb4823edb8adff66094d49de8fffe976d753e348
+> using existing layer sha256:3e2c24001f9ef57bf7ec959a3658fbb49cdad113cdf394c264da9d16f9bdd132
+> creating new layer sha256:0c28c9fef6cddbd4be3120a34389918e8184fa41fab9867b8a6cec4ba16fdbff
+> creating new layer sha256:16786f72092bd87213a033d6d0992415f4c43510d3d5b752faca08b2f7c2caf2
+> writing manifest
+> success
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
 > ╰─$ cat test_en.md | ollama run cuda-translator > test_es.md
 > Added image './img/f008.png'
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
-> ╰─$ 
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
+> ╰─$
 > ```
 
 Qué comportamiento tan frustrante, pero ahora queda clarísimo lo que está haciendo **Ollama** a nivel de sistema.
@@ -346,9 +346,9 @@ sed 's/!\[/REPLACE_IMG_TAG\[/g' test_en.md | ollama run cuda-translator | sed 's
 
 ## ¿Cómo funciona este truco?
 
-   1. El primer `sed` cambia `![Figure 8]` por `REPLACE_IMG_TAG[Figure 8]`.
-   2. Como Ollama ya no ve el signo de exclamación pegado a los corchetes, **no se confunde**, no busca la imagen, no mete caracteres raros y traduce el capítulo limpiamente.
-   3. El segundo `sed` toma la traducción y vuelve a transformar `REPLACE_IMG_TAG` en el signo `!` original. Tu archivo final quedará impecable y con el enlace funcionando perfectamente en GitHub.
+1. El primer `sed` cambia `![Figure 8]` por `REPLACE_IMG_TAG[Figure 8]`.
+2. Como Ollama ya no ve el signo de exclamación pegado a los corchetes, **no se confunde**, no busca la imagen, no mete caracteres raros y traduce el capítulo limpiamente.
+3. El segundo `sed` toma la traducción y vuelve a transformar `REPLACE_IMG_TAG` en el signo `!` original. Tu archivo final quedará impecable y con el enlace funcionando perfectamente en GitHub.
 
 Prueba aplicando la **Solución 2** (que no requiere instalar nada nuevo en tu Git Bash).
 
@@ -361,19 +361,19 @@ Prueba aplicando la **Solución 2** (que no requiere instalar nada nuevo en tu G
 > - Usé el primer método:
 >
 >   ```bash
->   ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
+>   ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
 >   ╰─$ curl -s http://localhost:11434/api/generate -d "{
 >     \"model\": \"cuda-translator\",
 >     \"prompt\": $(jq -Rs . < test_en.md),
 >     \"stream\": false
 >   }" | jq -r '.response' > test_es.md
->   ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
->   ╰─$ 
+>   ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
+>   ╰─$
 >   ```
 >
 > - Ollama está instalado en Msys2.
 > - La traducción la hizo bien ahora; mirá el adjunto.
-> - Como verás en la imagen adjunta, no veo que ollama use la GPU, es la CPU la que se > pone al palo!
+> - Como verás en la imagen adjunta, no veo que ollama use la GPU, ¡es la CPU la que se pone al palo!
 
 ¡Excelente! La traducción con `curl` y `jq` quedó impecable, **completamente limpia, sin basura en el archivo y respetando la ruta de la imagen original.** Qué gran combinación hacen `ucrt64` y `zsh` en MSYS2.
 
@@ -410,10 +410,10 @@ export CUDA_VISIBLE_DEVICES=0
 
 Windows 10/11 a veces bloquea el acceso a la GPU dedicada a procesos de consola para ahorrar energía. Vamos a forzarlo manualmente:
 
-   1. Abre el menú de inicio de Windows y busca **Configuración de gráficos** (Graphics Settings).
-   2. En la sección "Preferencia de rendimiento de gráficos", asegúrate de seleccionar **Aplicación de escritorio** (Desktop app) y haz clic en **Examinar** (Browse).
-   3. Busca el archivo ejecutable de Ollama. Si lo instalaste de forma nativa en Windows, suele estar en: `C:\Users\TU_USUARIO\AppData\Local\Programs\Ollama\ollama.exe` (o el binario correspondiente dentro de tu instalación de MSYS2 si lo compilaste ahí).
-   4. Una vez agregado a la lista, haz clic sobre él, selecciona **Opciones** (Options) y elige **Alto rendimiento** (High performance), asegurándote de que apunte a tu **NVIDIA T1200**.
+1. Abre el menú de inicio de Windows y busca **Configuración de gráficos** (Graphics Settings).
+2. En la sección "Preferencia de rendimiento de gráficos", asegúrate de seleccionar **Aplicación de escritorio** (Desktop app) y haz clic en **Examinar** (Browse).
+3. Busca el archivo ejecutable de Ollama. Si lo instalaste de forma nativa en Windows, suele estar en: `C:\Users\TU_USUARIO\AppData\Local\Programs\Ollama\ollama.exe` (o el binario correspondiente dentro de tu instalación de MSYS2 si lo compilaste ahí).
+4. Una vez agregado a la lista, haz clic sobre él, selecciona **Opciones** (Options) y elige **Alto rendimiento** (High performance), asegurándote de que apunte a tu **NVIDIA T1200**.
 
 ## 4. Ajustar el `Modelfile` para forzar las capas en GPU
 
@@ -443,24 +443,24 @@ Si vuelves a ejecutar el comando `ollama ps` mientras traduce, ¿qué te aparece
 >
 > ```bash
 > martin@jetson-orin-nano:~/ollama_translate$ ollama list
-> NAME                      ID              SIZE      MODIFIED       
-> translategemma:latest     c49d986b0764    3.3 GB    4 minutes ago     
-> cuda-translator:latest    aa2005f489b4    3.3 GB    4 minutes ago     
-> llama3.2:1b               baf6a787fdff    1.3 GB    25 minutes ago    
-> martin@jetson-orin-nano:~/ollama_translate$ 
+> NAME                      ID              SIZE      MODIFIED
+> translategemma:latest     c49d986b0764    3.3 GB    4 minutes ago
+> cuda-translator:latest    aa2005f489b4    3.3 GB    4 minutes ago
+> llama3.2:1b               baf6a787fdff    1.3 GB    25 minutes ago
+> martin@jetson-orin-nano:~/ollama_translate$
 > ```
 >
-> Pero cuando intento acceder a través de windows con el comando `curl` anterior, > no hace nada, ni responde. Podemos diagnosticar? Mi jetson está en `192.168.0.> 100`.
+> Pero cuando intento acceder a través de windows con el comando `curl` anterior, no hace nada, ni responde. ¿Podemos diagnosticar? Mi jetson está en `192.168.0.> 100`.
 >
 > ```bash
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
 > ╰─$ curl -s http://192.168.0.100:11434/api/generate -d "{
 >   \"model\": \"cuda-translator\",
 >   \"prompt\": $(jq -Rs . < test_en.md),
 >   \"stream\": false
 > }" | jq -r '.response' > test_es.md
-> ╭─F78570C@UBRBE1LT0072627 /c/P/B/CUDA Programming Guide ‹main●› 
-> ╰─$ 
+> ╭─user@pc /c/P/B/CUDA Programming Guide ‹main●›
+> ╰─$
 > ```
 >
 > Ya me creé un script en windows (ucrt64) con ese comando `curl`. El script se llama `traducir.sh`
@@ -478,27 +478,27 @@ La forma correcta de hacerlo depende de cómo instalaste Ollama en Linux:
 
 ### Si Ollama corre como servicio de `systemd` (Lo más probable si usaste el script oficial)
 
-   1. En la terminal de tu Jetson, edita la configuración del servicio:
+1. En la terminal de tu Jetson, edita la configuración del servicio:
 
-      ```bash
-      sudo systemctl edit ollama.service
-      ```
+    ```bash
+    sudo systemctl edit ollama.service
+    ```
 
-   2. Se abrirá un editor de texto vacío o con comentarios. Agrega estas dos líneas exactas al principio (respetando la sección `[Service]`):
+2. Se abrirá un editor de texto vacío o con comentarios. Agrega estas dos líneas exactas al principio (respetando la sección `[Service]`):
 
-      ```ini
-      [Service]
-      Environment="OLLAMA_HOST=0.0.0.0:11434"
-      ```
+    ```ini
+    [Service]
+    Environment="OLLAMA_HOST=0.0.0.0:11434"
+    ```
 
-   3. Guarda el archivo (si es `nano`, presiona **Ctrl+O**, **Enter**, **Ctrl+X**).
+3. Guarda el archivo (si es `nano`, presiona **Ctrl+O**, **Enter**, **Ctrl+X**).
 
-   4. Aplica los cambios y reinicia el servicio ejecutando:
+4. Aplica los cambios y reinicia el servicio ejecutando:
 
-      ```bash
-      sudo systemctl daemon-reload
-      sudo systemctl restart ollama.service
-      ```
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl restart ollama.service
+    ```
 
 ### Si corres Ollama manualmente en la terminal con `ollama serve`
 
@@ -640,11 +640,11 @@ Las líneas adicionales que agregaste al `override.conf` son una **decisión bri
 
 A partir de este momento, tu flujo de trabajo queda optimizado y súper limpio:
 
-   1. Sigues editando, maquetando a tu gusto compatible con GitHub y extrayendo imágenes en VS Code bajo Windows (UCRT64/zsh).
+1. Sigues editando, maquetando a tu gusto compatible con GitHub y extrayendo imágenes en VS Code bajo Windows (UCRT64/zsh).
 
-   2. Cuando tienes listo un fragmento, corres tu script `traducir.sh`.
+2. Cuando tienes listo un fragmento, corres tu script `traducir.sh`.
 
-   3. El comando `curl` empaqueta el contenido mediante `jq`, viaja por tu red local sin límites de caracteres, la Jetson lo traduce usando la potencia nativa de su hardware y te devuelve el archivo `.md` traducido de forma inmediata y directa a tu entorno de desarrollo.
+3. El comando `curl` empaqueta el contenido mediante `jq`, viaja por tu red local sin límites de caracteres, la Jetson lo traduce usando la potencia nativa de su hardware y te devuelve el archivo `.md` traducido de forma inmediata y directa a tu entorno de desarrollo.
 
 ¡Felicitaciones por armar este pipeline de traducción local tan eficiente y profesional para la Guía de CUDA!
 

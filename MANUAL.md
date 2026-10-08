@@ -1,5 +1,29 @@
 # Manual de uso: de la guía web de CUDA a Markdown en español
 
+> Última actualización: 07/10/2026
+
+---
+
+## Tabla de Contenidos
+
+- [Manual de uso: de la guía web de CUDA a Markdown en español](#manual-de-uso-de-la-guía-web-de-cuda-a-markdown-en-español)
+  - [Tabla de Contenidos](#tabla-de-contenidos)
+  - [Requisitos](#requisitos)
+    - [Preparar el entorno de Python (una sola vez)](#preparar-el-entorno-de-python-una-sola-vez)
+  - [Paso 1: copiar el sitio con wget](#paso-1-copiar-el-sitio-con-wget)
+    - [Ver la copia local (opcional)](#ver-la-copia-local-opcional)
+  - [Paso 2: convertir HTML a Markdown](#paso-2-convertir-html-a-markdown)
+    - [Qué hace el conversor](#qué-hace-el-conversor)
+  - [Paso 3: traducir al español](#paso-3-traducir-al-español)
+    - [3.1 Crear el modelo en la Jetson (una vez, o cada vez que cambie el Modelfile)](#31-crear-el-modelo-en-la-jetson-una-vez-o-cada-vez-que-cambie-el-modelfile)
+    - [3.2 Traducir](#32-traducir)
+    - [Cómo traduce](#cómo-traduce)
+  - [Flujo completo](#flujo-completo)
+  - [Problemas comunes](#problemas-comunes)
+  - [Archivos del proyecto](#archivos-del-proyecto)
+
+---
+
 Este proyecto descarga la [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/) de NVIDIA, convierte cada página a Markdown y la traduce al español latinoamericano con un modelo local de Ollama.
 
 El proceso tiene tres pasos, y cada uno deja sus archivos junto a los del paso anterior:
@@ -12,11 +36,11 @@ programming-model[es].md ─(3. translate.py + Ollama en la Jetson)
 
 ## Requisitos
 
-| Qué | Dónde | Para qué |
-| --- | --- | --- |
-| MSYS2 con zsh, `wget` y `curl` | `C:\S\Msys2\msys64` | Terminal y descarga del sitio |
-| Python 3 con el entorno virtual `.venv` | raíz del proyecto | Conversión y traducción |
-| Ollama con `translategemma:latest` | Jetson en `192.168.0.100:11434` | Modelo de traducción |
+| Qué                                     | Dónde                           | Para qué                      |
+| --------------------------------------- | ------------------------------- | ----------------------------- |
+| MSYS2 con zsh, `wget` y `curl`          | `C:\S\Msys2\msys64`             | Terminal y descarga del sitio |
+| Python 3 con el entorno virtual `.venv` | raíz del proyecto               | Conversión y traducción       |
+| Ollama con `translategemma:latest`      | Jetson en `192.168.0.100:11434` | Modelo de traducción          |
 
 Todos los comandos de este manual se ejecutan desde la raíz del proyecto, en zsh.
 
@@ -42,13 +66,13 @@ wget --recursive --page-requisites --adjust-extension --convert-links --no-paren
      https://docs.nvidia.com/cuda/cuda-programming-guide/index.html
 ```
 
-| Opción | Efecto |
-| --- | --- |
-| `--recursive` | Sigue los enlaces y conserva la estructura de carpetas del servidor (hasta 5 niveles, alcanza para la guía) |
-| `--page-requisites` | Incluye imágenes (`_images/`), estilos y scripts (`_static/`) |
-| `--adjust-extension` | Asegura que las páginas terminen en `.html` |
-| `--convert-links` | Reescribe los enlaces para navegar la copia local |
-| `--no-parent` | No sube por encima de `/cuda/cuda-programming-guide/` (no baja todo docs.nvidia.com) |
+| Opción               | Efecto                                                                                                      |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `--recursive`        | Sigue los enlaces y conserva la estructura de carpetas del servidor (hasta 5 niveles, alcanza para la guía) |
+| `--page-requisites`  | Incluye imágenes (`_images/`), estilos y scripts (`_static/`)                                               |
+| `--adjust-extension` | Asegura que las páginas terminen en `.html`                                                                 |
+| `--convert-links`    | Reescribe los enlaces para navegar la copia local                                                           |
+| `--no-parent`        | No sube por encima de `/cuda/cuda-programming-guide/` (no baja todo docs.nvidia.com)                        |
 
 Opcionalmente, `--wait=1` deja un segundo entre pedidos para no sobrecargar el servidor.
 
@@ -90,10 +114,10 @@ El script deja comentada la línea `<script src="https://cdn.cookielaw.org/...">
 
 Cada `nombre.html` genera `nombre.md` en la misma carpeta.
 
-| Opción | Efecto |
-| --- | --- |
-| `-o salida.md` | Elige otro archivo de salida (solo con una página) |
-| `-f`, `--force` | Sobrescribe los `.md` que ya existen |
+| Opción          | Efecto                                             |
+| --------------- | -------------------------------------------------- |
+| `-o salida.md`  | Elige otro archivo de salida (solo con una página) |
+| `-f`, `--force` | Sobrescribe los `.md` que ya existen               |
 
 > [!IMPORTANT]
 > Sin `--force`, los `.md` que ya tienen contenido se omiten y aparece `omitido (ya existe, usá --force)`. Así no se pierden los archivos que hayas retocado a mano.
@@ -102,20 +126,20 @@ Cada `nombre.html` genera `nombre.md` en la misma carpeta.
 
 Toma solo el contenido de la página (`<article class="bd-article">`) y descarta los menús, el índice lateral, el bloque "On this page" y los botones. Después adapta cada elemento de Sphinx:
 
-| En el HTML | En el Markdown |
-| --- | --- |
-| Títulos con su numeración | `#`, `##`, `###`… con la numeración (`## 1.2.1. Heterogeneous Systems`) |
-| Código con resaltado (`highlight-cuda`, `c++`, `python`, `bash`…) | Bloques ```` ```cuda ```` y similares, con el texto limpio |
-| Note, Hint, Warning… | Avisos de GitHub: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]` |
-| Figuras | `![texto alternativo](../_images/x.png)` y debajo **Figure N.** *pie de figura* |
-| Fórmulas | `$...$` en línea y `$$...$$` en bloque |
-| Notas al pie | `[^1]` en el texto y `[^1]: ...` al final |
-| Pestañas (p. ej. "Unified Memory" / "Explicit Memory") | El nombre de la pestaña en **negrita** y su contenido debajo |
-| Tablas simples | Tablas Markdown |
-| Tablas con celdas combinadas o con código adentro | HTML limpio (GitHub lo muestra bien) |
-| Tablas de una sola celda (contenedor de código) | Se desarman y queda el bloque de código |
-| Enlaces a otras páginas (`foo.html#x`) | `foo.md#x` |
-| Subíndices y superíndices | `<sub>` y `<sup>` |
+| En el HTML                                                        | En el Markdown                                                                  |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Títulos con su numeración                                         | `#`, `##`, `###`… con la numeración (`## 1.2.1. Heterogeneous Systems`)         |
+| Código con resaltado (`highlight-cuda`, `c++`, `python`, `bash`…) | Bloques ` ```cuda ` y similares, con el texto limpio                            |
+| Note, Hint, Warning…                                              | Avisos de GitHub: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`                       |
+| Figuras                                                           | `![texto alternativo](../_images/x.png)` y debajo **Figure N.** _pie de figura_ |
+| Fórmulas                                                          | `$...$` en línea y `$$...$$` en bloque                                          |
+| Notas al pie                                                      | `[^1]` en el texto y `[^1]: ...` al final                                       |
+| Pestañas (p. ej. "Unified Memory" / "Explicit Memory")            | El nombre de la pestaña en **negrita** y su contenido debajo                    |
+| Tablas simples                                                    | Tablas Markdown                                                                 |
+| Tablas con celdas combinadas o con código adentro                 | HTML limpio (GitHub lo muestra bien)                                            |
+| Tablas de una sola celda (contenedor de código)                   | Se desarman y queda el bloque de código                                         |
+| Enlaces a otras páginas (`foo.html#x`)                            | `foo.md#x`                                                                      |
+| Subíndices y superíndices                                         | `<sub>` y `<sup>`                                                               |
 
 Las imágenes quedan con la misma ruta relativa (`../_images/...`), así que se ven desde los `.md` sin copiar nada.
 
@@ -155,14 +179,14 @@ curl -s http://192.168.0.100:11434/api/tags | jq -r '.models[].name'
 
 Cada `nombre.md` genera `nombre[es].md` en la misma carpeta.
 
-| Opción | Efecto |
-| --- | --- |
-| `-o salida.md` | Elige otro archivo de salida (solo con una página) |
-| `-f`, `--force` | Sobrescribe las traducciones que ya existen |
-| `--no-cache` | Vuelve a traducir todas las secciones, sin usar la caché |
-| `--host URL` | Otro servidor Ollama (por defecto `http://192.168.0.100:11434`) |
-| `--model NOMBRE` | Otro modelo (por defecto `cuda-translator`) |
-| `--timeout SEG` | Tiempo máximo por llamada (por defecto 900) |
+| Opción           | Efecto                                                          |
+| ---------------- | --------------------------------------------------------------- |
+| `-o salida.md`   | Elige otro archivo de salida (solo con una página)              |
+| `-f`, `--force`  | Sobrescribe las traducciones que ya existen                     |
+| `--no-cache`     | Vuelve a traducir todas las secciones, sin usar la caché        |
+| `--host URL`     | Otro servidor Ollama (por defecto `http://192.168.0.100:11434`) |
+| `--model NOMBRE` | Otro modelo (por defecto `cuda-translator`)                     |
+| `--timeout SEG`  | Tiempo máximo por llamada (por defecto 900)                     |
 
 > [!WARNING]
 > En zsh, los corchetes son comodines. Para nombrar un archivo traducido, ponelo entre comillas: `less "programming-model[es].md"`. Sin comillas, zsh responde `no matches found`.
@@ -216,23 +240,23 @@ Para actualizar la guía cuando NVIDIA publique cambios, repetí los tres pasos 
 
 ## Problemas comunes
 
-| Síntoma | Causa y solución |
-| --- | --- |
-| `Error al conectar con Ollama en http://192.168.0.100:11434` | La Jetson está apagada o Ollama no está corriendo. Probá con `curl http://192.168.0.100:11434/api/tags`. |
-| `aviso: la respuesta se cortó por límite de contexto (num_ctx)` | La sección no entra en el contexto. Subí `num_ctx` en `Modelfile-translate` y volvé a crear el modelo. |
-| La Jetson se queda sin memoria o Ollama se reinicia | Liberá la caché del sistema con `liberar_memoria_jetson.sh` (en la Jetson). Si sigue pasando, bajá `num_ctx` a 12288. |
-| `omitido (ya existe, usá --force)` | El archivo de salida ya existe. Agregá `--force` para regenerarlo. |
-| `zsh: no matches found: ...[es].md` | Faltan comillas alrededor del nombre (ver el aviso del paso 3.2). |
+| Síntoma                                                                                                        | Causa y solución                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `Error al conectar con Ollama en http://192.168.0.100:11434`                                                   | La Jetson está apagada o Ollama no está corriendo. Probá con `curl http://192.168.0.100:11434/api/tags`.               |
+| `aviso: la respuesta se cortó por límite de contexto (num_ctx)`                                                | La sección no entra en el contexto. Subí `num_ctx` en `Modelfile-translate` y volvé a crear el modelo.                 |
+| La Jetson se queda sin memoria o Ollama se reinicia                                                            | Liberá la caché del sistema con `liberar_memoria_jetson.sh` (en la Jetson). Si sigue pasando, bajá `num_ctx` a 12288.  |
+| `omitido (ya existe, usá --force)`                                                                             | El archivo de salida ya existe. Agregá `--force` para regenerarlo.                                                     |
+| `zsh: no matches found: ...[es].md`                                                                            | Faltan comillas alrededor del nombre (ver el aviso del paso 3.2).                                                      |
 | Términos traducidos que deberían quedar en inglés ("hilo" en lugar de "thread", "núcleo" en lugar de "kernel") | TranslateGemma respeta el glosario del Modelfile solo en parte. Se corrige a mano, o se usa otro modelo con `--model`. |
 
 ## Archivos del proyecto
 
-| Archivo | Función |
-| --- | --- |
-| `disable_cookie_banner.py` | Comenta el script de cookies en los HTML descargados (para verlos localmente) |
-| `html_to_md.py` | Conversor de HTML (Sphinx) a Markdown |
-| `translate.py` | Traductor sección por sección con Ollama |
-| `Modelfile-translate` | Definición del modelo `cuda-translator` para Ollama |
-| `requirements.txt` | Dependencias de Python |
-| `liberar_memoria_jetson.sh` | Libera la caché de memoria de la Jetson (`drop_caches`) |
-| `.translate_cache/` | Caché de secciones traducidas (se puede borrar sin problema) |
+| Archivo                     | Función                                                                       |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| `disable_cookie_banner.py`  | Comenta el script de cookies en los HTML descargados (para verlos localmente) |
+| `html_to_md.py`             | Conversor de HTML (Sphinx) a Markdown                                         |
+| `translate.py`              | Traductor sección por sección con Ollama                                      |
+| `Modelfile-translate`       | Definición del modelo `cuda-translator` para Ollama                           |
+| `requirements.txt`          | Dependencias de Python                                                        |
+| `liberar_memoria_jetson.sh` | Libera la caché de memoria de la Jetson (`drop_caches`)                       |
+| `.translate_cache/`         | Caché de secciones traducidas (se puede borrar sin problema)                  |

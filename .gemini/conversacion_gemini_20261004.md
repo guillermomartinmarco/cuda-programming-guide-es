@@ -1,7 +1,7 @@
 # Conversión HTML a Markdown
 
 > **Yo:**
-> Existe alguna utilidad para convertir a markdown todo un sitio de documentación? Por ejemplo, la _Guia de Grogramación CUDA de Nvidia_.
+> ¿Existe alguna utilidad para convertir a markdown todo un sitio de documentación? Por ejemplo, la _Guia de Grogramación CUDA de Nvidia_.
 
 **Sí, existen excelentes herramientas diseñadas específicamente para rastrear y convertir sitios enteros de documentación a Markdown**, optimizadas además para limpiar menús, pies de página o anuncios, dejando solo el contenido técnico útil (código, explicaciones y tablas) listo para ser leído o ingresado a una Inteligencia Artificial.
 
