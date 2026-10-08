@@ -20,7 +20,7 @@ In Python, the tile API lives in the module `cuda.tiles` which is imported as sh
 
 In C++, the tile API lives in the `cuda::tiles` namespace, which is exposed by the `cuda_tile.h` header.
 
-```cuda
+```c
 #include "cuda_tile.h"
 namespace ct = cuda::tiles;
 ```
@@ -51,7 +51,7 @@ In practice, any function called from a kernel is automatically compiled as tile
 
 **C++**
 
-```cuda
+```c
 #include "cuda_tile.h"
 
 // Tile kernel entry point. Cannot be called directly; must be launched.
@@ -93,7 +93,7 @@ In Python, `ct.launch` takes four positional arguments: a CUDA stream, a grid tu
 
 **C++**
 
-```cuda
+```c
 my_kernel<<<dim3(num_blocks_x, num_blocks_y), 1>>>(a, b, c);  // second arg must be 1
 ```
 
@@ -113,7 +113,7 @@ A common pattern is to launch enough blocks to cover a full array, including a f
 
 **C++**
 
-```cuda
+```c
 int num_blocks = (N + tile_size - 1) / tile_size;   // ceil division -> covers partial tail
 kernel<<<num_blocks, 1>>>(in, out, N);
 ```
@@ -139,7 +139,7 @@ In Python, `ct.bid(axis)` returns the current block’s index along the given ax
 
 **C++**
 
-```cuda
+```c
 #include "cuda_tile.h"
 
 __tile_global__ void my_kernel(float* a, float* b, float* c) {
@@ -186,7 +186,7 @@ The factory functions are:
 
 **C++**
 
-```cuda
+```c
 #include "cuda_tile.h"
 
 __tile__ void factories() {
@@ -246,7 +246,7 @@ APIs that take compile-time values accept both the non-type template parameter (
 
 **C++**
 
-```cuda
+```c
 #include "cuda_tile.h"
 
 __tile__ void concat_demo() {
@@ -266,7 +266,7 @@ There is one other place where `_ic` literals routinely appear. Each of `ct::ext
 
 **C++**
 
-```cuda
+```c
 auto shape2d = ct::extents{8_ic, length};  // 8 is compile-time; length is runtime
 ```
 
@@ -321,7 +321,7 @@ In Python, `Array.tiled_view(tile_shape)` returns a `TiledView` that partitions 
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void vec_add(float* __restrict__ a, float* __restrict__ b, float* __restrict__ out) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -403,7 +403,7 @@ For stores, `ct.store` needs no `padding_mode` parameter: by default it bounds-c
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void edge_safe(float* __restrict__ in, float* __restrict__ out, int N) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -452,7 +452,7 @@ In Python, `ct.gather` loads the element at each index in the index tile. Bounds
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void vec_add_gather(int* __restrict__ a, int* __restrict__ b, int* __restrict__ out) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -498,7 +498,7 @@ In C++, bounds checking is not automatic. The programmer constructs a boolean ma
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void gather_safe(int* __restrict__ arr, int* __restrict__ out, int N) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -537,7 +537,7 @@ The following single-block kernels sum all tiles of a 1D array:
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void tile_sum(float* __restrict__ arr, float* __restrict__ out, int num_tiles) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -580,7 +580,7 @@ Standard `if`/`else` conditionals work normally. Because each block follows a si
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void conditional_load(float* __restrict__ arr, float* __restrict__ out, int N) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -630,7 +630,7 @@ The example below exercises both singleton stretching and rank promotion in a si
 
 **C++**
 
-```cuda
+```c
 auto x = ct::iota<ct::tile<int, ct::shape<8, 2>>>();      // 8x2   (rank 2)
 auto y = ct::iota<ct::tile<int, ct::shape<4, 1, 2>>>();   // 4x1x2 (rank 3)
 auto z = x + y;                                           // x promoted to 1x8x2, then broadcasts to 4x8x2
@@ -661,7 +661,7 @@ The snippets below illustrate the divergent scalar-tile case:
 
 **C++**
 
-```cuda
+```c
 using i32x8 = ct::tile<int, ct::shape<8>>;
 i32x8 x = ct::full<i32x8>(3);
 
@@ -682,7 +682,7 @@ In practice, write scalar literals in the tile’s element type when you can and
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void elementwise(float* __restrict__ a, float* __restrict__ b, float* __restrict__ out, int N) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -733,7 +733,7 @@ A common pattern, used in the kernels below, is to accumulate in FP32 regardless
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void gemm(const __half* __restrict__ A, const __half* __restrict__ B, float* __restrict__ C,
                           std::size_t M, std::size_t K, std::size_t N) {
     namespace ct = cuda::tiles;
@@ -793,7 +793,7 @@ The one point worth internalizing up front is the shape of the result. Python dr
 
 **C++**
 
-```cuda
+```c
 using namespace ct::literals;
 using i32x2x4 = ct::tile<int, ct::shape<2, 4>>;
 
@@ -821,7 +821,7 @@ In Python, `ct.transpose(x)` on a rank-2 tile swaps its two axes; on higher-rank
 
 **C++**
 
-```cuda
+```c
 using namespace ct::literals;
 using t2d = ct::tile<int, ct::shape<2, 4>>;
 using t3d = ct::tile<int, ct::shape<2, 2, 2>>;
@@ -849,7 +849,7 @@ Element-wise selection is the tile form of a conditional: given a boolean tile a
 
 **C++**
 
-```cuda
+```c
 using namespace ct::literals;
 auto cond = ct::iota<ct::tile<int, ct::shape<4>>>() < 2;   // {T, T, F, F}
 auto t    = ct::full<ct::tile<float, ct::shape<4>>>( 1.0f);
@@ -910,7 +910,7 @@ In the code example below, cross-block contention occurs because different block
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void block_sum(int* __restrict__ arr, int* __restrict__ out, std::size_t N) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -952,7 +952,7 @@ In this example, each element in the `ptrs` tile points to the same location in 
 
 **C++**
 
-```cuda
+```c
 using i32x16 = ct::tile<int, ct::shape<16>>;
 
 int* slot = /* pointer to the contended location */;
@@ -1006,7 +1006,7 @@ The set of hint kinds, what each hint actually controls, is shared between the t
 
 In C++, hints are expressed with the C++ attribute `cutile::hint`:
 
-```cuda
+```c
 [[ cutile::hint(arch, kind1=value1, kind2=value2, ...) ]]
 ```
 
@@ -1023,7 +1023,7 @@ The kernel below illustrates both placements: a kernel-level hint that sets a di
 
 **C++**
 
-```cuda
+```c
 [[ cutile::hint(900,  num_cta_in_cga=4),    // sm_90:  prefer 4 CTAs per cluster
    cutile::hint(1000, num_cta_in_cga=8) ]]  // sm_100: prefer 8 CTAs per cluster
 __tile_global__ void optimization_hints(float* __restrict__ in,
@@ -1126,7 +1126,7 @@ To see why, consider an element-wise copy which uses arrays whose pointers are n
 
 **C++**
 
-```cuda
+```c
 __tile_global__ void tile_elementwise_copy(float* out, float const* in) {
     namespace ct = cuda::tiles;
 
@@ -1155,7 +1155,7 @@ Labeling a pointer with `__restrict__` when the memory region can be accessed by
 
 Mark pointers to arrays as 16-byte aligned with `ct::assume_aligned`:
 
-```cuda
+```c
 __tile_global__ void foo(float* __restrict__ in) {
     namespace ct = cuda::tiles;
     using namespace ct::literals;
@@ -1181,7 +1181,7 @@ Prefer `ct::partition_view` over the gather and scatter forms `ct::load` and `ct
 
 Use `ct::irange` instead of a plain `for` loop when iterating over a fixed range. The structured form lets the compiler apply optimizations such as pipelining and vectorization that aren’t available when the loop bounds and step are opaque integer expressions (see [Control Flow](writing-tile-kernels.md#writing-tile-kernels-control-flow)):
 
-```cuda
+```c
 for (auto idx : ct::irange(lowerBound, upperBound, step)) {
     // ...
 }

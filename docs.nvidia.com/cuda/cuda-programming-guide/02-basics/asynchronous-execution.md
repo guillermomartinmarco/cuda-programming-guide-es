@@ -15,7 +15,7 @@ The concurrency is expressed via an asynchronous interface, where a dispatching 
 
 ![Asynchronous Concurrent Execution with CUDA streams](../_images/cuda_streams.png)
 
-**Figure 20.** *Asynchronous COncurrent Execution with CUDA streams*
+**Figure 20.** _Asynchronous COncurrent Execution with CUDA streams_
 
 In general, asynchronous interfaces typically provide three main ways to synchronize with the dispatched operation
 
@@ -527,12 +527,12 @@ We should note that a priority of a stream is only a hint to the runtime and gen
 
 CUDA streams allow programs to specify a sequence of operations, kernels or memory copies, in order. Using multiple streams and cross-stream dependencies with `cudaStreamWaitEvent`, an application can specify a full directed acyclic graph (DAG) of operations. Some applications may have a sequence or DAG of operations that needs to be run many times throughout execution.
 
-For this situation, CUDA provides a feature known as CUDA graphs. This section introduces CUDA graphs and one mechanism of creating them called *stream capture*. A more detailed discussion of CUDA graphs is presented in [CUDA Graphs](../04-special-topics/cuda-graphs.md#cuda-graphs). Capturing or creating a graph can help reduce latency and CPU overhead of repeatedly invoking the same chain of API calls from the host thread. Instead, the APIs to specify the graph operations can be called once, and then the resulting graph executed many times.
+For this situation, CUDA provides a feature known as CUDA graphs. This section introduces CUDA graphs and one mechanism of creating them called _stream capture_. A more detailed discussion of CUDA graphs is presented in [CUDA Graphs](../04-special-topics/cuda-graphs.md#cuda-graphs). Capturing or creating a graph can help reduce latency and CPU overhead of repeatedly invoking the same chain of API calls from the host thread. Instead, the APIs to specify the graph operations can be called once, and then the resulting graph executed many times.
 
 CUDA Graphs work in the following way:
 
-1. The graph is *captured* by the application. This step is done once the first time the graph is executed. The graph can also be manually composed using the CUDA graph API.
-2. The graph is *instantiated*. This step is done one time, after the graph is captured. This step can set up all the various runtime structures needed to execute the graph, in order to make launching its components as fast as possible.
+1. The graph is _captured_ by the application. This step is done once the first time the graph is executed. The graph can also be manually composed using the CUDA graph API.
+2. The graph is _instantiated_. This step is done one time, after the graph is captured. This step can set up all the various runtime structures needed to execute the graph, in order to make launching its components as fast as possible.
 3. In the remaining steps, the pre-instantiated graph is executed as many times as required. Since all the runtime structures needed to execute the graph operations are already in place, the CPU overheads of the graph execution are minimized.
 
 Listing 2 The stages of capturing, instantiating and executing a simple linear graph using CUDA Graphs (from [CUDA Developer Technical Blog](https://developer.nvidia.com/blog/cuda-graphs/), A. Gray, 2019)
@@ -587,6 +587,6 @@ The key points of this section are:
 > - The key abstractions in CUDA for asynchronous execution are streams, events and callback functions.
 > - Synchronization is possible at the event, stream and device level
 > - The default stream is a blocking stream which synchronizes with all other blocking streams, but does not synchronize with non-blocking streams
-> - The default stream behavior can be avoided using per-thread default streams via the `--default-stream per-thread` compiler option or the CUDA\_API\_PER\_THREAD\_DEFAULT\_STREAM preprocessor macro.
+> - The default stream behavior can be avoided using per-thread default streams via the `--default-stream per-thread` compiler option or the CUDA_API_PER_THREAD_DEFAULT_STREAM preprocessor macro.
 > - Streams can be created with different priorities, which are hints to the runtime and may not be respected for memory transfers.
 > - CUDA provides API functions to reduce, or overlap overheads of kernel launches and memory transfers such as CUDA Graphs, Batched Memory Transfers and Programmatic Dependent Kernel Launch.

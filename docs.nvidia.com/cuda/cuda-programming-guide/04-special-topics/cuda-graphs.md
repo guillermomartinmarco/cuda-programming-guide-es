@@ -29,7 +29,7 @@ A graph node can be one of:
 
 ![Child Graph Example](../_images/child-graph.png)
 
-**Figure 24.** *Child Graph Example*
+**Figure 24.** _Child Graph Example_
 
 ### 4.2.1.2. Edge Data
 
@@ -62,7 +62,7 @@ one non-default dependency type, `cudaGraphDependencyTypeProgrammatic`, which is
 Work submission using graphs is separated into three distinct stages: definition, instantiation, and execution.
 
 - During the **definition** or **creation** phase, a program creates a description of the operations in the graph along with the dependencies between them.
-- **Instantiation** takes a snapshot of the graph template, validates it, and performs much of the setup and initialization of work with the aim of minimizing what needs to be done at launch. The resulting instance is known as an *executable graph.*
+- **Instantiation** takes a snapshot of the graph template, validates it, and performs much of the setup and initialization of work with the aim of minimizing what needs to be done at launch. The resulting instance is known as an _executable graph._
 - An **executable** graph may be launched into a stream, similar to any other CUDA work. It may be launched any number of times without repeating the instantiation.
 
 ### 4.2.2.1. Graph Creation
@@ -75,9 +75,9 @@ The following is an example (omitting declarations and other boilerplate code) o
 
 ![Creating a Graph Using Graph APIs Example](../_images/create-a-graph.png)
 
-**Figure 25.** *Creating a Graph Using Graph APIs Example*
+**Figure 25.** _Creating a Graph Using Graph APIs Example_
 
-```cuda
+```c
 // Create the graph - it starts out empty
 cudaGraphCreate(&graph, 0);
 
@@ -104,7 +104,7 @@ The example above shows four kernel nodes with dependencies between them to illu
 
 Stream capture provides a mechanism to create a graph from existing stream-based APIs. A section of code which launches work into streams, including existing code, can be bracketed with calls to `cudaStreamBeginCapture()` and `cudaStreamEndCapture()`. See below.
 
-```cuda
+```c
 cudaGraph_t graph;
 
 cudaStreamBeginCapture(stream);
@@ -117,9 +117,9 @@ kernel_C<<< ..., stream >>>(...);
 cudaStreamEndCapture(stream, &graph);
 ```
 
-A call to `cudaStreamBeginCapture()` places a stream in capture mode. When a stream is being captured, work launched into the stream is not enqueued for execution. It is instead appended to an internal graph that is progressively being built up. This graph is then returned by calling `cudaStreamEndCapture()`, which also ends capture mode for the stream. A graph which is actively being constructed by stream capture is referred to as a *capture graph.*
+A call to `cudaStreamBeginCapture()` places a stream in capture mode. When a stream is being captured, work launched into the stream is not enqueued for execution. It is instead appended to an internal graph that is progressively being built up. This graph is then returned by calling `cudaStreamEndCapture()`, which also ends capture mode for the stream. A graph which is actively being constructed by stream capture is referred to as a _capture graph._
 
-Stream capture can be used on any CUDA stream except `cudaStreamLegacy` (the “NULL stream”). Note that it *can* be used on `cudaStreamPerThread`. If a program is using the legacy stream, it may be possible to redefine stream 0 to be the per-thread stream with no functional change. See [Blocking and non-blocking streams and the default stream](../02-basics/asynchronous-execution.md#async-execution-blocking-non-blocking-default-stream).
+Stream capture can be used on any CUDA stream except `cudaStreamLegacy` (the “NULL stream”). Note that it _can_ be used on `cudaStreamPerThread`. If a program is using the legacy stream, it may be possible to redefine stream 0 to be the per-thread stream with no functional change. See [Blocking and non-blocking streams and the default stream](../02-basics/asynchronous-execution.md#async-execution-blocking-non-blocking-default-stream).
 
 Whether a stream is being captured can be queried with `cudaStreamIsCapturing()`.
 
@@ -129,13 +129,13 @@ Work can be captured to an existing graph using `cudaStreamBeginCaptureToGraph()
 
 Stream capture can handle cross-stream dependencies expressed with `cudaEventRecord()` and `cudaStreamWaitEvent()`, provided the event being waited upon was recorded into the same capture graph.
 
-When an event is recorded in a stream that is in capture mode, it results in a *captured event.* A captured event represents a set of nodes in a capture graph.
+When an event is recorded in a stream that is in capture mode, it results in a _captured event._ A captured event represents a set of nodes in a capture graph.
 
 When a captured event is waited on by a stream, it places the stream in capture mode if it is not already, and the next item in the stream will have additional dependencies on the nodes in the captured event. The two streams are then being captured to the same capture graph.
 
-When cross-stream dependencies are present in stream capture, `cudaStreamEndCapture()` must still be called in the same stream where `cudaStreamBeginCapture()` was called; this is the *origin stream*. Any other streams which are being captured to the same capture graph, due to event-based dependencies, must also be joined back to the origin stream. This is illustrated below. All streams being captured to the same capture graph are taken out of capture mode upon `cudaStreamEndCapture()`. Failure to rejoin to the origin stream will result in failure of the overall capture operation.
+When cross-stream dependencies are present in stream capture, `cudaStreamEndCapture()` must still be called in the same stream where `cudaStreamBeginCapture()` was called; this is the _origin stream_. Any other streams which are being captured to the same capture graph, due to event-based dependencies, must also be joined back to the origin stream. This is illustrated below. All streams being captured to the same capture graph are taken out of capture mode upon `cudaStreamEndCapture()`. Failure to rejoin to the origin stream will result in failure of the overall capture operation.
 
-```cuda
+```c
 // stream1 is the origin stream
 cudaStreamBeginCapture(stream1);
 
@@ -184,7 +184,7 @@ A small number of APIs that enqueue asynchronous operations into streams are not
 
 ##### 4.2.2.1.2.3. Invalidation
 
-When an invalid operation is attempted during stream capture, any associated capture graphs are *invalidated*. When a capture graph is invalidated, further use of any streams which are being captured or captured events associated with the graph is invalid and will return an error, until stream capture is ended with `cudaStreamEndCapture()`. This call will take the associated streams out of capture mode, but will also return an error value and a NULL graph.
+When an invalid operation is attempted during stream capture, any associated capture graphs are _invalidated_. When a capture graph is invalidated, further use of any streams which are being captured or captured events associated with the graph is invalid and will return an error, until stream capture is ended with `cudaStreamEndCapture()`. This call will take the associated streams out of capture mode, but will also return an error value and a NULL graph.
 
 ##### 4.2.2.1.2.4. Capture Introspection
 
@@ -198,11 +198,11 @@ The example in [Figure 25](cuda-graphs.md#cuda-graphs-creating-a-graph-using-api
 
 ![CUDA graph example using two stage reduction kernel](../_images/cuda_graph_reduction.png)
 
-**Figure 26.** *CUDA graph example using two stage reduction kernel*
+**Figure 26.** _CUDA graph example using two stage reduction kernel_
 
 **Graph API**
 
-```cuda
+```c
 void cudaGraphsManual(float  *inputVec_h,
                       float  *inputVec_d,
                       double *outputVec_d,
@@ -359,7 +359,7 @@ void cudaGraphsManual(float  *inputVec_h,
 
 **Stream Capture**
 
-```cuda
+```c
 void cudaGraphsUsingStreamCapture(float  *inputVec_h,
                                   float  *inputVec_d,
                                   double *outputVec_d,
@@ -437,7 +437,7 @@ void cudaGraphsUsingStreamCapture(float  *inputVec_h,
 
 Once a graph has been created, either by the use of the graph API or stream capture, the graph must be instantiated to create an executable graph, which can then be launched. Assuming the `cudaGraph_t graph` has been created successfully, the following code will instantiate the graph and create the executable graph `cudaGraphExec_t graphExec`:
 
-```cuda
+```c
 cudaGraphExec_t graphExec;
 cudaGraphInstantiate(&graphExec, graph, 0);
 ```
@@ -446,13 +446,13 @@ cudaGraphInstantiate(&graphExec, graph, 0);
 
 After a graph has been created and instantiated to create an executable graph, it can be launched. Assuming the `cudaGraphExec_t graphExec` has been created successfully, the following code snippet will launch the graph into the specified stream:
 
-```cuda
+```c
 cudaGraphLaunch(graphExec, stream);
 ```
 
 Pulling it all together and using the stream capture example from [Section 4.2.2.1.2](cuda-graphs.md#cuda-graphs-creating-a-graph-using-stream-capture), the following code snippet will create a graph, instantiate it, and launch it:
 
-```cuda
+```c
 cudaGraph_t graph;
 
 cudaStreamBeginCapture(stream);
@@ -490,7 +490,6 @@ More explicitly, following the following rules will cause `cudaGraphExecUpdate()
 1. For any capturing stream, the API calls operating on that stream must be made in the same order, including event wait and other API calls not directly corresponding to node creation.
 2. The API calls which directly manipulate a given graph node’s incoming edges (including captured stream APIs, node add APIs, and edge addition / removal APIs) must be made in the same order. Moreover, when dependencies are specified in arrays to these APIs, the order in which the dependencies are specified inside those arrays must match.
 3. Sink nodes must be consistently ordered. Sink nodes are nodes without dependent nodes / outgoing edges in the final graph at the time of the `cudaGraphExecUpdate()` invocation. The following operations affect sink node ordering (if present) and must (as a combined set) be made in the same order:
-
    - Node add APIs resulting in a sink node.
    - Edge removal resulting in a node becoming a sink node.
    - `cudaStreamUpdateCaptureDependencies()`, if it removes a sink node from a capturing stream’s dependency set.
@@ -498,7 +497,7 @@ More explicitly, following the following rules will cause `cudaGraphExecUpdate()
 
 The following example shows how the API could be used to update an instantiated graph:
 
-```cuda
+```c
 cudaGraphExec_t graphExec = NULL;
 
 for (int i = 0; i < 10; i++) {
@@ -558,17 +557,17 @@ Instantiated graph node parameters can be updated directly. This eliminates the 
 
 Table 8 Individual Node Update APIs
 
-| API | Node Type |
-| --- | --- |
-| `cudaGraphExecKernelNodeSetParams()` | Kernel node |
-| `cudaGraphExecMemcpyNodeSetParams()` | Memory copy node |
-| `cudaGraphExecMemsetNodeSetParams()` | Memory set node |
-| `cudaGraphExecHostNodeSetParams()` | Host node |
-| `cudaGraphExecChildGraphNodeSetParams()` | Child graph node |
-| `cudaGraphExecEventRecordNodeSetEvent()` | Event record node |
-| `cudaGraphExecEventWaitNodeSetEvent()` | Event wait node |
+| API                                                    | Node Type                      |
+| ------------------------------------------------------ | ------------------------------ |
+| `cudaGraphExecKernelNodeSetParams()`                   | Kernel node                    |
+| `cudaGraphExecMemcpyNodeSetParams()`                   | Memory copy node               |
+| `cudaGraphExecMemsetNodeSetParams()`                   | Memory set node                |
+| `cudaGraphExecHostNodeSetParams()`                     | Host node                      |
+| `cudaGraphExecChildGraphNodeSetParams()`               | Child graph node               |
+| `cudaGraphExecEventRecordNodeSetEvent()`               | Event record node              |
+| `cudaGraphExecEventWaitNodeSetEvent()`                 | Event wait node                |
 | `cudaGraphExecExternalSemaphoresSignalNodeSetParams()` | External semaphore signal node |
-| `cudaGraphExecExternalSemaphoresWaitNodeSetParams()` | External semaphore wait node |
+| `cudaGraphExecExternalSemaphoresWaitNodeSetParams()`   | External semaphore wait node   |
 
 Please see the [Graph API](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__GRAPH.html#group__CUDART__GRAPH) for more information on usage and current limitations.
 
@@ -663,11 +662,11 @@ The body graph of an IF node will be executed once if the condition is non-zero 
 
 ![../_images/conditional-if-node.png](../_images/conditional-if-node.png)
 
-**Figure 27.** *Conditional IF Node*
+**Figure 27.** _Conditional IF Node_
 
 The following code illustrates the creation of a graph containing an IF conditional node. The default value of the condition is set using an upstream kernel. The body of the conditional is populated using the [graph API](cuda-graphs.md#cuda-graphs-creating-a-graph-using-graph-apis).
 
-```cuda
+```c
 __global__ void setHandle(cudaGraphConditionalHandle handle, int value)
 {
     ...
@@ -727,7 +726,7 @@ void graphSetup() {
 
 IF nodes can also have an optional second body graph which is executed once when the node is executed if the condition value is zero.
 
-```cuda
+```c
 void graphSetup() {
     cudaGraph_t graph;
     cudaGraphExec_t graphExec;
@@ -788,13 +787,13 @@ a 3 node graph where the middle node, B, is a conditional node:
 
 ![../_images/conditional-while-node.png](../_images/conditional-while-node.png)
 
-**Figure 28.** *Conditional WHILE Node*
+**Figure 28.** _Conditional WHILE Node_
 
 The following code illustrates the creation of a graph containing a WHILE conditional node. The handle
-is created using *cudaGraphCondAssignDefault* to avoid the need for an upstream kernel. The body of the
+is created using _cudaGraphCondAssignDefault_ to avoid the need for an upstream kernel. The body of the
 conditional is populated using the [graph API](cuda-graphs.md#cuda-graphs-creating-a-graph-using-graph-apis).
 
-```cuda
+```c
 __global__ void loopKernel(cudaGraphConditionalHandle handle, char *dPtr)
 {
    // Decrement the value of dPtr and set the condition value to 0 once dPtr is 0
@@ -859,11 +858,11 @@ The zero-indexed nth body graph of a SWITCH node will be executed once if the co
 
 ![../_images/conditional-switch-node.png](../_images/conditional-switch-node.png)
 
-**Figure 29.** *Conditional SWITCH Node*
+**Figure 29.** _Conditional SWITCH Node_
 
 The following code illustrates the creation of a graph containing a SWITCH conditional node. The value of the condition is set using an upstream kernel. The bodies of the conditional are populated using the [graph API](cuda-graphs.md#cuda-graphs-creating-a-graph-using-graph-apis).
 
-```cuda
+```c
 __global__ void setHandle(cudaGraphConditionalHandle handle, int value)
 {
     ...
@@ -962,11 +961,11 @@ In the following figure, there is an example graph with an alloc and a free node
 
 ![Kernel Nodes](../_images/kernel-nodes.png)
 
-**Figure 30.** *Kernel Nodes*
+**Figure 30.** _Kernel Nodes_
 
 The following code snippet establishes the graph in this figure:
 
-```cuda
+```c
 // Create the graph - it starts out empty
 cudaGraphCreate(&graph, 0);
 
@@ -1009,7 +1008,7 @@ Graph memory nodes can be created by capturing the corresponding stream ordered 
 
 Ignoring kernel nodes **d** and **e**, for clarity, the following code snippet shows how to use stream capture to create the graph from the previous figure:
 
-```cuda
+```c
 cudaMallocAsync(&dptr, size, stream1);
 kernel_A<<< ..., stream1 >>>(dptr, ...);
 
@@ -1044,7 +1043,7 @@ The three following code snippets demonstrate accessing graph allocations outsid
 
 First, ordering established by using a single stream:
 
-```cuda
+```c
 // Contents of allocating graph
 void *dptr;
 cudaGraphNodeParams params = { cudaGraphNodeTypeMemAlloc };
@@ -1063,7 +1062,7 @@ cudaFreeAsync(dptr, stream);
 
 Second, ordering established by recording and waiting on CUDA events:
 
-```cuda
+```c
 // Contents of allocating graph
 void *dptr;
 
@@ -1097,7 +1096,7 @@ cudaGraphLaunch(freeGraphExec, stream3);
 
 Third, ordering established by using graph external event nodes:
 
-```cuda
+```c
 // Contents of allocating graph
 void *dptr;
 cudaEvent_t allocEvent; // event indicating when the allocation will be ready for use.
@@ -1159,7 +1158,7 @@ Auto free on launch is useful for single-producer multiple-consumer algorithms. 
 > The `cudaGraphInstantiateFlagAutoFreeOnLaunch` flag does not change the behavior of graph destruction. The application must explicitly free the unfreed memory in order to avoid memory leaks, even for graphs instantiated with the flag.
 > The following code shows the use of `cudaGraphInstantiateFlagAutoFreeOnLaunch` to simplify a single-producer / multiple-consumer algorithm:
 
-```cuda
+```c
 // Create producer graph which allocates memory and populates it with data
 cudaStreamBeginCapture(cudaStreamPerThread, cudaStreamCaptureModeGlobal);
 cudaMallocAsync(&data1, blocks * threads, cudaStreamPerThread);
@@ -1216,7 +1215,7 @@ The following restrictions apply to child graphs after they have been moved:
 - Cannot be used as an argument to cuGraphExecUpdate.
 - Cannot have additional memory allocation or free nodes added.
 
-```cuda
+```c
 // Create the child graph
 cudaGraphCreate(&child, 0);
 
@@ -1259,11 +1258,11 @@ The following figure shows adding a new allocation node (2) that can reuse the a
 
 ![Adding New Alloc Node 2](../_images/new-alloc-node.png)
 
-**Figure 31.** *Adding New Alloc Node 2*
+**Figure 31.** _Adding New Alloc Node 2_
 
 ![Adding New Alloc Node 3](../_images/adding-new-alloc-nodes.png)
 
-**Figure 32.** *Adding New Alloc Node 3*
+**Figure 32.** _Adding New Alloc Node 3_
 
 #### 4.2.5.3.2. Physical Memory Management and Sharing
 
@@ -1275,7 +1274,7 @@ The following figure shows graphs sequentially launched in the same stream. In t
 
 ![Sequentially Launched Graphs](../_images/sequentially-launched-graphs.png)
 
-**Figure 33.** *Sequentially Launched Graphs*
+**Figure 33.** _Sequentially Launched Graphs_
 
 ### 4.2.5.4. Performance Considerations
 
@@ -1309,7 +1308,7 @@ Graph allocations can be configured for access from multiple GPUs, in which case
 
 The `cudaGraphAddNode` API accepts mapping requests in the `accessDescs` array field of the alloc node parameters structures. The `poolProps.location` embedded structure specifies the resident device for the allocation. Access from the allocating GPU is assumed to be needed, thus the application does not need to specify an entry for the resident device in the `accessDescs` array.
 
-```cuda
+```c
 cudaGraphNodeParams allocNodeParams = { cudaGraphNodeTypeMemAlloc };
 allocNodeParams.alloc.poolProps.allocType = cudaMemAllocationTypePinned;
 allocNodeParams.alloc.poolProps.location.type = cudaMemLocationTypeDevice;
@@ -1343,7 +1342,7 @@ cudaGraphAddNode(&allocNode, graph, NULL, NULL, 0, &allocNodeParams);
 
 For stream capture, the allocation node records the peer accessibility of the allocating pool at the time of the capture. Altering the peer accessibility of the allocating pool after a `cudaMallocFromPoolAsync` call is captured does not affect the mappings that the graph will make for the allocation.
 
-```cuda
+```c
 // boilerplate for the access descs (only ReadWrite and Device access supported by the add node api)
 accessDesc.flags = cudaMemAccessFlagsProtReadWrite;
 accessDesc.location.type = cudaMemLocationTypeDevice;
@@ -1407,7 +1406,7 @@ Alternatively, the graph can first be launched from the host, which will perform
 
 Examples of all three methods can be seen below:
 
-```cuda
+```c
 // Explicit upload after instantiation
 cudaGraphInstantiate(&deviceGraphExec1, deviceGraph1, cudaGraphInstantiateFlagDeviceLaunch);
 cudaGraphUpload(deviceGraphExec1, stream);
@@ -1437,11 +1436,11 @@ Unlike host launch, device graphs cannot be launched into regular CUDA streams, 
 
 Table 9 Device-only Graph Launch Streams
 
-| Stream | Launch Mode |
-| --- | --- |
-| `cudaStreamGraphFireAndForget` | Fire and forget launch |
-| `cudaStreamGraphTailLaunch` | Tail launch |
-| `cudaStreamGraphFireAndForgetAsSibling` | Sibling launch |
+| Stream                                  | Launch Mode            |
+| --------------------------------------- | ---------------------- |
+| `cudaStreamGraphFireAndForget`          | Fire and forget launch |
+| `cudaStreamGraphTailLaunch`             | Tail launch            |
+| `cudaStreamGraphFireAndForgetAsSibling` | Sibling launch         |
 
 #### 4.2.6.2.1. Fire and Forget Launch
 
@@ -1449,11 +1448,11 @@ As the name suggests, a fire and forget launch is submitted to the GPU immediate
 
 ![../_images/fire-and-forget-simple.png](../_images/fire-and-forget-simple.png)
 
-**Figure 34.** *Fire and forget launch*
+**Figure 34.** _Fire and forget launch_
 
 The above diagram can be generated by the sample code below:
 
-```cuda
+```c
 __global__ void launchFireAndForgetGraph(cudaGraphExec_t graph) {
     cudaGraphLaunch(graph, cudaStreamGraphFireAndForget);
 }
@@ -1490,19 +1489,19 @@ The below diagram shows the environment encapsulation that would be generated by
 
 ![../_images/fire-and-forget-environments.png](../_images/fire-and-forget-environments.png)
 
-**Figure 35.** *Fire and forget launch, with execution environments*
+**Figure 35.** _Fire and forget launch, with execution environments_
 
 These environments are also hierarchical, so a graph environment can include multiple levels of child-environments from fire and forget launches.
 
 ![../_images/fire-and-forget-nested-environments.png](../_images/fire-and-forget-nested-environments.png)
 
-**Figure 36.** *Nested fire and forget environments*
+**Figure 36.** _Nested fire and forget environments_
 
 When a graph is launched from the host, there exists a stream environment that parents the execution environment of the launched graph. The stream environment encapsulates all work generated as part of the overall launch. The stream launch is complete (i.e. downstream dependent work may now run) when the overall stream environment is marked as complete.
 
 ![../_images/device-graph-stream-environment.png](../_images/device-graph-stream-environment.png)
 
-**Figure 37.** *The stream environment, visualized*
+**Figure 37.** _The stream environment, visualized_
 
 #### 4.2.6.2.2. Tail Launch
 
@@ -1512,11 +1511,11 @@ A tail launch executes when a graph’s environment is considered complete - ie,
 
 ![../_images/tail-launch-simple.png](../_images/tail-launch-simple.png)
 
-**Figure 38.** *A simple tail launch*
+**Figure 38.** _A simple tail launch_
 
 The above execution flow can be generated by the code below:
 
-```cuda
+```c
 __global__ void launchTailGraph(cudaGraphExec_t graph) {
     cudaGraphLaunch(graph, cudaStreamGraphTailLaunch);
 }
@@ -1545,13 +1544,13 @@ Tail launches enqueued by a given graph will execute one at a time, in order of 
 
 ![../_images/tail-launch-ordering-simple.png](../_images/tail-launch-ordering-simple.png)
 
-**Figure 39.** *Tail launch ordering*
+**Figure 39.** _Tail launch ordering_
 
 Tail launches enqueued by a tail graph will execute before tail launches enqueued by previous graphs in the tail launch list. These new tail launches will execute in the order they are enqueued.
 
 ![../_images/tail-launch-ordering-complex.png](../_images/tail-launch-ordering-complex.png)
 
-**Figure 40.** *Tail launch ordering when enqueued from multiple graphs*
+**Figure 40.** _Tail launch ordering when enqueued from multiple graphs_
 
 A graph can have up to 255 pending tail launches.
 
@@ -1559,7 +1558,7 @@ A graph can have up to 255 pending tail launches.
 
 It is possible for a device graph to enqueue itself for a tail launch, although a given graph can only have one self-launch enqueued at a time. In order to query the currently running device graph so that it can be relaunched, a new device-side function is added:
 
-```cuda
+```c
 cudaGraphExec_t cudaGetCurrentGraphExec();
 ```
 
@@ -1567,7 +1566,7 @@ This function returns the handle of the currently running graph if it is a devic
 
 Below is sample code showing usage of this function for a relaunch loop:
 
-```cuda
+```c
 __device__ int relaunchCount = 0;
 
 __global__ void relaunchSelf() {
@@ -1589,11 +1588,11 @@ Sibling launch is a variation of fire-and-forget launch in which the graph is la
 
 ![../_images/sibling-launch-simple.png](../_images/sibling-launch-simple.png)
 
-**Figure 41.** *A simple sibling launch*
+**Figure 41.** _A simple sibling launch_
 
 The above diagram can be generated by the sample code below:
 
-```cuda
+```c
 __global__ void launchSiblingGraph(cudaGraphExec_t graph) {
     cudaGraphLaunch(graph, cudaStreamGraphFireAndForgetAsSibling);
 }
@@ -1636,7 +1635,7 @@ CUDA User Objects can be used to help manage the lifetime of resources used by a
 
 Various resource management schemes are not compatible with CUDA graphs. Consider for example an event-based pool or a synchronous-create, asynchronous-destroy scheme.
 
-```cuda
+```c
 // Library API with pool allocation
 void libraryWork(cudaStream_t stream) {
     auto &resource = pool.claimTemporaryResource();
@@ -1646,7 +1645,7 @@ void libraryWork(cudaStream_t stream) {
 }
 ```
 
-```cuda
+```c
 // Library API with asynchronous resource deletion
 void libraryWork(cudaStream_t stream) {
     Resource *resource = new Resource(...);
@@ -1670,7 +1669,7 @@ When a reference is associated to a CUDA graph, CUDA will manage the graph opera
 
 Here is an example use.
 
-```cuda
+```c
 cudaGraph_t graph;  // Preexisting graph
 
 Object *object = new Object;  // C++ object with possibly nontrivial destructor

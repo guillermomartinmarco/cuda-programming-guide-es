@@ -22,9 +22,9 @@ Linux HMM requires Linux kernel version 6.1.24+, 6.2.11+ or 6.3+, devices with c
 
 > [!NOTE]
 >
-> We refer to systems with a combined page table for both CPUs and GPUs as *hardware
-> coherent* systems. Systems with separate page tables for CPUs and GPUs are
-> referred to as *software-coherent*.
+> We refer to systems with a combined page table for both CPUs and GPUs as _hardware
+> coherent_ systems. Systems with separate page tables for CPUs and GPUs are
+> referred to as _software-coherent_.
 
 Hardware-coherent systems such as NVIDIA Grace Hopper offer a logically combined page table for both CPUs and GPUs, see [CPU and GPU Page Tables: Hardware Coherency vs. Software Coherency](unified-memory.md#um-hw-coherency).
 The following section only applies to hardware-coherent systems:
@@ -39,7 +39,7 @@ allow the device to access any memory owned by the host process interacting with
 This section shows a few advanced use-cases, using a kernel that simply prints
 the first 8 characters of an input character array to the standard output stream:
 
-```cuda
+```c
 __global__ void kernel(const char* type, const char* data) {
   static const int n_char = 8;
   printf("%s - first %d characters: '", type, n_char);
@@ -52,7 +52,7 @@ The following tabs show various ways of how this kernel may be called with syste
 
 **Malloc**
 
-```cuda
+```c
 void test_malloc() {
   const char test_string[] = "Hello World";
   char* heap_data = (char*)malloc(sizeof(test_string));
@@ -66,7 +66,7 @@ void test_malloc() {
 
 **Managed**
 
-```cuda
+```c
 void test_managed() {
   const char test_string[] = "Hello World";
   char* data;
@@ -81,7 +81,7 @@ void test_managed() {
 
 **Stack variable**
 
-```cuda
+```c
 void test_stack() {
   const char test_string[] = "Hello World";
   kernel<<<1, 1>>>("stack", test_string);
@@ -92,7 +92,7 @@ void test_stack() {
 
 **File-scope static variable**
 
-```cuda
+```c
 void test_static() {
   static const char test_string[] = "Hello World";
   kernel<<<1, 1>>>("static", test_string);
@@ -103,7 +103,7 @@ void test_static() {
 
 **Global-scope variable**
 
-```cuda
+```c
 const char global_string[] = "Hello World";
 
 void test_global() {
@@ -115,7 +115,7 @@ void test_global() {
 
 **Global-scope extern variable**
 
-```cuda
+```c
 // declared in separate file, see below
 extern char* ext_data;
 
@@ -167,7 +167,7 @@ int main() {
 }
 ```
 
-In the example above, we need to ensure to pass a *pointer* to the global variable to the kernel instead of directly accessing the global variable in the kernel. This is because global variables without the `__managed__` specifier are declared as `__host__`-only by default, thus most compilers won’t allow using these variables directly in device code as of now.
+In the example above, we need to ensure to pass a _pointer_ to the global variable to the kernel instead of directly accessing the global variable in the kernel. This is because global variables without the `__managed__` specifier are declared as `__host__`-only by default, thus most compilers won’t allow using these variables directly in device code as of now.
 
 #### 4.1.1.1.1. File-backed Unified Memory
 
@@ -175,7 +175,7 @@ Since systems with full CUDA unified memory support allow the device to access a
 
 Here, we show a modified version of the initial example shown in the previous section to use file-backed memory in order to print a string from the GPU, read directly from an input file. In the following example, the memory is backed by a physical file, but the example applies to memory-backed files too.
 
-```cuda
+```c
 __global__ void kernel(const char* type, const char* data) {
   static const int n_char = 8;
   printf("%s - first %d characters: '", type, n_char);
@@ -184,7 +184,7 @@ __global__ void kernel(const char* type, const char* data) {
 }
 ```
 
-```cuda
+```c
 void test_file_backed() {
   int fd = open(INPUT_FILE_NAME, O_RDONLY);
   ASSERT(fd >= 0, "Invalid file handle");
@@ -221,9 +221,9 @@ the same programming model applies, similar to [File-backed Unified Memory](unif
 See the following references for more information on various ways of creating
 IPC-capable system-allocated memory under Linux:
 
-- [mmap with MAP\_SHARED](https://man7.org/linux/man-pages/man2/mmap.2.html)
+- [mmap with MAP_SHARED](https://man7.org/linux/man-pages/man2/mmap.2.html)
 - [POSIX IPC APIs](https://pubs.opengroup.org/onlinepubs/007904875/functions/shm_open.html)
-- [Linux memfd\_create](https://man7.org/linux/man-pages/man2/memfd_create.2.html) .
+- [Linux memfd_create](https://man7.org/linux/man-pages/man2/memfd_create.2.html) .
 
 Note that it is not possible to share memory between different hosts and their devices using this technique.
 
@@ -248,22 +248,22 @@ memory pages and page sizes.
 This sub-section attempts to define all necessary terms and explain why paging matters for performance.
 
 All currently supported systems for unified memory use a virtual address space:
-this means that memory addresses used by an application represent a *virtual* location
-which might be *mapped* to a physical location where the memory actually resides.
+this means that memory addresses used by an application represent a _virtual_ location
+which might be _mapped_ to a physical location where the memory actually resides.
 
 All currently supported processors, including both CPUs and GPUs, additionally use
-memory *paging*. Because all systems use a virtual address space, there are two types
+memory _paging_. Because all systems use a virtual address space, there are two types
 of memory pages:
 
 - Virtual pages: This represents a fixed-size contiguous chunk of virtual memory
-  per process tracked by the operating system, which can be *mapped* into physical memory.
-  Note that the virtual page is linked to the *mapping*: for example, a single
+  per process tracked by the operating system, which can be _mapped_ into physical memory.
+  Note that the virtual page is linked to the _mapping_: for example, a single
   virtual address might be mapped into physical memory using different page sizes.
 - Physical pages: This represents a fixed-size contiguous chunk of memory
   the processor’s main Memory Management Unit (MMU) supports and into which
   a virtual page can be mapped.
 
-Currently, all x86\_64 CPUs use a default physical page size of 4KiB.
+Currently, all x86_64 CPUs use a default physical page size of 4KiB.
 Arm CPUs support multiple physical page sizes - 4KiB, 16KiB, 32KiB and 64KiB - depending on the exact CPU.
 Finally, NVIDIA GPUs support multiple physical page sizes, but prefer 2MiB physical pages or larger.
 Note that these sizes are subject to change in future hardware.
@@ -273,10 +273,10 @@ but an application may use different page sizes as long as they are supported by
 operating system and the hardware. Typically, supported virtual page sizes must be
 powers of 2 and multiples of the physical page size.
 
-The logical entity tracking the mapping of virtual pages into physical pages will be referred to as a *page table*,
-and each mapping of a given virtual page with a given virtual size to physical pages is called a *Page Table Entry (PTE)*.
+The logical entity tracking the mapping of virtual pages into physical pages will be referred to as a _page table_,
+and each mapping of a given virtual page with a given virtual size to physical pages is called a _Page Table Entry (PTE)_.
 All supported processors provide specific caches for the page table to speed up the translation of
-virtual addresses to physical addresses. These caches are called *Translation Lookaside Buffers (TLBs)*.
+virtual addresses to physical addresses. These caches are called _Translation Lookaside Buffers (TLBs)_.
 
 There are two important aspects for performance tuning of applications:
 
@@ -321,7 +321,7 @@ thus significant slowdowns.
 On the other hand, on software-coherent systems where the CPUs and GPUs each have their own logical
 page table, different performance tuning aspects should be considered:
 in order to guarantee coherency, these systems
-usually use *page faults* in case a processor accesses a memory address mapped
+usually use _page faults_ in case a processor accesses a memory address mapped
 into the physical memory of a different processor. Such a page fault means that:
 
 - It needs to be ensured that the currently owning processor (where the physical page currently resides)
@@ -387,7 +387,7 @@ to enable this direct access without page faults, see example below.
 
 **System Allocator**
 
-```cuda
+```c
 __global__ void write(int *ret, int a, int b) {
   ret[threadIdx.x] = a + b + threadIdx.x;
 }
@@ -415,7 +415,7 @@ void test_malloc() {
 
 **Managed**
 
-```cuda
+```c
 __global__ void write(int *ret, int a, int b) {
   ret[threadIdx.x] = a + b + threadIdx.x;
 }
@@ -463,7 +463,7 @@ CUDA unified memory supports all atomic operations available to host and device 
 
 On software-coherent systems, atomic accesses from the device to file-backed host memory are not supported. The following example code is valid on hardware-coherent systems but exhibits undefined behavior on other systems:
 
-```cuda
+```c
 #include <cuda/atomic>
 
 #include <cstdio>
@@ -522,68 +522,16 @@ Thus, it is recommended to follow the following performance advice:
 For systems with full CUDA unified memory support various different allocators may be used to allocate unified memory.
 The following table shows an overview of a selection of allocators with their respective features. Note that all information in this section is subject to change in future CUDA versions.
 
-<table>
-<caption><span>Table 7 </span><span>Overview of unified memory support of different allocators</span></caption>
-<thead>
-<tr><th>API</th>
-<th>Placement Policy</th>
-<th>Accessible From</th>
-<th>Migrate Based
-On Access [^2]</th>
-<th>Page Sizes [^4] [^5]</th>
-</tr>
-</thead>
-<tbody>
-<tr><td><code>malloc</code>, <code>new</code>,  <code>mmap</code></td>
-<td>First touch/hint [^1]</td>
-<td>CPU, GPU</td>
-<td>Yes [^3]</td>
-<td>System or huge page size [^6]</td>
-</tr>
-<tr><td><code>cudaMallocManaged</code></td>
-<td>First touch/hint</td>
-<td>CPU, GPU</td>
-<td>Yes</td>
-<td>CPU resident: system page size
-GPU resident: 2MB</td>
-</tr>
-<tr><td><code>cudaMalloc</code></td>
-<td>GPU</td>
-<td>GPU</td>
-<td>No</td>
-<td>GPU page size: 2MB</td>
-</tr>
-<tr><td><code>cudaMallocHost</code>,
-<code>cudaHostAlloc</code>,
-<code>cudaHostRegister</code></td>
-<td>CPU</td>
-<td>CPU, GPU</td>
-<td>No</td>
-<td><p>Mapped by CPU: system page size</p>
-<p>Mapped by GPU: 2MB</p>
-</td>
-</tr>
-<tr><td>Memory pools, location type host:
-<code>cuMemCreate</code>,
-<code>cudaMemPoolCreate</code></td>
-<td>CPU</td>
-<td>CPU, GPU</td>
-<td>No</td>
-<td><p>Mapped by CPU: system page size</p>
-<p>Mapped by GPU: 2MB</p>
-</td>
-</tr>
-<tr><td>Memory pools, location type device:
-<code>cuMemCreate</code>,
-<code>cudaMemPoolCreate</code>,
-<code>cudaMallocAsync</code></td>
-<td>GPU</td>
-<td>GPU</td>
-<td>No</td>
-<td>2MB</td>
-</tr>
-</tbody>
-</table>
+| API                                                                                       | Placement Policy      | Accessible From | Migrate Based On Access [^2] | Page Sizes [^4] [^5]                                |
+| ----------------------------------------------------------------------------------------- | --------------------- | --------------- | ---------------------------- | --------------------------------------------------- |
+| `malloc`, `new`, `mmap`                                                                   | First touch/hint [^1] | CPU, GPU        | Yes [^3]                     | System or huge page size [^6]                       |
+| `cudaMallocManaged`                                                                       | First touch/hint      | CPU, GPU        | Yes                          | CPU resident: system page size GPU resident: 2MB    |
+| `cudaMalloc`                                                                              | GPU                   | GPU             | No                           | GPU page size: 2MB                                  |
+| `cudaMallocHost`, `cudaHostAlloc`, `cudaHostRegister`                                     | CPU                   | CPU, GPU        | No                           | Mapped by CPU: system page size. Mapped by GPU: 2MB |
+| Memory pools, location type host: `cuMemCreate`, `cudaMemPoolCreate`                      | CPU                   | CPU, GPU        | No                           | Mapped by CPU: system page size. Mapped by GPU: 2MB |
+| Memory pools, location type device: `cuMemCreate`, `cudaMemPoolCreate`, `cudaMallocAsync` | GPU                   | GPU             | No                           | 2MB                                                 |
+
+> _Table 7_ Overview of unified memory support of different allocators
 
 [^1]: For `mmap`, file-backed memory is placed on the CPU by default, unless specified otherwise through `cudaMemAdviseSetPreferredLocation` (or `mbind`, see bullet points below).
 
@@ -630,7 +578,7 @@ If the host accesses unified memory, cache misses may introduce more traffic tha
 
 **System Allocator**
 
-```cuda
+```c
   size_t data_size = sizeof(int);
   int* data = (int*)malloc(data_size);
   // ensure that data stays local to the host and avoid faults
@@ -652,7 +600,7 @@ If the host accesses unified memory, cache misses may introduce more traffic tha
 
 **Managed**
 
-```cuda
+```c
   int* data;
   size_t data_size = sizeof(int);
   cudaMallocManaged(&data, data_size);
@@ -685,7 +633,7 @@ If independent work can be scheduled on the device while the result is transferr
 
 **1. Explicit Copy**
 
-```cuda
+```c
 void exchange_explicit_copy(cudaStream_t stream) {
   int* data, *host_data;
   size_t n_bytes = sizeof(int) * 16;
@@ -709,7 +657,7 @@ void exchange_explicit_copy(cudaStream_t stream) {
 
 **2. Device Direct Write**
 
-```cuda
+```c
 void exchange_device_direct_write(cudaStream_t stream) {
   int* data;
   size_t n_bytes = sizeof(int) * 16;
@@ -730,7 +678,7 @@ void exchange_device_direct_write(cudaStream_t stream) {
 
 **3. Host Direct Read**
 
-```cuda
+```c
 void exchange_host_direct_read(cudaStream_t stream) {
   int* data;
   size_t n_bytes = sizeof(int) * 16;
@@ -899,6 +847,8 @@ This is the default visibility for a `cudaMallocManaged()` allocation or a `__ma
 >
 > By associating an allocation with a specific stream, the program makes a guarantee that only kernels launched into that stream will touch that data. No error checking is performed by the unified memory system.
 
+<!---->
+
 > [!NOTE]
 >
 > In addition to allowing greater concurrency, the use of `cudaStreamAttachMemAsync()` can enable data transfer optimizations within the unified memory system that may affect latencies and other overhead.
@@ -981,7 +931,6 @@ When using `cudaMemset*()` with unified memory, the data must be coherently acce
 When data is accessed from the device either by `cudaMemcpy*` or `cudaMemset*`, the stream of operation is considered to be active on the GPU. During this time, any CPU access of data that is associated with that stream or data that has global visibility, will result in a segmentation fault if the GPU has a zero value for the device attribute `concurrentManagedAccess`. The program must synchronize appropriately to ensure the operation has completed before accessing any associated data from the CPU.
 
 > 1. Coherently accessible from the host in a given stream means that the memory neither has global visibility nor is it associated with the given stream.
-
 > 2. Coherently accessible from the device in a given stream means that the memory either has global visibility or is associated with the given stream.
 
 ## 4.1.4. Performance Hints
@@ -1022,7 +971,7 @@ Consider the simple code example below:
 
 **System Allocator**
 
-```cuda
+```c
 void test_prefetch_sam(const cudaStream_t& s) {
   // initialize data on CPU
   char *data = (char*)malloc(dataSizeBytes);
@@ -1051,7 +1000,7 @@ void test_prefetch_sam(const cudaStream_t& s) {
 
 **Managed**
 
-```cuda
+```c
 void test_prefetch_managed(const cudaStream_t& s) {
   // initialize data on CPU
   char *data;
@@ -1094,7 +1043,7 @@ cudaError_t cudaMemAdvise(const void *devPtr,
 
 The example shows how to use `cudaMemAdvise`:
 
-```cuda
+```c
   init_data(data, dataSizeBytes);
   cudaMemLocation location = {.type = cudaMemLocationTypeDevice, .id = myGpuId};
 
@@ -1131,24 +1080,24 @@ void test_advise_managed(cudaStream_t stream) {
 Where `advice` may take the following values:
 
 - `cudaMemAdviseSetReadMostly`:
-  :   This implies that the data is mostly going to be read from and only occasionally written to.
-      In general, it allows trading off read bandwidth for write bandwidth on this region.
+  : This implies that the data is mostly going to be read from and only occasionally written to.
+  In general, it allows trading off read bandwidth for write bandwidth on this region.
 
 - `cudaMemAdviseSetPreferredLocation`:
-  :   This hint sets the preferred location for the data to be the specified device’s physical memory.
-      This hint encourages the system to keep the data at the preferred location, but does not guarantee it.
-      Passing in a value of `cudaMemLocationTypeHost` for location.type sets the preferred location as CPU memory.
-      Other hints, like `cudaMemPrefetchAsync`, may override this hint and allow the memory to migrate away from its preferred location.
+  : This hint sets the preferred location for the data to be the specified device’s physical memory.
+  This hint encourages the system to keep the data at the preferred location, but does not guarantee it.
+  Passing in a value of `cudaMemLocationTypeHost` for location.type sets the preferred location as CPU memory.
+  Other hints, like `cudaMemPrefetchAsync`, may override this hint and allow the memory to migrate away from its preferred location.
 
 - `cudaMemAdviseSetAccessedBy`:
-  :   In some systems, it may be beneficial for performance to establish a
-      mapping into memory before accessing the data from a given processor.
-      This hint tells the system that the data will be frequently accessed by `location.id`
-      when `location.type` is `cudaMemLocationTypeDevice`,
-      enabling the system to assume that creating these mappings pays off.
-      This hint does not imply where the data should reside,
-      but it can be combined with `cudaMemAdviseSetPreferredLocation` to specify that.
-      On hardware-coherent systems, this hint switches on access counter migration, see [Access Counter Migration](unified-memory.md#um-access-counters).
+  : In some systems, it may be beneficial for performance to establish a
+  mapping into memory before accessing the data from a given processor.
+  This hint tells the system that the data will be frequently accessed by `location.id`
+  when `location.type` is `cudaMemLocationTypeDevice`,
+  enabling the system to assume that creating these mappings pays off.
+  This hint does not imply where the data should reside,
+  but it can be combined with `cudaMemAdviseSetPreferredLocation` to specify that.
+  On hardware-coherent systems, this hint switches on access counter migration, see [Access Counter Migration](unified-memory.md#um-access-counters).
 
 Each advice can be also unset by using one of the following values:
 `cudaMemAdviseUnsetReadMostly`, `cudaMemAdviseUnsetPreferredLocation` and
@@ -1158,7 +1107,7 @@ The example shows how to use `cudaMemAdvise`:
 
 **System Allocator**
 
-```cuda
+```c
 void test_advise_sam(cudaStream_t stream) {
   char *dataPtr;
   size_t dataSize = 64 * threadsPerBlock;  // 16 KiB
@@ -1201,7 +1150,7 @@ void test_advise_sam(cudaStream_t stream) {
 
 **Managed**
 
-```cuda
+```c
 void test_advise_managed(cudaStream_t stream) {
   char *dataPtr;
   size_t dataSize = 64 * threadsPerBlock;  // 16 KiB
@@ -1321,25 +1270,25 @@ declared via `__managed__` variables. It is possible to query the following attr
 - `cudaMemRangeAttributeAccessedBy`: will return the list of devices that have that advise set for that memory range.
 - `cudaMemRangeAttributeLastPrefetchLocation`: will return the last location to which the memory range was prefetched explicitly using `cudaMemPrefetchAsync`. Note that this simply returns the last location that the application requested to prefetch the memory range to. It gives no indication as to whether the prefetch operation to that location has completed or even begun.
 - `cudaMemRangeAttributePreferredLocationType`: it returns the location type of the preferred location with the following values:
-
   - `cudaMemLocationTypeDevice`: if all pages in the memory range have the same GPU as their preferred location,
   - `cudaMemLocationTypeHost`: if all pages in the memory range have the CPU as their preferred location,
   - `cudaMemLocationTypeHostNuma`: if all the pages in the memory range have the same host NUMA node ID as their preferred location,
   - `cudaMemLocationTypeInvalid`: if either all the pages don’t have the same preferred location or some of the pages don’t have a preferred location at all.
+
 - `cudaMemRangeAttributePreferredLocationId`: returns the device ordinal if the `cudaMemRangeAttributePreferredLocationType` query for the same address range returns `cudaMemLocationTypeDevice`. If the preferred location type is a host NUMA node, it returns the host NUMA node ID. Otherwise, the id should be ignored.
 - `cudaMemRangeAttributeLastPrefetchLocationType`: returns the last location type to which all pages in the memory range were prefetched explicitly via `cudaMemPrefetchAsync`. The following values are returned:
-
   - `cudaMemLocationTypeDevice`: if all pages in the memory range were prefetched to the same GPU,
   - `cudaMemLocationTypeHost`: if all pages in the memory range were prefetched to the CPU,
   - `cudaMemLocationTypeHostNuma`: if all the pages in the memory range were prefetched to the same host NUMA node ID,
   - `cudaMemLocationTypeInvalid`: if either all the pages were not prefetched to the same location or some of the pages were never prefetched at all.
+
 - `cudaMemRangeAttributeLastPrefetchLocationId`: if the `cudaMemRangeAttributeLastPrefetchLocationType` query for the same address range returns `cudaMemLocationTypeDevice`, it will be a valid device ordinal or if it returns `cudaMemLocationTypeHostNuma`, it will be a valid host NUMA node ID. Otherwise, the id should be ignored.
 
 Additionally, multiple attributes can be queried by using corresponding `cudaMemRangeGetAttributes` function.
 
 ### 4.1.4.5. GPU Memory Oversubscription
 
-Unified memory enables applications to *oversubscribe* the memory of any individual processor:
+Unified memory enables applications to _oversubscribe_ the memory of any individual processor:
 in other words they can allocate and share arrays larger than
 the memory capacity of any individual processor in the system,
 enabling among others out-of-core processing of datasets that do not fit within

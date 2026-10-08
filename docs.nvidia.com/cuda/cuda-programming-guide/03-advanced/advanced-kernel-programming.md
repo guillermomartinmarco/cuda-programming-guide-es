@@ -9,7 +9,7 @@ Detailed descriptions for some of these features are contained in chapters dedic
 
 ## 3.2.1. Using PTX
 
-*Parallel Thread Execution* (PTX), the virtual machine instruction set architecture (ISA) that CUDA uses to abstract hardware ISAs, was introduced in [Section 1.3.3](../01-introduction/cuda-platform.md#cuda-platform-ptx). Writing code in PTX directly is a highly advanced optimization technique that is not necessary for most developers and should be considered a tool of last resort. Nevertheless, there are situations where the fine-grained control enabled by writing PTX directly enables performance improvements in specific applications. These situations are typically in very performance-sensitive portions of an application where every fraction of a percent of performance improvement has significant benefits. All of the available PTX instructions are in the [PTX ISA document](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html).
+_Parallel Thread Execution_ (PTX), the virtual machine instruction set architecture (ISA) that CUDA uses to abstract hardware ISAs, was introduced in [Section 1.3.3](../01-introduction/cuda-platform.md#cuda-platform-ptx). Writing code in PTX directly is a highly advanced optimization technique that is not necessary for most developers and should be considered a tool of last resort. Nevertheless, there are situations where the fine-grained control enabled by writing PTX directly enables performance improvements in specific applications. These situations are typically in very performance-sensitive portions of an application where every fraction of a percent of performance improvement has significant benefits. All of the available PTX instructions are in the [PTX ISA document](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html).
 
 `cuda::ptx` **namespace**
 
@@ -21,7 +21,7 @@ Another way to include PTX in your code is to use inline PTX. This method is des
 
 ## 3.2.2. Hardware Implementation
 
-A streaming multiprocessor or SM (see [GPU Hardware Model](../01-introduction/programming-model.md#programming-model-hardware-model)) is designed to execute hundreds of threads concurrently. To manage such a large number of threads, it employs a unique parallel computing model called *Single-Instruction, Multiple-Thread*, or *SIMT*, that is described in [SIMT Execution Model](advanced-kernel-programming.md#advanced-kernels-hardware-implementation-simt-architecture). The instructions are pipelined, leveraging instruction-level parallelism within a single thread, as well as extensive thread-level parallelism through simultaneous hardware multithreading as detailed in [Hardware Multithreading](advanced-kernel-programming.md#advanced-kernels-hardware-implementation-hardware-multithreading). Unlike CPU cores, SMs issue instructions in order and do not perform branch prediction or speculative execution.
+A streaming multiprocessor or SM (see [GPU Hardware Model](../01-introduction/programming-model.md#programming-model-hardware-model)) is designed to execute hundreds of threads concurrently. To manage such a large number of threads, it employs a unique parallel computing model called _Single-Instruction, Multiple-Thread_, or _SIMT_, that is described in [SIMT Execution Model](advanced-kernel-programming.md#advanced-kernels-hardware-implementation-simt-architecture). The instructions are pipelined, leveraging instruction-level parallelism within a single thread, as well as extensive thread-level parallelism through simultaneous hardware multithreading as detailed in [Hardware Multithreading](advanced-kernel-programming.md#advanced-kernels-hardware-implementation-hardware-multithreading). Unlike CPU cores, SMs issue instructions in order and do not perform branch prediction or speculative execution.
 
 Sections [SIMT Execution Model](advanced-kernel-programming.md#advanced-kernels-hardware-implementation-simt-architecture) and [Hardware Multithreading](advanced-kernel-programming.md#advanced-kernels-hardware-implementation-hardware-multithreading) describe the architectural features of the SM that are common to all devices. Section [Compute Capabilities](../05-appendices/compute-capabilities.md#compute-capabilities) provides the specifics for devices of different compute capabilities.
 
@@ -29,7 +29,7 @@ The NVIDIA GPU architecture uses a little-endian representation.
 
 ### 3.2.2.1. SIMT Execution Model
 
-Each SM creates, manages, schedules, and executes threads in groups of 32 parallel threads called *warps*. Individual threads composing a warp start together at the same program address, but they have their own instruction address counter and register state and are therefore free to branch and execute independently. The term *warp* originates from weaving, the first parallel thread technology. A *half-warp* is either the first or second half of a warp. A *quarter-warp* is either the first, second, third, or fourth quarter of a warp.
+Each SM creates, manages, schedules, and executes threads in groups of 32 parallel threads called _warps_. Individual threads composing a warp start together at the same program address, but they have their own instruction address counter and register state and are therefore free to branch and execute independently. The term _warp_ originates from weaving, the first parallel thread technology. A _half-warp_ is either the first or second half of a warp. A _quarter-warp_ is either the first, second, third, or fourth quarter of a warp.
 
 A warp executes one common instruction at a time, so full efficiency is realized when all 32 threads of a warp agree on their execution path. If threads of a warp diverge via a data-dependent conditional branch, the warp executes each branch path taken, disabling threads that are not on that path. Branch divergence occurs only within a warp; different warps execute independently regardless of whether they are executing common or disjoint code paths.
 
@@ -39,13 +39,13 @@ The SIMT architecture is akin to SIMD (Single Instruction, Multiple Data) vector
 
 On GPUs with compute capability lower than 7.0, warps used a single program counter shared amongst all 32 threads in the warp together with an active mask specifying the active threads of the warp. As a result, threads from the same warp in divergent regions or different states of execution cannot signal each other or exchange data, and algorithms requiring fine-grained sharing of data guarded by locks or mutexes can lead to deadlock, depending on which warp the contending threads come from.
 
-In GPUs of compute capability 7.0 and later, *independent thread scheduling* allows full concurrency between threads, regardless of warp. With independent thread scheduling, the GPU maintains execution state per thread, including a program counter and call stack, and can yield execution at a per-thread granularity, either to make better use of execution resources or to allow one thread to wait for data to be produced by another. A schedule optimizer determines how to group active threads from the same warp together into SIMT units. This retains the high throughput of SIMT execution as in prior NVIDIA GPUs, but with much more flexibility: threads can now diverge and reconverge at sub-warp granularity.
+In GPUs of compute capability 7.0 and later, _independent thread scheduling_ allows full concurrency between threads, regardless of warp. With independent thread scheduling, the GPU maintains execution state per thread, including a program counter and call stack, and can yield execution at a per-thread granularity, either to make better use of execution resources or to allow one thread to wait for data to be produced by another. A schedule optimizer determines how to group active threads from the same warp together into SIMT units. This retains the high throughput of SIMT execution as in prior NVIDIA GPUs, but with much more flexibility: threads can now diverge and reconverge at sub-warp granularity.
 
-Independent thread scheduling can break code that relies on implicit warp-synchronous behavior from previous GPU architectures. *Warp-synchronous* code assumes that threads in the same warp execute in lockstep at every instruction, but the ability for threads to diverge and reconverge at sub-warp granularity makes such assumptions invalid. This can lead to a different set of threads participating in the executed code than intended. Any warp-synchronous code developed for GPUs prior to CC 7.0 (such as synchronization-free intra-warp reductions) should be revisited to ensure compatibility. Developers should explicitly synchronize such code using `__syncwarp()` to ensure correct behavior across all GPU generations.
+Independent thread scheduling can break code that relies on implicit warp-synchronous behavior from previous GPU architectures. _Warp-synchronous_ code assumes that threads in the same warp execute in lockstep at every instruction, but the ability for threads to diverge and reconverge at sub-warp granularity makes such assumptions invalid. This can lead to a different set of threads participating in the executed code than intended. Any warp-synchronous code developed for GPUs prior to CC 7.0 (such as synchronization-free intra-warp reductions) should be revisited to ensure compatibility. Developers should explicitly synchronize such code using `__syncwarp()` to ensure correct behavior across all GPU generations.
 
 > [!NOTE]
 >
-> The threads of a warp that are participating in the current instruction are called the *active* threads, whereas threads not on the current instruction are *inactive* (disabled). Threads can be inactive for a variety of reasons including having exited earlier than other threads of their warp, having taken a different branch path than the branch path currently executed by the warp, or being the last threads of a block whose number of threads is not a multiple of the warp size.
+> The threads of a warp that are participating in the current instruction are called the _active_ threads, whereas threads not on the current instruction are _inactive_ (disabled). Threads can be inactive for a variety of reasons including having exited earlier than other threads of their warp, having taken a different branch path than the branch path currently executed by the warp, or being the last threads of a block whose number of threads is not a multiple of the warp size.
 >
 > If a non-atomic instruction executed by a warp writes to the same location in global or shared memory from more than one of the threads of the warp, the number of serialized writes that occur to that location may vary depending on the compute capability of the device. However, for all compute capabilities, which thread performs the final write is undefined.
 >
@@ -53,19 +53,19 @@ Independent thread scheduling can break code that relies on implicit warp-synchr
 
 ### 3.2.2.2. Hardware Multithreading
 
-When an SM is given one or more thread blocks to execute, it partitions them into warps and each warp gets scheduled for execution by a *warp scheduler*. The way a block is partitioned into warps is always the same; each warp contains threads of consecutive, increasing thread IDs with the first warp containing thread 0. [Thread Hierarchy](../02-basics/writing-cuda-kernels.md#writing-cuda-kernels-thread-hierarchy-review) describes how thread IDs relate to thread indices in the block.
+When an SM is given one or more thread blocks to execute, it partitions them into warps and each warp gets scheduled for execution by a _warp scheduler_. The way a block is partitioned into warps is always the same; each warp contains threads of consecutive, increasing thread IDs with the first warp containing thread 0. [Thread Hierarchy](../02-basics/writing-cuda-kernels.md#writing-cuda-kernels-thread-hierarchy-review) describes how thread IDs relate to thread indices in the block.
 
 The total number of warps in a block is defined as follows:
 
 $\text{ceil}\left( \frac{T}{W_{size}}, 1 \right)$
 
-- *T* is the number of threads per block,
-- *Wsize* is the warp size, which is equal to 32,
+- _T_ is the number of threads per block,
+- _Wsize_ is the warp size, which is equal to 32,
 - ceil(x, y) is equal to x rounded up to the nearest multiple of y.
 
 ![A thread block is partitioned into warps of 32 threads.](../_images/warps-in-a-block.png)
 
-**Figure 22.** *A thread block is partitioned into warps of 32 threads.*
+**Figure 22.** _A thread block is partitioned into warps of 32 threads._
 
 The execution context (program counters, registers, etc.) for each warp processed by an SM is maintained on-chip throughout the warp’s lifetime. Therefore, switching between warps incurs no cost. At each instruction issue cycle, a warp scheduler selects a warp with threads ready to execute its next instruction (the [active threads](advanced-kernel-programming.md#simt-architecture-notes) of the warp) and issues the instruction to those threads.
 
@@ -81,33 +81,33 @@ Compute capability 9.0 (The NVIDIA Hopper GPU architecture) extended the asynchr
 
 CUDA provides APIs which can be called by threads from device code to use these features. The asynchronous programming model defines the behavior of asynchronous operations with respect to CUDA threads.
 
-An asynchronous operation is an operation initiated by a CUDA thread, but executed asynchronously as if by another thread, which we will refer to as an *async thread*. In a well-formed program, one or more CUDA threads synchronize with the asynchronous operation. The CUDA thread that initiated the asynchronous operation is not required to be among the synchronizing threads. The async thread is always associated with the CUDA thread that initiated the operation.
+An asynchronous operation is an operation initiated by a CUDA thread, but executed asynchronously as if by another thread, which we will refer to as an _async thread_. In a well-formed program, one or more CUDA threads synchronize with the asynchronous operation. The CUDA thread that initiated the asynchronous operation is not required to be among the synchronizing threads. The async thread is always associated with the CUDA thread that initiated the operation.
 
 An asynchronous operation uses a synchronization object to signal its completion, which could be a barrier or a pipeline. These synchronization objects are explained in detail in [Advanced Synchronization Primitives](advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives), and their role in performing asynchronous memory operations is demonstrated in [Asynchronous Data Copies](advanced-kernel-programming.md#advanced-kernels-async-copies).
 
 #### 3.2.2.3.1. Async Thread and Async Proxy
 
-Asynchronous operations may access memory differently than regular operations. To distinguish between these different memory access methods, CUDA introduces the concepts of an *async thread*, a *generic proxy*, and an *async proxy*. Normal operations (loads and stores) go through the generic proxy. Some asynchronous instructions, such as [LDGSTS](../04-special-topics/async-copies.md#async-copies-ldgsts) and [STAS/REDAS](../04-special-topics/async-copies.md#async-copies-stas), are modeled using an async thread operating in the generic proxy. Other asynchronous instructions, such as bulk-asynchronous copies with TMA and some tensor core operations (tcgen05.\*, wgmma.mma\_async.\*), are modeled using an async thread operating in the async proxy.
+Asynchronous operations may access memory differently than regular operations. To distinguish between these different memory access methods, CUDA introduces the concepts of an _async thread_, a _generic proxy_, and an _async proxy_. Normal operations (loads and stores) go through the generic proxy. Some asynchronous instructions, such as [LDGSTS](../04-special-topics/async-copies.md#async-copies-ldgsts) and [STAS/REDAS](../04-special-topics/async-copies.md#async-copies-stas), are modeled using an async thread operating in the generic proxy. Other asynchronous instructions, such as bulk-asynchronous copies with TMA and some tensor core operations (tcgen05.\*, wgmma.mma_async.\*), are modeled using an async thread operating in the async proxy.
 
-**Async thread operating in generic proxy**. When an asynchronous operation is initiated, it is associated with an async thread, which is different from the CUDA thread that initiated the operation. *Preceding* generic proxy (normal) loads and stores to the same address are guaranteed to be ordered before the asynchronous operation. However, *subsequent* normal loads and stores to the same address are not guaranteed to maintain their ordering, potentially incurring a race condition until the async thread completes.
+**Async thread operating in generic proxy**. When an asynchronous operation is initiated, it is associated with an async thread, which is different from the CUDA thread that initiated the operation. _Preceding_ generic proxy (normal) loads and stores to the same address are guaranteed to be ordered before the asynchronous operation. However, _subsequent_ normal loads and stores to the same address are not guaranteed to maintain their ordering, potentially incurring a race condition until the async thread completes.
 
-**Async thread operating in async proxy**. When an asynchronous operation is initiated, it is associated with an async thread, which is different from the CUDA thread that initiated the operation. *Prior and subsequent* normal loads and stores to the same address are not guaranteed to maintain their ordering. A proxy fence is required to synchronize them across the different proxies to ensure proper memory ordering. Section [Using the Tensor Memory Accelerator (TMA)](../04-special-topics/async-copies.md#async-copies-tma) demonstrates use of proxy fences to ensure correctness when performing asynchronous copies with TMA.
+**Async thread operating in async proxy**. When an asynchronous operation is initiated, it is associated with an async thread, which is different from the CUDA thread that initiated the operation. _Prior and subsequent_ normal loads and stores to the same address are not guaranteed to maintain their ordering. A proxy fence is required to synchronize them across the different proxies to ensure proper memory ordering. Section [Using the Tensor Memory Accelerator (TMA)](../04-special-topics/async-copies.md#async-copies-tma) demonstrates use of proxy fences to ensure correctness when performing asynchronous copies with TMA.
 
 For more details on these concepts, see the [PTX ISA](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html?highlight=proxy#proxies) documentation.
 
 ## 3.2.3. Thread Scopes
 
-CUDA threads form a [Thread Hierarchy](../02-basics/writing-cuda-kernels.md#writing-cuda-kernels-thread-hierarchy-review), and using this hierarchy is essential for writing both correct and performant CUDA kernels. Within this hierarchy, the visibility and synchronization scope of memory operations can vary. To account for this non-uniformity, the CUDA programming model introduces the concept of *thread scopes*. A thread scope defines which threads can observe a thread’s loads and stores and specifies which threads can synchronize with each other using synchronization primitives such as atomic operations and barriers. Each scope has an associated point of coherency in the memory hierarchy.
+CUDA threads form a [Thread Hierarchy](../02-basics/writing-cuda-kernels.md#writing-cuda-kernels-thread-hierarchy-review), and using this hierarchy is essential for writing both correct and performant CUDA kernels. Within this hierarchy, the visibility and synchronization scope of memory operations can vary. To account for this non-uniformity, the CUDA programming model introduces the concept of _thread scopes_. A thread scope defines which threads can observe a thread’s loads and stores and specifies which threads can synchronize with each other using synchronization primitives such as atomic operations and barriers. Each scope has an associated point of coherency in the memory hierarchy.
 
 Thread scopes are exposed in [CUDA PTX](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html?highlight=thread%2520scopes#scope) and are also available as extensions in the [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#thread-scopes) library. The following table defines the thread scopes available:
 
-| CUDA C++ Thread Scope | CUDA PTX Thread Scope | Description | Point of Coherency in Memory Hierarchy |
-| --- | --- | --- | --- |
-| `cuda::thread_scope_thread` |  | Memory operations are visible only to the local thread. | – |
-| `cuda::thread_scope_block` | `.cta` | Memory operations are visible to other threads in the same thread block. | L1 |
-|  | `.cluster` | Memory operations are visible to other threads in the same thread block cluster. | L2 |
-| `cuda::thread_scope_device` | `.gpu` | Memory operations are visible to other threads in the same GPU device. | L2 |
-| `cuda::thread_scope_system` | `.sys` | Memory operations are visible to other threads in the same system (CPU, other GPUs). | L2 + connected caches |
+| CUDA C++ Thread Scope       | CUDA PTX Thread Scope | Description                                                                          | Point of Coherency in Memory Hierarchy |
+| --------------------------- | --------------------- | ------------------------------------------------------------------------------------ | -------------------------------------- |
+| `cuda::thread_scope_thread` |                       | Memory operations are visible only to the local thread.                              | –                                      |
+| `cuda::thread_scope_block`  | `.cta`                | Memory operations are visible to other threads in the same thread block.             | L1                                     |
+|                             | `.cluster`            | Memory operations are visible to other threads in the same thread block cluster.     | L2                                     |
+| `cuda::thread_scope_device` | `.gpu`                | Memory operations are visible to other threads in the same GPU device.               | L2                                     |
+| `cuda::thread_scope_system` | `.sys`                | Memory operations are visible to other threads in the same system (CPU, other GPUs). | L2 + connected caches                  |
 
 Sections [Advanced Synchronization Primitives](advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives) and [Asynchronous Data Copies](advanced-kernel-programming.md#advanced-kernels-async-copies) demonstrate use of thread scopes.
 
@@ -121,7 +121,7 @@ This section introduces three families of synchronization primitives:
 
 ### 3.2.4.1. Scoped Atomics
 
-[Section 5.4.5](../05-appendices/cpp-language-extensions.md#atomic-functions) gives an overview of atomic functions available in CUDA. In this section, we will focus on *scoped* atomics that support [C++ standard atomic memory](https://en.cppreference.com/w/cpp/atomic/memory_order.html) semantics, available through the [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives.html) library or through compiler built-in functions. Scoped atomics provide the tools for efficient synchronization at the appropriate level of the CUDA thread hierarchy, enabling both correctness and performance in complex parallel algorithms.
+[Section 5.4.5](../05-appendices/cpp-language-extensions.md#atomic-functions) gives an overview of atomic functions available in CUDA. In this section, we will focus on _scoped_ atomics that support [C++ standard atomic memory](https://en.cppreference.com/w/cpp/atomic/memory_order.html) semantics, available through the [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives.html) library or through compiler built-in functions. Scoped atomics provide the tools for efficient synchronization at the appropriate level of the CUDA thread hierarchy, enabling both correctness and performance in complex parallel algorithms.
 
 #### 3.2.4.1.1. Thread Scope and Memory Ordering
 
@@ -132,7 +132,7 @@ Scoped atomics combine two key concepts:
 
 **CUDA C++ cuda::atomic**
 
-```cuda
+```c
 #include <cuda/atomic>
 
 __global__ void block_scoped_counter() {
@@ -154,7 +154,7 @@ __global__ void block_scoped_counter() {
 
 **Built-in Atomic Functions**
 
-```cuda
+```c
 __global__ void block_scoped_counter() {
     // Shared counter visible only within this block
     __shared__ int counter;
@@ -176,7 +176,7 @@ __global__ void block_scoped_counter() {
 }
 ```
 
-This example implements a *block-scoped atomic counter* that demonstrates the fundamental concepts of scoped atomics:
+This example implements a _block-scoped atomic counter_ that demonstrates the fundamental concepts of scoped atomics:
 
 - **Shared Variable**: a single counter is shared among all threads in the block using `__shared__` memory.
 - **Atomic Type Declaration**: `cuda::atomic<int, cuda::thread_scope_block>` creates an atomic integer with block-level visibility.
@@ -190,7 +190,7 @@ For producer-consumer patterns, acquire-release semantics ensure proper ordering
 
 **CUDA C++ cuda::atomic**
 
-```cuda
+```c
 __global__ void producer_consumer() {
     __shared__ int data;
     __shared__ cuda::atomic<bool, cuda::thread_scope_block> ready;
@@ -212,7 +212,7 @@ __global__ void producer_consumer() {
 
 **Built-in Atomic Functions**
 
-```cuda
+```c
 __global__ void producer_consumer() {
     __shared__ int data;
     __shared__ bool ready; // Only ready flag needs atomic operations
@@ -238,9 +238,9 @@ __global__ void producer_consumer() {
 
 #### 3.2.4.1.2. Performance Considerations
 
-- *Use the narrowest scope possible*: block-scoped atomics are much faster than system-scoped atomics.
-- *Prefer weaker orderings*: use stronger orderings only when necessary for correctness.
-- *Consider memory location*: shared memory atomics are faster than global memory atomics.
+- _Use the narrowest scope possible_: block-scoped atomics are much faster than system-scoped atomics.
+- _Prefer weaker orderings_: use stronger orderings only when necessary for correctness.
+- _Consider memory location_: shared memory atomics are faster than global memory atomics.
 
 ### 3.2.4.2. Asynchronous Barriers
 
@@ -252,13 +252,13 @@ The CUDA programming model provides asynchronous barriers via `cuda::std::barrie
 
 The following table gives an overview of asynchronous barriers available for synchronizing at different thread scopes.
 
-> | Thread Scope | Memory Location | Arrive on Barrier | Wait on Barrier | Hardware-accelerated | CUDA APIs |
-> | --- | --- | --- | --- | --- | --- |
-> | block | local shared memory | allowed | allowed | yes (8.0+) | `cuda::barrier`, `cuda::ptx`, primitives |
-> | cluster | local shared memory | allowed | allowed | yes (9.0+) | `cuda::barrier`, `cuda::ptx` |
-> | cluster | remote shared memory | allowed | not allowed | yes (9.0+) | `cuda::barrier`, `cuda::ptx` |
-> | device | global memory | allowed | allowed | no | `cuda::barrier` |
-> | system | global/unified memory | allowed | allowed | no | `cuda::barrier` |
+> | Thread Scope | Memory Location       | Arrive on Barrier | Wait on Barrier | Hardware-accelerated | CUDA APIs                                |
+> | ------------ | --------------------- | ----------------- | --------------- | -------------------- | ---------------------------------------- |
+> | block        | local shared memory   | allowed           | allowed         | yes (8.0+)           | `cuda::barrier`, `cuda::ptx`, primitives |
+> | cluster      | local shared memory   | allowed           | allowed         | yes (9.0+)           | `cuda::barrier`, `cuda::ptx`             |
+> | cluster      | remote shared memory  | allowed           | not allowed     | yes (9.0+)           | `cuda::barrier`, `cuda::ptx`             |
+> | device       | global memory         | allowed           | allowed         | no                   | `cuda::barrier`                          |
+> | system       | global/unified memory | allowed           | allowed         | no                   | `cuda::barrier`                          |
 
 Temporal Splitting of Synchronization
 
@@ -293,7 +293,7 @@ Using asynchronous barriers instead, the temporally-split synchronization patter
 
 **CUDA C++ cuda::barrier**
 
-```cuda
+```c
 #include <cuda/barrier>
 #include <cooperative_groups.h>
 
@@ -331,7 +331,7 @@ __global__ void split_arrive_wait(int iteration_count, float *data)
 
 **CUDA C++ cuda::ptx**
 
-```cuda
+```c
 #include <cuda/ptx>
 #include <cooperative_groups.h>
 
@@ -368,7 +368,7 @@ __global__ void split_arrive_wait(int iteration_count, float *data)
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cuda_awbarrier_primitives.h>
 #include <cooperative_groups.h>
 
@@ -405,7 +405,7 @@ __global__ void split_arrive_wait(int iteration_count, float *data)
 
 In this pattern, the synchronization point is split into an arrive point (`bar.arrive()`) and a wait point (`bar.wait(std::move(token))`). A thread begins participating in a `cuda::barrier` with its first call to `bar.arrive()`. When a thread calls `bar.wait(std::move(token))` it will be blocked until participating threads have completed `bar.arrive()` the expected number of times, which is the expected arrival count argument passed to `init()`. Memory updates that happen before participating threads’ call to `bar.arrive()` are guaranteed to be visible to participating threads after their call to `bar.wait(std::move(token))`. Note that the call to `bar.arrive()` does not block a thread, it can proceed with other work that does not depend upon memory updates that happen before other participating threads’ call to `bar.arrive()`.
 
-The *arrive and wait* pattern has five stages:
+The _arrive and wait_ pattern has five stages:
 
 - Code **before** the arrive performs memory updates that will be read **after** the wait.
 - Arrive point with implicit memory fence (i.e., equivalent to `cuda::atomic_thread_fence(cuda::memory_order_seq_cst, cuda::thread_scope_block)`).
@@ -417,22 +417,22 @@ For a comprehensive guide on how to use asynchronous barriers, see [Asynchronous
 
 ### 3.2.4.3. Pipelines
 
-The CUDA programming model provides the pipeline synchronization object as a coordination mechanism to sequence asynchronous memory copies into multiple stages, facilitating the implementation of double- or multi-buffering producer-consumer patterns. A pipeline is a double-ended queue with a *head* and a *tail* that processes work in a first-in first-out (FIFO) order. Producer threads commit work to the pipeline’s head, while consumer threads pull work from the pipeline’s tail.
+The CUDA programming model provides the pipeline synchronization object as a coordination mechanism to sequence asynchronous memory copies into multiple stages, facilitating the implementation of double- or multi-buffering producer-consumer patterns. A pipeline is a double-ended queue with a _head_ and a _tail_ that processes work in a first-in first-out (FIFO) order. Producer threads commit work to the pipeline’s head, while consumer threads pull work from the pipeline’s tail.
 
 Pipelines are exposed through the `cuda::pipeline` API in the [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/pipeline.html) library, as well as through a [primitives API](../05-appendices/device-callable-apis.md#pipeline-primitives-interface). The following tables describe the main functionality of the two APIs.
 
-| `cuda::pipeline` API | Description |
-| --- | --- |
-| `producer_acquire` | Acquires an available stage in the pipeline’s internal queue. |
-| `producer_commit` | Commits the asynchronous operations issued after the `producer_acquire` call on the currently acquired stage of the pipeline. |
-| `consumer_wait` | Waits for completion of asynchronous operations in the oldest stage of the pipeline. |
-| `consumer_release` | Releases the oldest stage of the pipeline to the pipeline object for reuse. The released stage can be then acquired by a producer. |
+| `cuda::pipeline` API | Description                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `producer_acquire`   | Acquires an available stage in the pipeline’s internal queue.                                                                      |
+| `producer_commit`    | Commits the asynchronous operations issued after the `producer_acquire` call on the currently acquired stage of the pipeline.      |
+| `consumer_wait`      | Waits for completion of asynchronous operations in the oldest stage of the pipeline.                                               |
+| `consumer_release`   | Releases the oldest stage of the pipeline to the pipeline object for reuse. The released stage can be then acquired by a producer. |
 
-| Primitives API | Description |
-| --- | --- |
-| `__pipeline_memcpy_async` | Request a memory copy from global to shared memory to be submitted for asynchronous evaluation. |
-| `__pipeline_commit` | Commits the asynchronous operations issued before the call on the current stage of the pipeline. |
-| `__pipeline_wait_prior(N)` | Waits for completion of asynchronous operations in all but the last N commits to the pipeline. |
+| Primitives API             | Description                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------ |
+| `__pipeline_memcpy_async`  | Request a memory copy from global to shared memory to be submitted for asynchronous evaluation.  |
+| `__pipeline_commit`        | Commits the asynchronous operations issued before the call on the current stage of the pipeline. |
+| `__pipeline_wait_prior(N)` | Waits for completion of asynchronous operations in all but the last N commits to the pipeline.   |
 
 The `cuda::pipeline` API has a richer interface with less restrictions, while the primitives API only supports tracking asynchronous copies from global memory to shared memory with specific size and alignment requirements. The primitives API provides equivalent functionality to a `cuda::pipeline` object with `cuda::thread_scope_thread`.
 
@@ -450,13 +450,13 @@ Asynchronous data copies enable overlapping of computation with data movement, b
 >
 > The asynchrony described in this section refers to enabling transfer of data between the GPU’s DRAM, i.e. global memory, and on-SM memory such as shared memory or tensor memory without blocking the GPU threads. This is an asynchrony within the execution of a single kernel launch.
 
-To understand how asynchronous copies can improve performance, it is helpful to examine a common GPU computing pattern. CUDA applications often employ a *copy and compute* pattern that:
+To understand how asynchronous copies can improve performance, it is helpful to examine a common GPU computing pattern. CUDA applications often employ a _copy and compute_ pattern that:
 
 - fetches data from global memory,
 - stores data to shared memory, and
 - performs computations on shared memory data, and potentially writes results back to global memory.
 
-The *copy* phase of this pattern is typically expressed as `shared[local_idx] = global[global_idx]`. This global to shared memory copy is expanded by the compiler to a read from global memory into a register followed by a write to shared memory from the register.
+The _copy_ phase of this pattern is typically expressed as `shared[local_idx] = global[global_idx]`. This global to shared memory copy is expanded by the compiler to a read from global memory into a register followed by a write to shared memory from the register.
 
 When this pattern occurs within an iterative algorithm, each thread block needs to synchronize after the `shared[local_idx] = global[global_idx]` assignment, to ensure all writes to shared memory have completed before the compute phase can begin. The thread block also needs to synchronize again after the compute phase, to prevent overwriting shared memory before all threads have completed their computations. This pattern is illustrated in the following code snippet.
 
@@ -536,7 +536,7 @@ __global__ void with_async_copy(int* global_out, int const* global_in, size_t si
 }
 ```
 
-The [cooperative\_groups::memcpy\_async](../05-appendices/device-callable-apis.md#cg-api-async-memcpy) function copies `block.size()` elements from global memory to the `shared` data. This operation happens as-if performed by another thread, which synchronizes with the current thread’s call to [cooperative\_groups::wait](../05-appendices/device-callable-apis.md#cg-api-async-wait) after the copy has completed. Until the copy operation completes, modifying the global data or reading or writing the shared data introduces a data race.
+The [cooperative_groups::memcpy_async](../05-appendices/device-callable-apis.md#cg-api-async-memcpy) function copies `block.size()` elements from global memory to the `shared` data. This operation happens as-if performed by another thread, which synchronizes with the current thread’s call to [cooperative_groups::wait](../05-appendices/device-callable-apis.md#cg-api-async-wait) after the copy has completed. Until the copy operation completes, modifying the global data or reading or writing the shared data introduces a data race.
 
 This example illustrates the fundamental concept behind all asynchronous copy operations: they decouple memory transfer initiation from completion, allowing threads to perform other work while data moves in the background. The CUDA programming model provides several APIs to access these capabilities, including `memcpy_async` functions available in [Cooperative Groups](../05-appendices/device-callable-apis.md#cg-api-async-memcpy) and the [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/asynchronous_operations/memcpy_async.html) library, as well as lower-level `cuda::ptx` and primitives APIs. These APIs share similar semantics: they copy objects from source to destination as-if performed by another thread which, on completion of the copy, can be synchronized using different completion mechanisms.
 

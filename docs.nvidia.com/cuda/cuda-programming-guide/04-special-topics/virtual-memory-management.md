@@ -15,7 +15,7 @@ another device. It is usually not necessary to map all allocations to all
 devices. In addition, extending this approach to multi-node settings becomes
 inherently difficult.
 
-CUDA provides a *virtual memory management*
+CUDA provides a _virtual memory management_
 (VMM) API to give developers explicit, low-level control over this process.
 
 Virtual memory allocation, a complex process managed by the operating system
@@ -98,11 +98,11 @@ different nodes.
 
 > [!NOTE]
 >
-> The fabric memory described here is *address-centric*: a peer’s physical memory is
+> The fabric memory described here is _address-centric_: a peer’s physical memory is
 > mapped into the local virtual address space and accessed with ordinary loads and
 > stores. [Compute fabric transport](compute-fabric-transport.md#compute-fabric-transport) provides a
-> complementary *resource-centric* model over the same NVLink fabric, moving data with
-> asynchronous put, get, and reduction operations against a named *logical endpoint*
+> complementary _resource-centric_ model over the same NVLink fabric, moving data with
+> asynchronous put, get, and reduction operations against a named _logical endpoint_
 > rather than a mapped address. It reports an explicit per-operation completion status,
 > so it suits large fabrics where fabric-error recovery is a concern.
 
@@ -117,7 +117,7 @@ direct pointers. Handles allow operations like exporting and importing memory
 across processes or devices, facilitating memory sharing and virtualization.
 
 **IMEX Channels:**
-The name IMEX stands for *internode memory exchange* and is part of NVIDIA’s
+The name IMEX stands for _internode memory exchange_ and is part of NVIDIA’s
 solution for GPU-to-GPU communication across different nodes.
 IMEX channels are a GPU driver feature that provides user-based memory
 isolation in multi-user or multi-node environments within an IMEX domain.
@@ -221,7 +221,7 @@ This command creates channelN using the major number obtained from
 > [!NOTE]
 >
 > By default, the driver can create channel0
-> if the NVreg\_CreateImexChannel0 module parameter is specified.
+> if the NVreg_CreateImexChannel0 module parameter is specified.
 
 **Multicast Object Support:**
 Before attempting to use multicast objects, applications must ensure that the
@@ -254,7 +254,7 @@ developers must have a solid grasp of a few key concepts in memory management:
 
 ![VMM Usage Overview Diagram](../_images/vmm-overview-diagram.png)
 
-**Figure 55.** *VMM Usage Overview.
+**Figure 55.** _VMM Usage Overview.
 This diagram outlines the series of steps required for VMM utilization.
 The process begins by evaluating the environmental setup. Based on this
 assessment, the user must make a critical initial decision: whether to
@@ -262,7 +262,7 @@ utilize fabric memory handles or OS-specific handles.
 A distinct series of subsequent steps must be taken based on the initial
 handle choice. However, the final memory management operations—specifically
 mapping, reserving, and setting access rights of the allocated memory—are
-identical, regardless of the type of handle that was selected.*
+identical, regardless of the type of handle that was selected._
 
 The VMM API workflow involves a sequence of steps for memory management, with
 a key focus on sharing memory between different devices or processes.
@@ -304,7 +304,7 @@ network of machines. The process follows these steps:
 
 ![Unicast Memory Sharing Example](../_images/unicast-memory-sharing.png)
 
-**Figure 56.** *Unicast Memory Sharing Example*
+**Figure 56.** _Unicast Memory Sharing Example_
 
 ### 4.17.3.1. Allocate and Export
 
@@ -324,7 +324,7 @@ regarding an allocation’s granularity requirements can be queried using
 
 **OS-Specific Handle (Linux)**
 
-```cuda
+```c
 CUmemGenericAllocationHandle allocatePhysicalMemory(int device, size_t size) {
     CUmemAllocationHandleType handleType = CU_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR;
     CUmemAllocationProp prop = {};
@@ -349,7 +349,7 @@ CUmemGenericAllocationHandle allocatePhysicalMemory(int device, size_t size) {
 
 **Fabric Handle**
 
-```cuda
+```c
 CUmemGenericAllocationHandle allocatePhysicalMemory(int device, size_t size) {
     CUmemAllocationHandleType handleType = CU_MEM_HANDLE_TYPE_FABRIC;
     CUmemAllocationProp prop = {};
@@ -377,6 +377,8 @@ CUmemGenericAllocationHandle allocatePhysicalMemory(int device, size_t size) {
 > The memory allocated by `cuMemCreate` is referenced by the
 > `CUmemGenericAllocationHandle` it returns. Note that this reference is
 > not a pointer and its memory is not accessible yet.
+
+<!---->
 
 > [!NOTE]
 >
@@ -420,7 +422,7 @@ node setups.
 
 **OS-Specific Handle (Linux)**
 
-```cuda
+```c
 CUmemAllocationHandleType handleType = CU_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR;
 CUmemGenericAllocationHandle handle = allocatePhysicalMemory(0, 1<<21);
 int fd;
@@ -429,7 +431,7 @@ cuMemExportToShareableHandle(&fd, handle, handleType, 0);
 
 **Fabric Handle**
 
-```cuda
+```c
 CUmemAllocationHandleType handleType = CU_MEM_HANDLE_TYPE_FABRIC;
 CUmemGenericAllocationHandle handle = allocatePhysicalMemory(0, 1<<21);
 CUmemFabricHandle fh;
@@ -439,6 +441,8 @@ cuMemExportToShareableHandle(&fh, handle, handleType, 0);
 > [!NOTE]
 >
 > OS-specific handles require all processes to be part of the same OS.
+
+<!---->
 
 > [!NOTE]
 >
@@ -468,7 +472,7 @@ MPI.
 
 **Send: OS-Specific IPC (Linux)**
 
-```cuda
+```c
 int ipcSendShareableHandle(int socket, int fd, pid_t process) {
     struct msghdr msg;
     struct iovec iov[1];
@@ -529,7 +533,7 @@ int ipcSendShareableHandle(int socket, int fd, pid_t process) {
 
 **Send: OS-Specific IPC (WIN)**
 
-```cuda
+```c
 int ipcSendShareableHandle(HANDLE *handle, HANDLE &shareableHandle, PROCESS_INFORMATION process) {
     HANDLE hProcess = OpenProcess(PROCESS_DUP_HANDLE, FALSE, process.dwProcessId);
     HANDLE hDup = INVALID_HANDLE_VALUE;
@@ -543,13 +547,13 @@ int ipcSendShareableHandle(HANDLE *handle, HANDLE &shareableHandle, PROCESS_INFO
 
 **Send: Fabric IPC**
 
-```cuda
+```c
 MPI_Send(&fh, sizeof(CUmemFabricHandle), MPI_BYTE, 1, 0, MPI_COMM_WORLD);
 ```
 
 **Receive: OS-Specific IPC (Linux)**
 
-```cuda
+```c
 int ipcRecvShareableHandle(int socket, int* fd) {
     struct msghdr msg = {0};
     struct iovec iov[1];
@@ -606,7 +610,7 @@ int ipcRecvShareableHandle(int socket, int* fd) {
 
 **Receive: OS-Specific IPC (WIN)**
 
-```cuda
+```c
 int ipcRecvShareableHandle(HANDLE &handle, HANDLE *shareableHandle) {
     DWORD cbRead;
     ReadFile(handle, shareableHandle, (DWORD)sizeof(*shareableHandles), &cbRead, NULL);
@@ -616,7 +620,7 @@ int ipcRecvShareableHandle(HANDLE &handle, HANDLE *shareableHandle) {
 
 **Receive: Fabric IPC**
 
-```cuda
+```c
 MPI_Recv(&fh, sizeof(CUmemFabricHandle), MPI_BYTE, 1, 0, MPI_COMM_WORLD);
 ```
 
@@ -627,14 +631,14 @@ single-node. Fabric-specific handles can be used for single- or multi-node.
 
 **OS-Specific Handle (Linux)**
 
-```cuda
+```c
 CUmemAllocationHandleType handleType = CU_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR;
 cuMemImportFromShareableHandle(handle, (void*) &fd, handleType);
 ```
 
 **Fabric Handle**
 
-```cuda
+```c
 CUmemAllocationHandleType handleType = CU_MEM_HANDLE_TYPE_FABRIC;
 cuMemImportFromShareableHandle(handle, (void*) &fh, handleType);
 ```
@@ -785,9 +789,9 @@ NVLink domain. Application developers generally should use the higher-level MPI,
 > [!NOTE]
 >
 > The multicast sharing described here maps a multicast object into each device’s virtual
-> address space and operates on it with `multimem` instructions — the *address-centric*
+> address space and operates on it with `multimem` instructions — the _address-centric_
 > model. [Compute fabric transport](compute-fabric-transport.md#compute-fabric-transport) provides a
-> *resource-centric* counterpart, the multicast **logical endpoint**, which serves a
+> _resource-centric_ counterpart, the multicast **logical endpoint**, which serves a
 > multicast team over the NVLink fabric without mapping the object into a local address
 > space. It reports an explicit per-operation completion status, so it suits large fabrics
 > where fabric-error recovery is a concern.

@@ -4,25 +4,25 @@ La plataforma NVIDIA CUDA consta de numerosos componentes de software y hardware
 
 ## 1.3.1. Capacidad de cómputo y versiones con múltiples procesadores de flujo
 
-Cada GPU de NVIDIA tiene un número de *Capacidad de cómputo* (CC), que indica qué características son compatibles con esa GPU y especifica algunos parámetros de hardware para esa GPU. Estas especificaciones están documentadas en el apéndice [5.1](../05-appendices/compute-capabilities.md#compute-capabilities). Se mantiene una lista de todas las GPUs de NVIDIA y sus capacidades de cómputo en la página [de capacidades de cómputo de GPU CUDA](https://developer.nvidia.com/cuda-gpus).
+Cada GPU de NVIDIA tiene un número de _Capacidad de cómputo_ (CC), que indica qué características son compatibles con esa GPU y especifica algunos parámetros de hardware para esa GPU. Estas especificaciones están documentadas en el apéndice [5.1](../05-appendices/compute-capabilities.md#compute-capabilities). Se mantiene una lista de todas las GPUs de NVIDIA y sus capacidades de cómputo en la página [de capacidades de cómputo de GPU CUDA](https://developer.nvidia.com/cuda-gpus).
 
-La capacidad de cómputo se indica como un número de versión principal y secundario en el formato X.Y, donde X es el número de versión principal y Y es el número de versión secundario. Por ejemplo, CC 12.0 tiene una versión principal de 12 y una versión secundaria de 0. La capacidad de cómputo corresponde directamente al número de versión del SM. Por ejemplo, los SM dentro de una GPU con CC 12.0 tienen una versión de SM sm\_120. Esta versión se utiliza para etiquetar los binarios.
+La capacidad de cómputo se indica como un número de versión principal y secundario en el formato X.Y, donde X es el número de versión principal y Y es el número de versión secundario. Por ejemplo, CC 12.0 tiene una versión principal de 12 y una versión secundaria de 0. La capacidad de cómputo corresponde directamente al número de versión del SM. Por ejemplo, los SM dentro de una GPU con CC 12.0 tienen una versión de SM sm_120. Esta versión se utiliza para etiquetar los binarios.
 
 La sección [5.1.1](../05-appendices/compute-capabilities.md#compute-capabilities-querying) muestra cómo consultar y determinar la capacidad de cómputo de las GPU(s) en un sistema.
 
 ## 1.3.2. Herramienta CUDA y controlador NVIDIA
 
-El *controlador NVIDIA* puede considerarse como el sistema operativo de la GPU. El controlador NVIDIA es un componente de software que debe instalarse en el sistema operativo del host y es necesario para todas las funciones de la GPU, incluyendo la visualización y la funcionalidad gráfica. El controlador NVIDIA es fundamental para la plataforma CUDA. Además de CUDA, el controlador NVIDIA proporciona todos los demás métodos para utilizar la GPU, por ejemplo, Vulkan y Direct3D. El controlador NVIDIA tiene números de versión, como r580.
+El _controlador NVIDIA_ puede considerarse como el sistema operativo de la GPU. El controlador NVIDIA es un componente de software que debe instalarse en el sistema operativo del host y es necesario para todas las funciones de la GPU, incluyendo la visualización y la funcionalidad gráfica. El controlador NVIDIA es fundamental para la plataforma CUDA. Además de CUDA, el controlador NVIDIA proporciona todos los demás métodos para utilizar la GPU, por ejemplo, Vulkan y Direct3D. El controlador NVIDIA tiene números de versión, como r580.
 
-La *Herramienta CUDA* es un conjunto de bibliotecas, encabezados y herramientas para escribir, construir y analizar software que utiliza la computación en GPU. La Herramienta CUDA es un producto de software separado del controlador NVIDIA.
+La _Herramienta CUDA_ es un conjunto de bibliotecas, encabezados y herramientas para escribir, construir y analizar software que utiliza la computación en GPU. La Herramienta CUDA es un producto de software separado del controlador NVIDIA.
 
-El *entorno de ejecución de CUDA* es un caso especial de una de las bibliotecas proporcionadas por la Herramienta CUDA. El entorno de ejecución de CUDA proporciona tanto una API como algunas extensiones de lenguaje para realizar tareas comunes, como la asignación de memoria, la copia de datos entre GPUs y otros GPUs o CPUs, y el lanzamiento de kernels. Los componentes de la API del entorno de ejecución de CUDA se denominan API del entorno de ejecución de CUDA.
+El _entorno de ejecución de CUDA_ es un caso especial de una de las bibliotecas proporcionadas por la Herramienta CUDA. El entorno de ejecución de CUDA proporciona tanto una API como algunas extensiones de lenguaje para realizar tareas comunes, como la asignación de memoria, la copia de datos entre GPUs y otros GPUs o CPUs, y el lanzamiento de kernels. Los componentes de la API del entorno de ejecución de CUDA se denominan API del entorno de ejecución de CUDA.
 
 El documento "[Compatibilidad CUDA](https://docs.nvidia.com/deploy/cuda-compatibility/index.html)" proporciona detalles completos sobre la compatibilidad entre diferentes GPUs, controladores NVIDIA y versiones de la Herramienta CUDA.
 
 ### 1.3.2.1. API de tiempo de ejecución de CUDA y API del controlador de CUDA
 
-La API de tiempo de ejecución de CUDA se implementa sobre una API de nivel inferior llamada la *API del controlador de CUDA*, que es una API proporcionada por el controlador de NVIDIA. Esta guía se centra en las APIs proporcionadas por la API de tiempo de ejecución de CUDA. Se puede lograr la misma funcionalidad utilizando únicamente la API del controlador, si se desea. Algunas funciones solo están disponibles utilizando la API del controlador. Las aplicaciones pueden utilizar una o ambas APIs de forma compatible. La sección [API del controlador de CUDA](../03-avanzado/driver-api.md#driver-api) cubre la interoperabilidad entre las APIs de tiempo de ejecución y de controladores.
+La API de tiempo de ejecución de CUDA se implementa sobre una API de nivel inferior llamada la _API del controlador de CUDA_, que es una API proporcionada por el controlador de NVIDIA. Esta guía se centra en las APIs proporcionadas por la API de tiempo de ejecución de CUDA. Se puede lograr la misma funcionalidad utilizando únicamente la API del controlador, si se desea. Algunas funciones solo están disponibles utilizando la API del controlador. Las aplicaciones pueden utilizar una o ambas APIs de forma compatible. La sección [API del controlador de CUDA](../03-avanzado/driver-api.md#driver-api) cubre la interoperabilidad entre las APIs de tiempo de ejecución y de controladores.
 
 La referencia completa de la API para las funciones de la API de tiempo de ejecución de CUDA se puede encontrar en [Documentación de la API de tiempo de ejecución de CUDA](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html).
 
@@ -30,25 +30,25 @@ La referencia completa de la API para la API del controlador de CUDA se puede en
 
 ## 1.3.3. Ejecución de Hilos Paralelos (PTX)
 
-Una capa fundamental, aunque a veces invisible, de la plataforma CUDA es la arquitectura de instrucciones virtual de *Ejecución de Hilos Paralelos* (PTX). PTX es un lenguaje de ensamblaje de alto nivel para las GPUs de NVIDIA. PTX proporciona una capa de abstracción sobre la arquitectura física de las GPUs reales. Al igual que otras plataformas, las aplicaciones pueden escribirse directamente en este lenguaje de ensamblaje, aunque esto puede añadir complejidad y dificultad innecesarias al desarrollo de software.
+Una capa fundamental, aunque a veces invisible, de la plataforma CUDA es la arquitectura de instrucciones virtual de _Ejecución de Hilos Paralelos_ (PTX). PTX es un lenguaje de ensamblaje de alto nivel para las GPUs de NVIDIA. PTX proporciona una capa de abstracción sobre la arquitectura física de las GPUs reales. Al igual que otras plataformas, las aplicaciones pueden escribirse directamente en este lenguaje de ensamblaje, aunque esto puede añadir complejidad y dificultad innecesarias al desarrollo de software.
 
 Los lenguajes y compiladores específicos de un dominio para lenguajes de alto nivel pueden generar código PTX como una representación intermedia (IR) y luego utilizar las herramientas de compilación offline o just-in-time (JIT) de NVIDIA para producir código binario ejecutable para GPUs. Esto permite que la plataforma CUDA se programe utilizando lenguajes además de aquellos soportados por las herramientas proporcionadas por NVIDIA, como [NVCC: El compilador NVIDIA CUDA](../02-basics/nvcc.md#nvcc).
 
-Dado que las capacidades de las GPUs cambian y evolucionan con el tiempo, la especificación de la arquitectura virtual PTX se actualiza. Las versiones de PTX, al igual que las versiones de SM, corresponden a una capacidad de cómputo. Por ejemplo, la versión de PTX que soporta todas las características de la capacidad de cómputo 8.0 se denomina "compute\_80".
+Dado que las capacidades de las GPUs cambian y evolucionan con el tiempo, la especificación de la arquitectura virtual PTX se actualiza. Las versiones de PTX, al igual que las versiones de SM, corresponden a una capacidad de cómputo. Por ejemplo, la versión de PTX que soporta todas las características de la capacidad de cómputo 8.0 se denomina "compute_80".
 
 La documentación completa sobre PTX se puede encontrar en [PTX ISA](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html).
 
 ## 1.3.4. Cubins y Fatbins
 
-Las aplicaciones y bibliotecas de CUDA generalmente se escriben en un lenguaje de nivel superior, como C++. Este lenguaje de nivel superior se compila a PTX, y luego el PTX se compila en un archivo binario real para una GPU física, llamado un *binario CUDA* o, simplemente, *cubin*. Un cubin tiene un formato binario específico para una versión específica de SM, como sm\_120.
+Las aplicaciones y bibliotecas de CUDA generalmente se escriben en un lenguaje de nivel superior, como C++. Este lenguaje de nivel superior se compila a PTX, y luego el PTX se compila en un archivo binario real para una GPU física, llamado un _binario CUDA_ o, simplemente, _cubin_. Un cubin tiene un formato binario específico para una versión específica de SM, como sm_120.
 
-Los ejecutables y los binarios de bibliotecas que utilizan la computación en GPU contienen tanto código de CPU como de GPU. El código de GPU se almacena dentro de un contenedor llamado un *fatbin*. Los fatbins pueden contener cubins y PTX para múltiples objetivos diferentes. Por ejemplo, una aplicación puede ser construida con binarios para múltiples arquitecturas de GPU diferentes, es decir, diferentes versiones de SM. Cuando se ejecuta una aplicación, su código de GPU se carga en una GPU específica y se utiliza el mejor binario para esa GPU del fatbin.
+Los ejecutables y los binarios de bibliotecas que utilizan la computación en GPU contienen tanto código de CPU como de GPU. El código de GPU se almacena dentro de un contenedor llamado un _fatbin_. Los fatbins pueden contener cubins y PTX para múltiples objetivos diferentes. Por ejemplo, una aplicación puede ser construida con binarios para múltiples arquitecturas de GPU diferentes, es decir, diferentes versiones de SM. Cuando se ejecuta una aplicación, su código de GPU se carga en una GPU específica y se utiliza el mejor binario para esa GPU del fatbin.
 
-![Los contenedores fatbin dentro de ejecutables o bibliotecas pueden contener múltiples versiones de código de GPU](../_images/fatbin.png)
+> <a id="f010"></a>
+> ![Figura 10](../_images/fatbin.png)
+> _Figura 10._ El binario de un ejecutable o biblioteca contiene tanto el código binario de CPU como un contenedor fatbin para el código de GPU. Un fatbin puede contener tanto el código binario de GPU de cubin como el código virtual de ISA de PTX. El código PTX puede compilarse dinámicamente para futuros objetivos.
 
-**Figura 10.** *El binario de un ejecutable o biblioteca contiene tanto el código binario de CPU como un contenedor fatbin para el código de GPU. Un fatbin puede contener tanto el código binario de GPU de cubin como el código virtual de ISA de PTX. El código PTX puede compilarse dinámicamente para futuros objetivos.*
-
-Los fatbins también pueden contener una o más versiones de PTX del código de GPU, cuyo uso se describe en [Compatibilidad con PTX](cuda-platform.md#cuda-platform-ptx-compatibility). La [Figura 10](cuda-platform.md#fatbin-graphic) muestra un ejemplo de un binario de aplicación o biblioteca que contiene múltiples versiones de código de GPU de cubin, así como una versión de código PTX.
+Los fatbins también pueden contener una o más versiones de PTX del código de GPU, cuyo uso se describe en [Compatibilidad con PTX](cuda-platform.md#cuda-platform-ptx-compatibility). La [Figura 10](#f010) muestra un ejemplo de un binario de aplicación o biblioteca que contiene múltiples versiones de código de GPU de cubin, así como una versión de código PTX.
 
 ### 1.3.4.1. Compatibilidad binaria
 
@@ -56,7 +56,7 @@ Las GPUs de NVIDIA garantizan la compatibilidad binaria en ciertas circunstancia
 
 Las GPUs de NVIDIA no son compatibles de forma binaria entre versiones principales de la capacidad de cómputo. Es decir, el código cubin compilado para la capacidad de cómputo 8.6 no se cargará en GPUs con capacidad de cómputo 9.0.
 
-Cuando se habla de código binario, este a menudo se denomina como si tuviera una versión, como "sm\_86" en el ejemplo anterior. Esto es lo mismo que decir que el código binario fue creado para la capacidad de cómputo 8.6. Este atajo se utiliza a menudo porque es la forma en que un desarrollador especifica este objetivo de compilación para el compilador NVIDIA CUDA, [nvcc](../02-basics/nvcc.md#nvcc).
+Cuando se habla de código binario, este a menudo se denomina como si tuviera una versión, como "sm_86" en el ejemplo anterior. Esto es lo mismo que decir que el código binario fue creado para la capacidad de cómputo 8.6. Este atajo se utiliza a menudo porque es la forma en que un desarrollador especifica este objetivo de compilación para el compilador NVIDIA CUDA, [nvcc](../02-basics/nvcc.md#nvcc).
 
 > [!NOTE]
 >
@@ -64,7 +64,7 @@ Cuando se habla de código binario, este a menudo se denomina como si tuviera un
 
 ### 1.3.4.2. Compatibilidad con PTX
 
-El código de GPU puede almacenarse en ejecutables en formato binario o PTX, lo cual está cubierto en [Cubins y Fatbins](cuda-platform.md#cuda-platform-cubins-fatbins). Cuando una aplicación almacena la versión PTX del código de GPU, esta puede compilarse dinámicamente (JIT) en tiempo de ejecución de la aplicación para cualquier capacidad de cómputo igual o superior a la capacidad de cómputo del código PTX. Por ejemplo, si una aplicación contiene PTX para "compute\_80", ese código PTX puede compilarse dinámicamente para versiones posteriores de SM, como "sm\_120", en tiempo de ejecución de la aplicación. Esto permite la compatibilidad hacia adelante con futuras GPU sin necesidad de reconstruir aplicaciones o bibliotecas.
+El código de GPU puede almacenarse en ejecutables en formato binario o PTX, lo cual está cubierto en [Cubins y Fatbins](cuda-platform.md#cuda-platform-cubins-fatbins). Cuando una aplicación almacena la versión PTX del código de GPU, esta puede compilarse dinámicamente (JIT) en tiempo de ejecución de la aplicación para cualquier capacidad de cómputo igual o superior a la capacidad de cómputo del código PTX. Por ejemplo, si una aplicación contiene PTX para "compute_80", ese código PTX puede compilarse dinámicamente para versiones posteriores de SM, como "sm_120", en tiempo de ejecución de la aplicación. Esto permite la compatibilidad hacia adelante con futuras GPU sin necesidad de reconstruir aplicaciones o bibliotecas.
 
 ### 1.3.4.3. Compilación en tiempo real
 

@@ -36,7 +36,7 @@ The invocation and coordination of the tools described above are done automatica
 
 The following example illustrates the compilation workflow for a CUDA source file `example.cu`:
 
-```cuda
+```c
 // ----- example.cu -----
 #include <stdio.h>
 __global__ void kernel() {
@@ -155,13 +155,13 @@ Host and device functions have external linkage by default and do not require th
 
 In the following example, `definition.cu` defines a variable and a function, while `example.cu` refers to them. Both files are compiled separately and linked into the final binary.
 
-```cuda
+```c
 // ----- definition.cu -----
 extern __device__ int device_variable = 5;
 __device__        int device_function() { return 10; }
 ```
 
-```cuda
+```c
 // ----- example.cu -----
 extern __device__ int  device_variable;
 __device__        int device_function();

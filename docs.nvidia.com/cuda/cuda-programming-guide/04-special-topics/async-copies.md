@@ -10,7 +10,7 @@ Many CUDA applications require frequent data movement between global and shared 
 
 **Source and destination**. The only direction supported for asynchronous copy operations with LDGSTS is from global to shared memory. The pointers need to be aligned to 4, 8, or 16 bytes depending on the size of the data being copied. Best performance is achieved when the alignment of both shared memory and global memory is 128 bytes.
 
-**Asynchronicity**. Data transfers using LDGSTS are [asynchronous](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features) and are modeled as async thread operations (see [Async Thread and Async Proxy](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features-async-thread-proxy)). This allows the initiating thread to continue computing while the hardware asynchronously copies the data. *Whether the data transfer occurs asynchronously in practice is up to the hardware implementation and may change in the future*.
+**Asynchronicity**. Data transfers using LDGSTS are [asynchronous](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features) and are modeled as async thread operations (see [Async Thread and Async Proxy](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features-async-thread-proxy)). This allows the initiating thread to continue computing while the hardware asynchronously copies the data. _Whether the data transfer occurs asynchronously in practice is up to the hardware implementation and may change in the future_.
 
 LDGSTS must provide a signal when the operation is complete. LDGSTS can use [shared memory barriers](../03-advanced/advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives-barriers) or [pipelines](../03-advanced/advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives-pipelines) as mechanisms to provide completion signals. By default, each thread only waits for its own LDGSTS copies. Thus, if you use LDGSTS to prefetch some data that will be shared with other threads, a `__syncthreads()` is necessary after synchronizing with the LDGSTS completion mechanism.
 
@@ -95,9 +95,9 @@ __global__ void stencil_kernel(const float *left, const float *center, const flo
 
 To ensure that the data is loaded in the optimal way, we can replace the synchronous memory copies with asynchronous copies that load data directly from global memory to shared memory. This not only reduces register usage by copying the data directly to shared memory, but also ensures all loads from global memory are in-flight.
 
-**CUDA C++ cuda::memcpy\_async**
+**CUDA C++ cuda::memcpy_async**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cuda/barrier>
 
@@ -141,9 +141,9 @@ __global__ void stencil_kernel(const float *left, const float *center, const flo
 }
 ```
 
-**CUDA C++ cooperative\_groups::memcpy\_async**
+**CUDA C++ cooperative_groups::memcpy_async**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cooperative_groups/memcpy_async.h>
 
@@ -168,7 +168,7 @@ __global__ void stencil_kernel(const float *left, const float *center, const flo
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cuda_pipeline.h>
 
 __global__ void stencil_kernel(const float *left, const float *center, const float *right)
@@ -197,7 +197,7 @@ The `cuda::memcpy_async` overload for `cuda::barrier` enables synchronizing asyn
 
 Note that we can either use thread-level copies (version 1) or collective copies (version 2) to achieve the same result. In version 2, the API will automatically handle how the copies are done under the hood. In both versions, we use `cuda::aligned_size_t<4>()` to inform the compiler that the data is aligned to 4 bytes and the size of the data to copy is a multiple of 4 to enable use of LDGSTS. Note that for interoperability with `cuda::barrier`, `cuda::memcpy_async` from the `cuda/barrier` header is used here.
 
-The [cooperative\_groups::memcpy\_async](../05-appendices/device-callable-apis.md#cg-api-async-memcpy) implementation coordinates the memory transfers collectively across all threads in the block, but synchronizes completion with `cg::wait(block)` instead of explicit barrier operations.
+The [cooperative_groups::memcpy_async](../05-appendices/device-callable-apis.md#cg-api-async-memcpy) implementation coordinates the memory transfers collectively across all threads in the block, but synchronizes completion with `cg::wait(block)` instead of explicit barrier operations.
 
 The implementation based on the low-level primitives uses `__pipeline_memcpy_async()` to initiate element-wise memory transfers, `__pipeline_commit()` to commit the batch of copies, and `__pipeline_wait_prior(0)` to wait for all operations in the pipeline to complete. This provides the most direct control at the expense of more verbose code compared to the higher-level APIs. It also ensures LDGSTS will be used under the hood, which is not guaranteed with the higher-level APIs.
 
@@ -209,9 +209,9 @@ The implementation based on the low-level primitives uses `__pipeline_memcpy_asy
 
 In this example, we will demonstrate how to use asynchronous data copies to prefetch data from global memory to shared memory. In an iterative copy and compute pattern, this allows hiding the latency of data transfers of future iterations with computation on the current iteration, potentially increasing bytes-in-flight.
 
-**CUDA C++ cuda::memcpy\_async**
+**CUDA C++ cuda::memcpy_async**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cuda/pipeline>
 
@@ -267,9 +267,9 @@ __global__ void prefetch_kernel(int* global_out, int const* global_in, size_t si
 }
 ```
 
-**CUDA C++ cooperative\_groups::memcpy\_async**
+**CUDA C++ cooperative_groups::memcpy_async**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cooperative_groups/memcpy_async.h>
 
@@ -324,7 +324,7 @@ __global__ void prefetch_kernel(int* global_out, int const* global_in, size_t si
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cuda_awbarrier_primitives.h>
 
@@ -387,9 +387,9 @@ An important detail to enable efficient code generation in this example is to ke
 
 In this example, we will demonstrate how to implement a producer-consumer pattern where a single warp is specialized as the producer performing asynchronous data copies from global to shared memory, while the remaining warps consume the data from shared memory and perform computations. To enable concurrency between the producer and the consumer threads, we use double-buffering in shared memory. While consumer warps process data in one buffer, the producer warp asynchronously fetches the next batch of data into the other buffer.
 
-**CUDA C++ cuda::memcpy\_async**
+**CUDA C++ cuda::memcpy_async**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cuda/pipeline>
 
@@ -460,7 +460,7 @@ __global__ void producer_consumer_pattern(float *in, float *out, int N, int buff
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cuda_awbarrier_primitives.h>
 
@@ -521,17 +521,17 @@ The CUDA C primitives implementation based on primitives combines `__pipeline_me
 
 ## 4.12.2. Using the Tensor Memory Accelerator (TMA)
 
-Many applications need to move large amounts of data to and from global memory. Often, the data is laid out in global memory as a multi-dimensional array with non-sequential data access patterns. To reduce global memory accesses, sub-tiles of such arrays are copied to shared memory before use in computations. The loading and storing involves address-calculations that can be error-prone and repetitive. To offload these computations, compute capability 9.0 (Hopper) and later (see [PTX documentation](https://docs.nvidia.com/cuda/parallel-thread-execution/#data-movement-and-conversion-instructions-cp-async-bulk)) have a *tensor memory accelerator* (TMA). The primary goal of the TMA is to provide an efficient data transfer mechanism from global memory to shared memory for multi-dimensional arrays.
+Many applications need to move large amounts of data to and from global memory. Often, the data is laid out in global memory as a multi-dimensional array with non-sequential data access patterns. To reduce global memory accesses, sub-tiles of such arrays are copied to shared memory before use in computations. The loading and storing involves address-calculations that can be error-prone and repetitive. To offload these computations, compute capability 9.0 (Hopper) and later (see [PTX documentation](https://docs.nvidia.com/cuda/parallel-thread-execution/#data-movement-and-conversion-instructions-cp-async-bulk)) have a _tensor memory accelerator_ (TMA). The primary goal of the TMA is to provide an efficient data transfer mechanism from global memory to shared memory for multi-dimensional arrays.
 
-**Naming**. Tensor memory accelerator (TMA) is a broad term used to refer to the features described in this section. For the purpose of forward-compatibility and to reduce discrepancies with the PTX ISA, the text in this section refers to TMA operations as either *bulk-asynchronous copies* or *bulk-tensor asynchronous copies*, depending on the specific type of copy used. The term “bulk” is used to contrast these operations with the asynchronous memory operations described in the previous section.
+**Naming**. Tensor memory accelerator (TMA) is a broad term used to refer to the features described in this section. For the purpose of forward-compatibility and to reduce discrepancies with the PTX ISA, the text in this section refers to TMA operations as either _bulk-asynchronous copies_ or _bulk-tensor asynchronous copies_, depending on the specific type of copy used. The term “bulk” is used to contrast these operations with the asynchronous memory operations described in the previous section.
 
-**Dimensions**. TMA supports copying both one-dimensional and multi-dimensional arrays (up to 5-dimensional). The programming model for bulk-asynchronous copies of one-dimensional contiguous arrays is different from the programming model for bulk-tensor asynchronous copies of multi-dimensional arrays. To perform a bulk-tensor asynchronous copy of a multi-dimensional array, the hardware requires a [tensor map](https://docs.nvidia.com/cuda/cuda-driver-api/structCUtensorMap.html#structCUtensorMap). This object describes the layout of the multi-dimensional array in global and shared memory. A tensor map is typically created on the host using the [cuTensorMapEncode API](https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__TENSOR__MEMORY.html#group__CUDA__TENSOR__MEMORY) and then transferred from host to device as a `const` kernel parameter annotated with `__grid_constant__` (see [\_\_grid\_constant\_\_ Parameters](../05-appendices/cpp-language-extensions.md#grid-constant)). The tensor map is transferred from host to device as a `const` kernel parameter annotated with `__grid_constant__`, and can be used on the device to copy a tile of data between shared and global memory. In contrast, performing a bulk-asynchronous copy of a contiguous one-dimensional array does not require a tensor map: it can be performed on-device with a pointer and size parameter.
+**Dimensions**. TMA supports copying both one-dimensional and multi-dimensional arrays (up to 5-dimensional). The programming model for bulk-asynchronous copies of one-dimensional contiguous arrays is different from the programming model for bulk-tensor asynchronous copies of multi-dimensional arrays. To perform a bulk-tensor asynchronous copy of a multi-dimensional array, the hardware requires a [tensor map](https://docs.nvidia.com/cuda/cuda-driver-api/structCUtensorMap.html#structCUtensorMap). This object describes the layout of the multi-dimensional array in global and shared memory. A tensor map is typically created on the host using the [cuTensorMapEncode API](https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__TENSOR__MEMORY.html#group__CUDA__TENSOR__MEMORY) and then transferred from host to device as a `const` kernel parameter annotated with `__grid_constant__` (see [\_\_grid_constant\_\_ Parameters](../05-appendices/cpp-language-extensions.md#grid-constant)). The tensor map is transferred from host to device as a `const` kernel parameter annotated with `__grid_constant__`, and can be used on the device to copy a tile of data between shared and global memory. In contrast, performing a bulk-asynchronous copy of a contiguous one-dimensional array does not require a tensor map: it can be performed on-device with a pointer and size parameter.
 
-**Source and destination**. The source and destination addresses of TMA operations can be in shared or global memory. The operations can read data from global to shared memory, write data from shared to global memory, and also copy from shared memory to [distributed shared memory](../02-basics/writing-cuda-kernels.md#writing-cuda-kernels-distributed-shared-memory) of another block in the same cluster. In addition, when in a cluster, a bulk-asynchronous tensor operation can be specified as being *multicast*. In this case, data can be transferred from global memory to the shared memory of multiple blocks within the cluster.
+**Source and destination**. The source and destination addresses of TMA operations can be in shared or global memory. The operations can read data from global to shared memory, write data from shared to global memory, and also copy from shared memory to [distributed shared memory](../02-basics/writing-cuda-kernels.md#writing-cuda-kernels-distributed-shared-memory) of another block in the same cluster. In addition, when in a cluster, a bulk-asynchronous tensor operation can be specified as being _multicast_. In this case, data can be transferred from global memory to the shared memory of multiple blocks within the cluster.
 The multicast feature is optimized for global memory accesses to the current device - that is, not for accesses over NVLink from peer devices - and for certain data-center GPU target architectures documented in the [PTX multicast Target ISA notes](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk) .
 It may have [significantly reduced performance](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk-tensor) on other targets. Hence, it is advised to only use it access to global memory on the local GPU and only on GPUs with the recommended compute capabilities described in the [PTX multicast Target ISA notes](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk)
 
-**Asynchronicity**. Data transfers using TMA are [asynchronous](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features) and are modeled as async proxy operations (see [Async Thread and Async Proxy](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features-async-thread-proxy)). This allows the initiating thread to continue computing while the hardware asynchronously copies the data. *Whether the data transfer occurs asynchronously in practice is up to the hardware implementation and may change in the future*. There are several [completion mechanisms](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-asynchronous-copy-completion-mechanisms) that bulk-asynchronous operations can use to signal that they have completed. When the operation reads from global to shared memory, any thread in the block can wait for the data to be readable in shared memory by waiting on a [shared memory barrier](../03-advanced/advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives-barriers). When the bulk-asynchronous operation writes data from shared memory to global or distributed shared memory, only the initiating thread can wait for the operation to have completed. This is accomplished using a *bulk async-group* based completion mechanism. A table describing the completion mechanisms can be found below and in the [PTX ISA](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk).
+**Asynchronicity**. Data transfers using TMA are [asynchronous](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features) and are modeled as async proxy operations (see [Async Thread and Async Proxy](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features-async-thread-proxy)). This allows the initiating thread to continue computing while the hardware asynchronously copies the data. _Whether the data transfer occurs asynchronously in practice is up to the hardware implementation and may change in the future_. There are several [completion mechanisms](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-asynchronous-copy-completion-mechanisms) that bulk-asynchronous operations can use to signal that they have completed. When the operation reads from global to shared memory, any thread in the block can wait for the data to be readable in shared memory by waiting on a [shared memory barrier](../03-advanced/advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives-barriers). When the bulk-asynchronous operation writes data from shared memory to global or distributed shared memory, only the initiating thread can wait for the operation to have completed. This is accomplished using a _bulk async-group_ based completion mechanism. A table describing the completion mechanisms can be found below and in the [PTX ISA](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk).
 
 <table>
 <caption><span>Table 19 </span><span>Asynchronous copies with possible source and destination memory spaces and completion mechanisms using TMA. An empty cell indicates that a source-destination pair is not supported.</span></caption>
@@ -644,7 +644,7 @@ In the following, we demonstrate how to use bulk-asynchronous copies through an 
 6. Initiate a bulk-asynchronous copy of the buffer in shared memory to global memory.
 7. Wait for the bulk-asynchronous copy to have finished reading shared memory.
 
-```cuda
+```c
 #include <cuda/barrier>
 #include <cuda/ptx>
 
@@ -772,11 +772,11 @@ ordered before the async operation performed in thread 0 using
 **TMA write and sync**. The write from shared to global memory is again
 initiated by a single thread. The completion of the write is not tracked by a
 shared memory barrier. Instead, a thread-local mechanism is used. Multiple
-writes can be batched into a so-called *bulk async-group*. Afterwards, the
+writes can be batched into a so-called _bulk async-group_. Afterwards, the
 thread can wait for all operations in this group to have completed reading from
 shared memory (as in the code above) or to have completed writing to global
 memory, making the writes visible to the initiating thread. For more information,
-refer to the PTX ISA documentation of [cp.async.bulk.wait\_group](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk-wait-group).
+refer to the PTX ISA documentation of [cp.async.bulk.wait_group](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk-wait-group).
 Note that the bulk-asynchronous and non-bulk-asynchronous copy instructions have
 different async-groups: there exist both `cp.async.wait_group` and
 `cp.async.bulk.wait_group` instructions.
@@ -790,27 +790,27 @@ different async-groups: there exist both `cp.async.wait_group` and
 > performance. To prevent this, we define the `is_elected()` helper function that
 > uses `cuda::ptx::elect_sync` to select one thread from warp 0 – which is known to
 > the compiler – to execute the copy allowing it to generate more efficient code.
-> Alternatively, the same effect can be achieved with [cooperative\_groups::invoke\_one](cooperative-groups.md#cooperative-groups-invoke-one).
+> Alternatively, the same effect can be achieved with [cooperative_groups::invoke_one](cooperative-groups.md#cooperative-groups-invoke-one).
 
 The bulk-asynchronous instructions have specific alignment requirements on their source and
 destination addresses. More information can be found in the table below.
 
 Table 21 Alignment requirements for one-dimensional bulk-asynchronous operations.
 
-| Address / Size | Alignment |
-| --- | --- |
-| Global memory address | Must be 16 byte aligned. |
-| Shared memory address | Must be 16 byte aligned. |
+| Address / Size                | Alignment                                                       |
+| ----------------------------- | --------------------------------------------------------------- |
+| Global memory address         | Must be 16 byte aligned.                                        |
+| Shared memory address         | Must be 16 byte aligned.                                        |
 | Shared memory barrier address | Must be 8 byte aligned (this is guaranteed by `cuda::barrier`). |
-| Size of transfer | Must be a multiple of 16 bytes. |
+| Size of transfer              | Must be a multiple of 16 bytes.                                 |
 
 #### 4.12.2.1.1. Prefetching Data
 
 In this example, we will demonstrate how to use TMA to prefetch data from global memory to shared memory. In an iterative copy and compute pattern, this allows hiding the latency of data transfers of future iterations with computation on the current iteration, potentially increasing bytes-in-flight.
 
-**CUDA C++ cuda::device::memcpy\_async\_tx**
+**CUDA C++ cuda::device::memcpy_async_tx**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cuda/barrier>
 #include <cuda/ptx>
@@ -897,11 +897,10 @@ __global__ void prefetch_kernel(int* global_out, int const* global_in, size_t si
 }
 ```
 
-This example implements *multi-stage data prefetching* using `cuda::device::memcpy_async_tx` for the TMA copies and employs shared memory barriers with explicit phase tracking for synchronization of the copies.
+This example implements _multi-stage data prefetching_ using `cuda::device::memcpy_async_tx` for the TMA copies and employs shared memory barriers with explicit phase tracking for synchronization of the copies.
 
 1. **Initialization Phase**: Sets up shared memory barriers (one per stage) and pre-loads the first `num_stages` batches into different shared memory sections.
 2. **Main Processing Loop**:
-
    1. **Wait**: Uses `mbarrier_try_wait_parity()` to wait for the current batch to complete copying.
    2. **Compute**: Processes the current batch data.
    3. **Prefetch**: Schedules the next `memcpy_async_tx` operation for future data (staying `num_stages` ahead).
@@ -1042,7 +1041,7 @@ memory using `cudaMemcpyToSymbol` or accessing it via global memory. When passin
 GCC C++ compiler issue the warning “the ABI for passing parameters with 64-byte
 alignment has changed in GCC 4.6”. This warning can be ignored.
 
-```cuda
+```c
 #include <cuda.h>
 
 __global__ void kernel(const __grid_constant__ CUtensorMap tensor_map)
@@ -1060,7 +1059,7 @@ As an alternative to the `__grid_constant__` kernel parameter, a global
 `__constant__` variable can be used. An example is included
 below.
 
-```cuda
+```c
 #include <cuda.h>
 
 __constant__ CUtensorMap global_tensor_map;
@@ -1082,7 +1081,7 @@ in the block uses the updated tensor map. Further uses of the tensor map by that
 do not need to be fenced unless the tensor map is modified again. Note that this mechanism
 may be slower than the two mechanisms described above.
 
-```cuda
+```c
 #include <cuda.h>
 #include <cuda/ptx>
 namespace ptx = cuda::ptx;
@@ -1112,7 +1111,7 @@ from a larger 2D array. The top-left corner of the tile is indicated by the
 indices `x` and `y`. The tile is loaded into shared memory, modified, and
 written back to global memory.
 
-```cuda
+```c
 #include <cuda.h>         // CUtensormap
 #include <cuda/barrier>
 
@@ -1191,9 +1190,9 @@ __global__ void kernel(const __grid_constant__ CUtensorMap tensor_map, int x, in
 ```
 
 **Negative indices and out of bounds**. When part of the tile that is being
-*read* from global to shared memory is out of bounds, the shared memory that
+_read_ from global to shared memory is out of bounds, the shared memory that
 corresponds to the out of bounds area is zero-filled. The top-left corner
-indices of the tile may also be negative. When *writing* from shared to global
+indices of the tile may also be negative. When _writing_ from shared to global
 memory, parts of the tile may be out of bounds, but the top left corner cannot
 have any negative indices.
 
@@ -1208,14 +1207,14 @@ More information about alignment requirements can be found in the table below.
 
 Table 23 Alignment requirements for multi-dimensional bulk tensor asynchronous copy operations.
 
-| Address / Size | Alignment |
-| --- | --- |
-| Global memory address | Must be 16 byte aligned. |
-| Global memory sizes | Must be greater than or equal to one. Does not have to be a multiple of 16 bytes. |
-| Global memory strides | Must be multiples of 16 bytes. |
-| Shared memory address | Must be 128 byte aligned. |
-| Shared memory barrier address | Must be 8 byte aligned (this is guaranteed by `cuda::barrier`). |
-| Size of transfer | Must be a multiple of 16 bytes. |
+| Address / Size                | Alignment                                                                         |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| Global memory address         | Must be 16 byte aligned.                                                          |
+| Global memory sizes           | Must be greater than or equal to one. Does not have to be a multiple of 16 bytes. |
+| Global memory strides         | Must be multiples of 16 bytes.                                                    |
+| Shared memory address         | Must be 128 byte aligned.                                                         |
+| Shared memory barrier address | Must be 8 byte aligned (this is guaranteed by `cuda::barrier`).                   |
+| Size of transfer              | Must be a multiple of 16 bytes.                                                   |
 
 #### 4.12.2.2.1. Encoding a Tensor Map on Device
 
@@ -1233,7 +1232,7 @@ The recommended pattern is as follows:
 
 The high-level code structure is as follows:
 
-```cuda
+```c
 // Initialize device context:
 CUDA_CHECK(cudaDeviceSynchronize());
 
@@ -1274,7 +1273,7 @@ CUDA_CHECK(cudaDeviceSynchronize());
 The following sections describe the high-level steps. Throughout the examples, the following `tensormap_params`
 struct contains the new values of the fields to be updated. It is included here to reference when reading the examples.
 
-```cuda
+```c
 struct tensormap_params {
   void* global_address;
   int rank;
@@ -1292,12 +1291,12 @@ The recommended process of encoding a tensor map in global memory proceeds as fo
 1. Pass an existing tensor map, the `template_tensor_map`, to the kernel. In contrast to kernels that use
    the tensor map in a `cp.async.bulk.tensor` instruction, this may be done in any way: a pointer to global
    memory, kernel parameter, a `__constant___` variable, and so on.
-2. Copy-initialize a tensor map in shared memory with the template\_tensor\_map value.
-3. Modify the tensor map in shared memory using the [cuda::ptx::tensormap\_replace](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/tensormap_replace.html)
+2. Copy-initialize a tensor map in shared memory with the template_tensor_map value.
+3. Modify the tensor map in shared memory using the [cuda::ptx::tensormap_replace](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/tensormap_replace.html)
    functions. These functions wrap the [tensormap.replace](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-tensormap-replace)
    PTX instruction, which can be used to modify any field of a tiled-type tensor map, including the
    base address, size, stride, and so on.
-4. Using the [cuda::ptx::tensormap\_copy\_fenceproxy](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/tensormap_cp_fenceproxy.html#tensormap-cp-fenceproxy)
+4. Using the [cuda::ptx::tensormap_copy_fenceproxy](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/tensormap_cp_fenceproxy.html#tensormap-cp-fenceproxy)
    function, copy the modified tensor map from shared memory to global memory and perform any necessary fencing.
 
 The following code contains a kernel that follows these steps. For completeness, it modifies all the fields
@@ -1309,21 +1308,25 @@ pointer to the existing tensor map to modify.
 
 > [!NOTE]
 >
-> The format of the tensor map may change over time. Therefore, the [cuda::ptx::tensormap\_replace](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/tensormap_replace.html)
+> The format of the tensor map may change over time. Therefore, the [cuda::ptx::tensormap_replace](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/tensormap_replace.html)
 > functions and corresponding [tensormap.replace.tile](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-tensormap-replace)
-> PTX instructions are marked as specific to sm\_90a. To use them, compile using `nvcc -arch sm_90a ....`.
+> PTX instructions are marked as specific to sm_90a. To use them, compile using `nvcc -arch sm_90a ....`.
+
+<!---->
 
 > [!TIP]
 >
-> On sm\_90a, a zero-initialized buffer in shared memory may also be used as the initial tensor map value. This
+> On sm_90a, a zero-initialized buffer in shared memory may also be used as the initial tensor map value. This
 > enables encoding a tensor map purely on device, without using the driver API to encode the `template_tensor_map value`.
+
+<!---->
 
 > [!NOTE]
 >
 > On-device modification is only supported for tiled-type tensor maps; other tensor map types cannot be modified on device. For more
 > information on the tensor map types, refer to the [Driver API reference](https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__TENSOR__MEMORY.html#group__CUDA__TENSOR__MEMORY).
 
-```cuda
+```c
 #include <cuda/ptx>
 
 namespace ptx = cuda::ptx;
@@ -1394,9 +1397,9 @@ global memory requires explicitly establishing a release-acquire pattern in the 
 that modify the tensor map and the threads that use it.
 
 The release part of the pattern was shown in the previous section. It is accomplished using
-the [cuda::ptx::tensormap.cp\_fenceproxy](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/tensormap_cp_fenceproxy.html) function.
+the [cuda::ptx::tensormap.cp_fenceproxy](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/tensormap_cp_fenceproxy.html) function.
 
-The acquire part is accomplished using the [cuda::ptx::fence\_proxy\_tensormap\_generic](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/fence.html)
+The acquire part is accomplished using the [cuda::ptx::fence_proxy_tensormap_generic](https://nvidia.github.io/cccl/unstable/libcudacxx/ptx/instructions/fence.html)
 function that wraps the [fence.proxy.tensormap::generic.acquire](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#parallel-synchronization-and-communication-instructions-membar)
 instruction. If the two threads participating in the release-acquire pattern are on the same device, the `.gpu` scope suffices. If the threads are on
 different devices, the `.sys` scope must be used. Once a tensor map has been acquired by one thread, it can be used by other threads in the block
@@ -1409,7 +1412,7 @@ before each `cp.async.bulk.tensor` instruction.
 
 The `fence` and subsequent use of the tensor map is shown in the following example.
 
-```cuda
+```c
 // Consumer of tensor map in global memory:
 __global__ void consume_tensor_map(CUtensorMap* tensor_map) {
   // Fence acquire tensor map:
@@ -1448,7 +1451,7 @@ __global__ void consume_tensor_map(CUtensorMap* tensor_map) {
 
 The following code creates a minimal tiled-type tensor map that can be subsequently modified on device.
 
-```cuda
+```c
 CUtensorMap make_tensormap_template() {
   CUtensorMap template_tensor_map{};
   auto cuTensorMapEncodeTiled = get_cuTensorMapEncodeTiled();
@@ -1511,15 +1514,15 @@ indices of the 16-byte matrix elements.
 
 ![The shared memory data layout without swizzle](../_images/swizzle-example1.png)
 
-**Figure 51.** *In the shared memory data layout without swizzle, the shared memory indices are equivalent to the global memory indices.
+**Figure 51.** _In the shared memory data layout without swizzle, the shared memory indices are equivalent to the global memory indices.
 Per load instruction, one row is read and stored in a column of the transpose buffer. Since all matrix elements of the
 column in the transpose fall in the same bank, the store must be serialized, resulting in eight store transactions, giving
-an eight-way bank conflict per stored column.*
+an eight-way bank conflict per stored column._
 
 ![The shared memory data layout with CU_TENSOR_MAP_SWIZZLE_128B swizzle.](../_images/swizzle-example2.png)
 
-**Figure 52.** *The shared memory data layout with `CU_TENSOR_MAP_SWIZZLE_128B` swizzle. One row is stored in a column, each matrix
-element is from a different bank for both the rows and columns, and so without any bank conflicts.*
+**Figure 52.** _The shared memory data layout with `CU_TENSOR_MAP_SWIZZLE_128B` swizzle. One row is stored in a column, each matrix
+element is from a different bank for both the rows and columns, and so without any bank conflicts._
 
 ```cpp
 __global__ void kernel_tma(const __grid_constant__ CUtensorMap tensor_map) {
@@ -1642,7 +1645,7 @@ shared memory indices. The tables define the mapping of the 16-byte chunks along
 
 ![An Overview of TMA Swizzle Patterns](../_images/swizzle-pattern.png)
 
-**Figure 53.** *An Overview of TMA Swizzle Patterns*
+**Figure 53.** _An Overview of TMA Swizzle Patterns_
 
 **Considerations.** When applying a TMA swizzle pattern, it is crucial to adhere to specific memory requirements:
 
@@ -1664,11 +1667,11 @@ When using TMA, the shared memory is required to be aligned to 128 bytes. To fin
 
 Table 24 Swizzle Pattern Pointer Offset Formula and Index Relation
 
-| Swizzle Mode | Offset Formula | Index Relation |
-| --- | --- | --- |
-| CU\_TENSOR\_MAP\_SWIZZLE\_128B | `(reinterpret_cast <uintptr_t>(smem_ptr)/128)%8` | `smem[y][x] <-> smem[y][((y+offset)%8)^x]` |
-| CU\_TENSOR\_MAP\_SWIZZLE\_64B | `(reinterpret_cast <uintptr_t>(smem_ptr)/128)%4` | `smem[y][x] <-> smem[y][((y+offset)%4)^x]` |
-| CU\_TENSOR\_MAP\_SWIZZLE\_32B | `(reinterpret_cast <uintptr_t>(smem_ptr)/128)%2` | `smem[y][x] <-> smem[y][((y+offset)%2)^x]` |
+| Swizzle Mode               | Offset Formula                                   | Index Relation                             |
+| -------------------------- | ------------------------------------------------ | ------------------------------------------ |
+| CU_TENSOR_MAP_SWIZZLE_128B | `(reinterpret_cast <uintptr_t>(smem_ptr)/128)%8` | `smem[y][x] <-> smem[y][((y+offset)%8)^x]` |
+| CU_TENSOR_MAP_SWIZZLE_64B  | `(reinterpret_cast <uintptr_t>(smem_ptr)/128)%4` | `smem[y][x] <-> smem[y][((y+offset)%4)^x]` |
+| CU_TENSOR_MAP_SWIZZLE_32B  | `(reinterpret_cast <uintptr_t>(smem_ptr)/128)%2` | `smem[y][x] <-> smem[y][((y+offset)%2)^x]` |
 
 In [Figure 53](async-copies.md#figure-swizzle-overview), this offset represents the initial row offset, thus, in the swizzle index calculation, it is added to the row index `y`.
 The following snippet shows how to access the swizzled shared memory in the `CU_TENSOR_MAP_SWIZZLE_128B` mode.
@@ -1683,12 +1686,12 @@ smem[y][((y+offset)%8)^x] = ...
 
 Table 25 Requirements and properties of the different swizzle patterns for Compute Capability 9
 
-| Pattern | Swizzle width | Shared box’s inner dimension | Repeats after | Shared memory alignment | Global memory alignment |
-| --- | --- | --- | --- | --- | --- |
-| CU\_TENSOR\_MAP\_SWIZZLE\_128B | 128 bytes | <=128 bytes | 1024 bytes | 128 bytes | 128 bytes |
-| CU\_TENSOR\_MAP\_SWIZZLE\_64B | 64 bytes | <=64 bytes | 512 bytes | 128 bytes | 128 bytes |
-| CU\_TENSOR\_MAP\_SWIZZLE\_32B | 32 bytes | <=32 bytes | 256 bytes | 128 bytes | 128 bytes |
-| CU\_TENSOR\_MAP\_SWIZZLE\_NONE (default) |  |  |  | 128 bytes | 16 bytes |
+| Pattern                              | Swizzle width | Shared box’s inner dimension | Repeats after | Shared memory alignment | Global memory alignment |
+| ------------------------------------ | ------------- | ---------------------------- | ------------- | ----------------------- | ----------------------- |
+| CU_TENSOR_MAP_SWIZZLE_128B           | 128 bytes     | <=128 bytes                  | 1024 bytes    | 128 bytes               | 128 bytes               |
+| CU_TENSOR_MAP_SWIZZLE_64B            | 64 bytes      | <=64 bytes                   | 512 bytes     | 128 bytes               | 128 bytes               |
+| CU_TENSOR_MAP_SWIZZLE_32B            | 32 bytes      | <=32 bytes                   | 256 bytes     | 128 bytes               | 128 bytes               |
+| CU_TENSOR_MAP_SWIZZLE_NONE (default) |               |                              |               | 128 bytes               | 16 bytes                |
 
 ## 4.12.3. Using STAS
 
@@ -1698,7 +1701,7 @@ CUDA applications using [thread block clusters](../02-basics/intro-to-cuda-cpp.m
 
 **Source and destination**. The only direction supported for asynchronous copy operations with STAS is from registers to distributed shared memory. The destination pointer needs to be aligned to 4, 8, or 16 bytes depending on the size of the data being copied.
 
-**Asynchronicity**. Data transfers using STAS are [asynchronous](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features) and are modeled as async thread operations (see [Async Thread and Async Proxy](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features-async-thread-proxy)). This allows the initiating thread to continue computing while the hardware asynchronously copies the data. *Whether the data transfer occurs asynchronously in practice is up to the hardware implementation and may change in the future*. The completion mechanisms that STAS operations can use to signal that they have completed are [shared memory barriers](../03-advanced/advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives-barriers).
+**Asynchronicity**. Data transfers using STAS are [asynchronous](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features) and are modeled as async thread operations (see [Async Thread and Async Proxy](../03-advanced/advanced-kernel-programming.md#advanced-kernels-hardware-implementation-asynchronous-execution-features-async-thread-proxy)). This allows the initiating thread to continue computing while the hardware asynchronously copies the data. _Whether the data transfer occurs asynchronously in practice is up to the hardware implementation and may change in the future_. The completion mechanisms that STAS operations can use to signal that they have completed are [shared memory barriers](../03-advanced/advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives-barriers).
 
 In the following example, we show how to use STAS to implement a producer-consumer pattern within a thread-block cluster. This kernel creates a circular communication pipeline where 8 thread blocks are arranged in a ring, and each block simultaneously:
 
@@ -1709,7 +1712,7 @@ To implement this pattern, we need 2 shared memory barriers per thread block, on
 
 **CUDA C++ cuda::ptx**
 
-```cuda
+```c
 #include <cooperative_groups.h>
 #include <cuda/barrier>
 #include <cuda/ptx>
@@ -1780,7 +1783,6 @@ __global__ __cluster_dims__(8, 1, 1) void producer_consumer_kernel()
 - A cluster-wide synchronization is performed to ensure that all barriers are initialized before any thread starts communication.
 - Each thread determines its neighbors’ ranks and uses them to map the remote shared memory barriers and the remote shared memory buffer to write data to.
 - In each iteration:
-
   1. As a producer, each thread sends data to its right neighbor.
   2. As a consumer, thread 0 arrives on the local `filled` barrier and indicates it expects to receive a certain number of bytes.
   3. As a consumer, each thread waits on the local `filled` barrier for data from the left neighbor to arrive.

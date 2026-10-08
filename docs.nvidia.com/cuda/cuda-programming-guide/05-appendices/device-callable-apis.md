@@ -8,14 +8,14 @@ The primitives API is a C-like interface to `cuda::barrier` functionality. These
 
 ### 5.6.1.1. Data Types
 
-```cuda
+```c
 typedef /* implementation defined */ __mbarrier_t;
 typedef /* implementation defined */ __mbarrier_token_t;
 ```
 
 ### 5.6.1.2. Memory Barrier Primitives API
 
-```cuda
+```c
 uint32_t __mbarrier_maximum_count();
 void __mbarrier_init(__mbarrier_t* bar, uint32_t expected_count);
 ```
@@ -24,14 +24,14 @@ void __mbarrier_init(__mbarrier_t* bar, uint32_t expected_count);
 - `expected_count <= __mbarrier_maximum_count()`
 - Initialize `*bar` expected arrival count for the current and next phase to `expected_count`.
 
-```cuda
+```c
 void __mbarrier_inval(__mbarrier_t* bar);
 ```
 
 - `bar` must be a pointer to the barrier object residing in shared memory.
 - Invalidation of `*bar` is required before the corresponding shared memory can be repurposed.
 
-```cuda
+```c
 __mbarrier_token_t __mbarrier_arrive(__mbarrier_t* bar);
 ```
 
@@ -40,7 +40,7 @@ __mbarrier_token_t __mbarrier_arrive(__mbarrier_t* bar);
 - Atomically decrement the pending count for the current phase of the barrier.
 - Return an arrival token associated with the barrier state immediately prior to the decrement.
 
-```cuda
+```c
 __mbarrier_token_t __mbarrier_arrive_and_drop(__mbarrier_t* bar);
 ```
 
@@ -49,14 +49,14 @@ __mbarrier_token_t __mbarrier_arrive_and_drop(__mbarrier_t* bar);
 - Atomically decrement the pending count for the current phase and expected count for the next phase of the barrier.
 - Return an arrival token associated with the barrier state immediately prior to the decrement.
 
-```cuda
+```c
 bool __mbarrier_test_wait(__mbarrier_t* bar, __mbarrier_token_t token);
 ```
 
 - `token` must be associated with the immediately preceding phase or current phase of `*bar`.
 - Returns `true` if `token` is associated with the immediately preceding phase of `*bar`, otherwise returns `false`.
 
-```cuda
+```c
 bool __mbarrier_test_wait_parity(__mbarrier_t* bar, bool phase_parity);
 ```
 
@@ -89,7 +89,7 @@ Pipeline primitives provide a C-like interface for the functionality available i
 
 ### 5.6.2.1. `memcpy_async` Primitive
 
-```cuda
+```c
 void __pipeline_memcpy_async(void* __restrict__ dst_shared,
                              const void* __restrict__ src_global,
                              size_t size_and_align,
@@ -98,27 +98,27 @@ void __pipeline_memcpy_async(void* __restrict__ dst_shared,
 
 - Request that the following operation be submitted for asynchronous evaluation:
 
-  ```cuda
+  ```c
   size_t i = 0;
   for (; i < size_and_align - zfill; ++i) ((char*)dst_shared)[i] = ((char*)src_global)[i]; /* copy */
   for (; i < size_and_align; ++i) ((char*)dst_shared)[i] = 0; /* zero-fill */
   ```
-- Requirements:
 
+- Requirements:
   - `dst_shared` must be a pointer to the shared memory destination for the `memcpy_async`.
   - `src_global` must be a pointer to the global memory source for the `memcpy_async`.
   - `size_and_align` must be 4, 8, or 16.
   - `zfill <= size_and_align`.
   - `size_and_align` must be the alignment of `dst_shared` and `src_global`.
-- It is a race condition for any thread to modify the source memory or observe the destination memory prior to waiting for the `memcpy_async` operation to complete. Between submitting a `memcpy_async` operation and waiting for its completion, any of the following actions introduces a race condition:
 
+- It is a race condition for any thread to modify the source memory or observe the destination memory prior to waiting for the `memcpy_async` operation to complete. Between submitting a `memcpy_async` operation and waiting for its completion, any of the following actions introduces a race condition:
   - Loading from `dst_shared`.
   - Storing to `dst_shared` or `src_global`.
   - Applying an atomic update to `dst_shared` or `src_global`.
 
 ### 5.6.2.2. Commit Primitive
 
-```cuda
+```c
 void __pipeline_commit();
 ```
 
@@ -126,27 +126,27 @@ void __pipeline_commit();
 
 ### 5.6.2.3. Wait Primitive
 
-```cuda
+```c
 void __pipeline_wait_prior(size_t N);
 ```
 
 - Let `{0, 1, 2, ..., L}` be the sequence of indices associated with invocations of `__pipeline_commit()` by a given thread.
-- Wait for completion of batches *at least* up to and including `L-N`.
+- Wait for completion of batches _at least_ up to and including `L-N`.
 
 ### 5.6.2.4. Arrive On Barrier Primitive
 
-```cuda
+```c
 void __pipeline_arrive_on(__mbarrier_t* bar);
 ```
 
 - `bar` points to a barrier in shared memory.
-- Increments the barrier arrival count by one, when all memcpy\_async operations sequenced before this call have completed, the arrival count is decremented by one and hence the net effect on the arrival count is zero. It is user’s responsibility to make sure that the increment on the arrival count does not exceed `__mbarrier_maximum_count()`.
+- Increments the barrier arrival count by one, when all memcpy_async operations sequenced before this call have completed, the arrival count is decremented by one and hence the net effect on the arrival count is zero. It is user’s responsibility to make sure that the increment on the arrival count does not exceed `__mbarrier_maximum_count()`.
 
 ## 5.6.3. Cooperative Groups API
 
-### 5.6.3.1. cooperative\_groups.h
+### 5.6.3.1. cooperative_groups.h
 
-#### 5.6.3.1.1. class thread\_block
+#### 5.6.3.1.1. class thread_block
 
 Any CUDA programmer is already familiar with a certain group of threads: the thread block. The Cooperative Groups extension introduces a new datatype, `thread_block`, to explicitly represent this concept within the kernel.
 
@@ -162,11 +162,11 @@ thread_block g = this_thread_block();
 
 `static void sync()`: Synchronize the threads named in the group, equivalent to `g.barrier_wait(g.barrier_arrive())`
 
-`thread_block::arrival_token barrier_arrive()`: Arrive on the thread\_block barrier, returns a token that needs to be passed into `barrier_wait()`.
+`thread_block::arrival_token barrier_arrive()`: Arrive on the thread_block barrier, returns a token that needs to be passed into `barrier_wait()`.
 
 `void barrier_wait(thread_block::arrival_token&& t)`: Wait on the `thread_block` barrier, takes arrival token returned from `barrier_arrive()` as an rvalue reference.
 
-`static unsigned int thread_rank()`: Rank of the calling thread within [0, num\_threads)
+`static unsigned int thread_rank()`: Rank of the calling thread within [0, num_threads)
 
 `static dim3 group_index()`: 3-Dimensional index of the block within the launched grid
 
@@ -204,7 +204,7 @@ __global__ void kernel(int *globalInput) {
 
 **Related:** The `thread_block` datatype is derived from the more generic `thread_group` datatype, which can be used to represent a wider class of groups.
 
-#### 5.6.3.1.2. class cluster\_group
+#### 5.6.3.1.2. class cluster_group
 
 This group object represents all the threads launched in a single cluster. The APIs are available on all hardware with Compute Capability 9.0+. In such cases, when a non-cluster grid is launched, the APIs assume a 1x1x1 cluster.
 
@@ -224,9 +224,9 @@ cluster_group g = this_cluster();
 
 `static void barrier_wait(cluster_group::arrival_token&& t)`: Wait on the cluster barrier, takes arrival token returned from `barrier_arrive()` as a rvalue reference.
 
-`static unsigned int thread_rank()`: Rank of the calling thread within [0, num\_threads)
+`static unsigned int thread_rank()`: Rank of the calling thread within [0, num_threads)
 
-`static unsigned int block_rank()`: Rank of the calling block within [0, num\_blocks)
+`static unsigned int block_rank()`: Rank of the calling block within [0, num_blocks)
 
 `static unsigned int num_threads()`: Total number of threads in the group
 
@@ -246,7 +246,7 @@ Legacy member functions (aliases):
 
 `static unsigned int size()`: Total number of threads in the group (alias of `num_threads()`)
 
-#### 5.6.3.1.3. class grid\_group
+#### 5.6.3.1.3. class grid_group
 
 This group object represents all the threads launched in a single grid. APIs other than `sync()` are available at all times, but to be able to synchronize across the grid, you need to use the cooperative launch API.
 
@@ -260,7 +260,7 @@ grid_group g = this_grid();
 
 **Public Member Functions:**
 
-`bool is_valid() const`: Returns whether the grid\_group can synchronize
+`bool is_valid() const`: Returns whether the grid_group can synchronize
 
 `void sync() const`: Synchronize the threads named in the group, equivalent to `g.barrier_wait(g.barrier_arrive())`
 
@@ -268,11 +268,11 @@ grid_group g = this_grid();
 
 `void barrier_wait(grid_group::arrival_token&& t)`: Wait on the grid barrier, takes arrival token returned from `barrier_arrive()` as a rvalue reference.
 
-`static unsigned long long thread_rank()`: Rank of the calling thread within [0, num\_threads)
+`static unsigned long long thread_rank()`: Rank of the calling thread within [0, num_threads)
 
-`static unsigned long long block_rank()`: Rank of the calling block within [0, num\_blocks)
+`static unsigned long long block_rank()`: Rank of the calling block within [0, num_blocks)
 
-`static unsigned long long cluster_rank()`: Rank of the calling cluster within [0, num\_clusters)
+`static unsigned long long cluster_rank()`: Rank of the calling cluster within [0, num_clusters)
 
 `static unsigned long long num_threads()`: Total number of threads in the group
 
@@ -294,7 +294,7 @@ Legacy member functions (aliases):
 
 `static dim3 group_dim()`: Dimensions of the launched grid (alias of `dim_blocks()`)
 
-#### 5.6.3.1.4. class thread\_block\_tile
+#### 5.6.3.1.4. class thread_block_tile
 
 A templated version of a tiled group, where a template parameter is used to specify the size of the tile - with this known at compile time there is the potential for more optimal execution.
 
@@ -320,13 +320,13 @@ _CG_QUALIFIER thread_block_tile<Size, ParentT> tiled_partition(const ParentT& g)
 
 `unsigned long long num_threads() const`: Total number of threads in the group
 
-`unsigned long long thread_rank() const`: Rank of the calling thread within [0, num\_threads)
+`unsigned long long thread_rank() const`: Rank of the calling thread within [0, num_threads)
 
 `unsigned long long meta_group_size() const`: Returns the number of groups created when the parent group was partitioned.
 
-`unsigned long long meta_group_rank() const`: Linear rank of the group within the set of tiles partitioned from a parent group (bounded by meta\_group\_size)
+`unsigned long long meta_group_rank() const`: Linear rank of the group within the set of tiles partitioned from a parent group (bounded by meta_group_size)
 
-`T shfl(T var, unsigned int src_rank) const`: Refer to [Warp Shuffle Functions](cpp-language-extensions.md#warp-shuffle-functions), **Note: For sizes larger than 32 all threads in the group have to specify the same src\_rank, otherwise the behavior is undefined.**
+`T shfl(T var, unsigned int src_rank) const`: Refer to [Warp Shuffle Functions](cpp-language-extensions.md#warp-shuffle-functions), **Note: For sizes larger than 32 all threads in the group have to specify the same src_rank, otherwise the behavior is undefined.**
 
 `T shfl_up(T var, int delta) const`: Refer to [Warp Shuffle Functions](cpp-language-extensions.md#warp-shuffle-functions), available only for sizes lower or equal to 32.
 
@@ -352,9 +352,9 @@ Legacy member functions (aliases):
 
 - `thread_block_tile` templated data structure is being used here, the size of the group is passed to the `tiled_partition` call as a template parameter rather than an argument.
 - `shfl, shfl_up, shfl_down, and shfl_xor` functions accept objects of any type when compiled with C++11 or later. This means it’s possible to shuffle non-integral types as long as they satisfy the below constraints:
-
   - Qualifies as trivially copyable i.e., `is_trivially_copyable<T>::value == true`
   - `sizeof(T) <= 32` for tile sizes lower or equal 32, `sizeof(T) <= 8` for larger tiles
+
 - On hardware with Compute Capability 7.5 or lower tiles of size larger than 32 need small amount of memory reserved for them. This can be done using `cooperative_groups::block_tile_memory` struct template that has to reside in either shared or global memory.
 
   ```cpp
@@ -394,7 +394,7 @@ __global__ void kernel(...) {
 }
 ```
 
-#### 5.6.3.1.5. class coalesced\_group
+#### 5.6.3.1.5. class coalesced_group
 
 In CUDA’s SIMT architecture, at the hardware level the multiprocessor executes threads in groups of 32 called warps. If there exists a data-dependent conditional branch in the application code such that threads within a warp diverge, then the warp serially executes each branch disabling threads not on that path. The threads that remain active on the path are referred to as coalesced. Cooperative Groups has functionality to discover, and create, a group containing all coalesced threads.
 
@@ -414,11 +414,11 @@ coalesced_group active = coalesced_threads();
 
 `unsigned long long num_threads() const`: Total number of threads in the group
 
-`unsigned long long thread_rank() const`: Rank of the calling thread within [0, num\_threads)
+`unsigned long long thread_rank() const`: Rank of the calling thread within [0, num_threads)
 
 `unsigned long long meta_group_size() const`: Returns the number of groups created when the parent group was partitioned. If this group was created by querying the set of active threads, for example `coalesced_threads()` the value of `meta_group_size()` will be 1.
 
-`unsigned long long meta_group_rank() const`: Linear rank of the group within the set of tiles partitioned from a parent group (bounded by meta\_group\_size). If this group was created by querying the set of active threads, e.g. `coalesced_threads()` the value of `meta_group_rank()` will always be 0.
+`unsigned long long meta_group_rank() const`: Linear rank of the group within the set of tiles partitioned from a parent group (bounded by meta_group_size). If this group was created by querying the set of active threads, e.g. `coalesced_threads()` the value of `meta_group_rank()` will always be 0.
 
 `T shfl(T var, unsigned int src_rank) const`: Refer to [Warp Shuffle Functions](cpp-language-extensions.md#warp-shuffle-functions)
 
@@ -465,13 +465,13 @@ __global__ void kernel(int *globalInput) {
 }
 ```
 
-### 5.6.3.2. cooperative\_groups/async.h
+### 5.6.3.2. cooperative_groups/async.h
 
 #### 5.6.3.2.1. `memcpy_async`
 
-`memcpy_async` is a group-wide collective memcpy that utilizes hardware accelerated support for non-blocking memory transactions from global to shared memory. Given a set of threads named in the group, `memcpy_async` will move specified amount of bytes or elements of the input type through a single pipeline stage. Additionally for achieving best performance when using the `memcpy_async` API, an alignment of 16 bytes for both shared memory and global memory is required. It is important to note that while this is a memcpy in the general case, it is only asynchronous if the source is global memory and the destination is shared memory and both can be addressed with 16, 8, or 4 byte alignments. Asynchronously copied data should only be read following a call to wait or wait\_prior which signals that the corresponding stage has completed moving data to shared memory.
+`memcpy_async` is a group-wide collective memcpy that utilizes hardware accelerated support for non-blocking memory transactions from global to shared memory. Given a set of threads named in the group, `memcpy_async` will move specified amount of bytes or elements of the input type through a single pipeline stage. Additionally for achieving best performance when using the `memcpy_async` API, an alignment of 16 bytes for both shared memory and global memory is required. It is important to note that while this is a memcpy in the general case, it is only asynchronous if the source is global memory and the destination is shared memory and both can be addressed with 16, 8, or 4 byte alignments. Asynchronously copied data should only be read following a call to wait or wait_prior which signals that the corresponding stage has completed moving data to shared memory.
 
-Having to wait on all outstanding requests can lose some flexibility (but gain simplicity). In order to efficiently overlap data transfer and execution, its important to be able to kick off an **N+1**`memcpy_async` request while waiting on and operating on request **N**. To do so, use `memcpy_async` and wait on it using the collective stage-based `wait_prior` API. See [wait and wait\_prior](device-callable-apis.md#cg-api-async-wait) for more details.
+Having to wait on all outstanding requests can lose some flexibility (but gain simplicity). In order to efficiently overlap data transfer and execution, its important to be able to kick off an **N+1**`memcpy_async` request while waiting on and operating on request **N**. To do so, use `memcpy_async` and wait on it using the collective stage-based `wait_prior` API. See [wait and wait_prior](device-callable-apis.md#cg-api-async-wait) for more details.
 
 Usage 1
 
@@ -485,7 +485,7 @@ void memcpy_async(
 );
 ```
 
-Performs a copy of **``shape`` bytes**.
+Performs a copy of **`shape` bytes**.
 
 Usage 2
 
@@ -500,7 +500,7 @@ void memcpy_async(
 );
 ```
 
-Performs a copy of **``min(dstLayout, srcLayout)`` elements**. If layouts are of type `cuda::aligned_size_t<N>`, both must specify the same alignment.
+Performs a copy of **`min(dstLayout, srcLayout)` elements**. If layouts are of type `cuda::aligned_size_t<N>`, both must specify the same alignment.
 
 **Errata**
 The `memcpy_async` API introduced in CUDA 11.1 with both src and dst input layouts, expects the layout to be provided in elements rather than bytes. The element type is inferred from `TyElem` and has the size `sizeof(TyElem)`. If `cuda::aligned_size_t<N>` type is used as the layout, the number of elements specified times `sizeof(TyElem)` must be a multiple of N and it is recommended to use `std::byte` or `char` as the element type.
@@ -549,7 +549,7 @@ template <unsigned int NumStages, typename TyGroup>
 void wait_prior(TyGroup & group);
 ```
 
-`wait` and `wait_prior` collectives allow to wait for memcpy\_async copies to complete. `wait` blocks calling threads until all previous copies are done. `wait_prior` allows that the latest NumStages are still not done and waits for all the previous requests. So with `N` total copies requested, it waits until the first `N-NumStages` are done and the last `NumStages` might still be in progress. Both `wait` and `wait_prior` will synchronize the named group.
+`wait` and `wait_prior` collectives allow to wait for memcpy_async copies to complete. `wait` blocks calling threads until all previous copies are done. `wait_prior` allows that the latest NumStages are still not done and waits for all the previous requests. So with `N` total copies requested, it waits until the first `N-NumStages` are done and the last `NumStages` might still be in progress. Both `wait` and `wait_prior` will synchronize the named group.
 
 **Codegen Requirements:** Compute Capability 5.0 minimum, Compute Capability 8.0 for asynchronicity, C++11
 
@@ -600,7 +600,7 @@ __global__ void kernel(int* global_data) {
 }
 ```
 
-### 5.6.3.3. cooperative\_groups/partition.h
+### 5.6.3.3. cooperative_groups/partition.h
 
 #### 5.6.3.3.1. `tiled_partition`
 
@@ -615,7 +615,7 @@ thread_group tiled_partition(const thread_group& parent, unsigned int tilesz);
 
 The `tiled_partition` method is a collective operation that partitions the parent group into a one-dimensional, row-major, tiling of subgroups. A total of ((size(parent)/tilesz) subgroups will be created, therefore the parent group size must be evenly divisible by the `Size`. The allowed parent groups are `thread_block` or `thread_block_tile`.
 
-The implementation may cause the calling thread to wait until all the members of the parent group have invoked the operation before resuming execution. Functionality is limited to native hardware sizes, 1/2/4/8/16/32 and the `cg::size(parent)` must be greater than the `Size` parameter. The templated version of `tiled_partition` supports 64/128/256/512 sizes as well, but some additional steps are required on Compute Capability 7.5 or lower, refer to [class thread\_block\_tile](device-callable-apis.md#cg-api-thread-block-tile) for details.
+The implementation may cause the calling thread to wait until all the members of the parent group have invoked the operation before resuming execution. Functionality is limited to native hardware sizes, 1/2/4/8/16/32 and the `cg::size(parent)` must be greater than the `Size` parameter. The templated version of `tiled_partition` supports 64/128/256/512 sizes as well, but some additional steps are required on Compute Capability 7.5 or lower, refer to [class thread_block_tile](device-callable-apis.md#cg-api-thread-block-tile) for details.
 
 **Codegen Requirements:** Compute Capability 5.0 minimum, C++11 for sizes larger than 32
 
@@ -673,7 +673,7 @@ _global__ void oddEven(int *inputArr) {
 }
 ```
 
-### 5.6.3.4. cooperative\_groups/reduce.h
+### 5.6.3.4. cooperative_groups/reduce.h
 
 #### 5.6.3.4.1. `Reduce` Operators
 
@@ -775,7 +775,7 @@ void reduce_store_async(const TyGroup& group, TyArg* ptr, TyArg&& val, TyOp&& op
 - In case of the atomic store or update variant, `atomic` argument can be either of `cuda::atomic` or `cuda::atomic_ref` available in [CUDA C++ Standard Library](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives.html). This variant of the API is available only on platforms and devices, where these types are supported by the CUDA C++ Standard Library. Result of the reduction is used to atomically update the atomic according to the specified `op`, eg. the result is atomically added to the atomic in case of `cg::plus()`. Type held by the `atomic` must match the type of `TyArg`. Scope of the atomic must include all the threads in the group and if multiple groups are using the same atomic concurrently, scope must include all threads in all groups using it. Atomic update is performed with relaxed memory ordering.
 - In case of the pointer store variant, result of the reduction will be weakly stored into the `dst` pointer.
 
-### 5.6.3.5. cooperative\_groups/scan.h
+### 5.6.3.5. cooperative_groups/scan.h
 
 #### 5.6.3.5.1. `inclusive_scan` and `exclusive_scan`
 
@@ -805,7 +805,7 @@ TyVal exclusive_scan(const TyGroup& group, TyVal&& val);
 
 **Note:** Different threads in the group can pass different values for this argument.
 
-`op`: Function objects defined for convenience are `plus(), less(), greater(), bit_and(), bit_xor(), bit_or()` described in [cooperative\_groups/reduce.h](device-callable-apis.md#cg-api-reduce-header). These must be constructed, hence the TyVal template argument is required, i.e. `plus<int>()`. `inclusive_scan` and `exclusive_scan` also supports lambdas and other function objects that can be invoked using `operator()`. Overloads without this argument use `cg::plus<TyVal>()`.
+`op`: Function objects defined for convenience are `plus(), less(), greater(), bit_and(), bit_xor(), bit_or()` described in [cooperative_groups/reduce.h](device-callable-apis.md#cg-api-reduce-header). These must be constructed, hence the TyVal template argument is required, i.e. `plus<int>()`. `inclusive_scan` and `exclusive_scan` also supports lambdas and other function objects that can be invoked using `operator()`. Overloads without this argument use `cg::plus<TyVal>()`.
 
 **Scan update**
 
@@ -846,7 +846,7 @@ return op(inclusive_scan(group, val, op), old);
 
 `cooperative_groups/scan.h` header needs to be included.
 
-**Example of stream compaction using exclusive\_scan:**
+**Example of stream compaction using exclusive_scan:**
 
 ```cpp
 #include <cooperative_groups.h>
@@ -885,7 +885,7 @@ __device__ int stream_compaction(Group &g, Data *input, int count, TyFn&& test_f
 }
 ```
 
-**Example of dynamic buffer space allocation using exclusive\_scan\_update:**
+**Example of dynamic buffer space allocation using exclusive_scan_update:**
 
 ```cpp
 #include <cooperative_groups.h>
@@ -931,7 +931,7 @@ __global__ void kernel() {
 }
 ```
 
-### 5.6.3.6. cooperative\_groups/sync.h
+### 5.6.3.6. cooperative_groups/sync.h
 
 #### 5.6.3.6.1. `barrier_arrive` and `barrier_wait`
 
@@ -945,7 +945,7 @@ When `barrier_arrive` is called with a group, result of calling any collective o
 Group type `T` can be any of the [implicit groups](../04-special-topics/cooperative-groups.md#cooperative-groups-implicit-groups). This allows threads to do independent work after they arrive and before they wait for the synchronization to resolve, allowing to hide some of the synchronization latency.
 `barrier_arrive` returns an `arrival_token` object that must be passed into the corresponding `barrier_wait`. Token is consumed this way and can not be used for another `barrier_wait` call.
 
-**Example of barrier\_arrive and barrier\_wait used to synchronize initialization of shared memory across the cluster:**
+**Example of barrier_arrive and barrier_wait used to synchronize initialization of shared memory across the cluster:**
 
 ```cpp
 #include <cooperative_groups.h>
@@ -1066,20 +1066,20 @@ Resource allocation for the device runtime system software is controlled via the
 
 The following named limits may be set:
 
-| Limit | Behavior |
-| --- | --- |
+| Limit                                   | Behavior                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `cudaLimitDevRuntimePendingLaunchCount` | Controls the amount of memory set aside for buffering kernel launches and events which have not yet begun to execute, due either to unresolved dependencies or lack of execution resources. When the buffer is full, an attempt to allocate a launch slot during a device side kernel launch will fail and return `cudaErrorLaunchOutOfResources`, while an attempt to allocate an event slot will fail and return `cudaErrorMemoryAllocation`. The default number of launch slots is 2048. Applications may increase the number of launch and/or event slots by setting `cudaLimitDevRuntimePendingLaunchCount`. The number of event slots allocated is twice the value of that limit. |
-| `cudaLimitStackSize` | Controls the stack size in bytes of each GPU thread. The CUDA driver automatically increases the per-thread stack size for each kernel launch as needed. This size isn’t reset back to the original value after each launch. To set the per-thread stack size to a different value, `cudaDeviceSetLimit()` can be called to set this limit. The stack will be immediately resized, and if necessary, the device will block until all preceding requested tasks are complete. `cudaDeviceGetLimit()` can be called to get the current per-thread stack size. |
+| `cudaLimitStackSize`                    | Controls the stack size in bytes of each GPU thread. The CUDA driver automatically increases the per-thread stack size for each kernel launch as needed. This size isn’t reset back to the original value after each launch. To set the per-thread stack size to a different value, `cudaDeviceSetLimit()` can be called to set this limit. The stack will be immediately resized, and if necessary, the device will block until all preceding requested tasks are complete. `cudaDeviceGetLimit()` can be called to get the current per-thread stack size.                                                                                                                             |
 
 #### 5.6.4.2.2. Allocation and Lifetime
 
 `cudaMalloc()` and `cudaFree()` have distinct semantics between the host and device environments. When invoked from the host, `cudaMalloc()` allocates a new region from unused device memory. When invoked from the device runtime these functions map to device-side `malloc()` and `free()`. This implies that within the device environment the total allocatable memory is limited to the device `malloc()` heap size, which may be smaller than the available unused device memory. Also, it is an error to invoke `cudaFree()` from the host program on a pointer which was allocated by `cudaMalloc()` on the device or vice-versa.
 
-|  | `cudaMalloc()` on Host | `cudaMalloc()` on Device |
-| --- | --- | --- |
-| `cudaFree()` on Host | Supported | Not Supported |
-| `cudaFree()` on Device | Not Supported | Supported |
-| Allocation limit | Available device memory | `cudaLimitMallocHeapSize` |
+|                        | `cudaMalloc()` on Host  | `cudaMalloc()` on Device  |
+| ---------------------- | ----------------------- | ------------------------- |
+| `cudaFree()` on Host   | Supported               | Not Supported             |
+| `cudaFree()` on Device | Not Supported           | Supported                 |
+| Allocation limit       | Available device memory | `cudaLimitMallocHeapSize` |
 
 ##### 5.6.4.2.2.1. Memory Declarations
 
@@ -1090,6 +1090,8 @@ Memory declared at file scope with `__device__` or `__constant__` memory space s
 ###### 5.6.4.2.2.1.2. Textures and Surfaces
 
 > The device runtime does not allow creation or destruction of texture or surface objects from within device code. Texture and surface objects created from the host may be used and passed around freely on the device. Regardless of where they are created, dynamically created texture objects are always valid and may be passed to child kernels from a parent.
+
+<!---->
 
 > [!NOTE]
 >
@@ -1151,9 +1153,9 @@ As with host-side launch, the device-side operator `<<<>>>` maps to underlying k
 Table 61 New Device-only Launch Implementation Functions
 
 | Runtime API Launch Functions | Description of Difference From Host Runtime Behavior (behavior is identical if no description) |
-| --- | --- |
-| `cudaGetParameterBuffer` | Generated automatically from `<<<>>>`. Note different API to host equivalent. |
-| `cudaLaunchDevice` | Generated automatically from `<<<>>>`. Note different API to host equivalent. |
+| ---------------------------- | ---------------------------------------------------------------------------------------------- |
+| `cudaGetParameterBuffer`     | Generated automatically from `<<<>>>`. Note different API to host equivalent.                  |
+| `cudaLaunchDevice`           | Generated automatically from `<<<>>>`. Note different API to host equivalent.                  |
 
 The APIs for these launch functions are different to those of the CUDA Runtime API, and are defined as follows:
 

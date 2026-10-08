@@ -21,12 +21,12 @@ Select group member functions are shown in the following table.
 
 Table 10 Select Member Functions
 
-| Accessor | Returns |
-| --- | --- |
-| `thread_rank()` | The rank of the calling thread. |
-| `num_threads()` | The total number of threads in the group . |
+| Accessor         | Returns                                                        |
+| ---------------- | -------------------------------------------------------------- |
+| `thread_rank()`  | The rank of the calling thread.                                |
+| `num_threads()`  | The total number of threads in the group .                     |
 | `thread_index()` | A 3-Dimensional index of the thread within the launched block. |
-| `dim_threads()` | The 3D dimensions of the launched block in units of threads. |
+| `dim_threads()`  | The 3D dimensions of the launched block in units of threads.   |
 
 A complete list of member functions is available in the [Cooperative Groups API](../05-appendices/device-callable-apis.md#cg-api-common-header).
 
@@ -38,12 +38,12 @@ Implicit groups can be accessed using the following methods:
 
 Table 11 Cooperative Groups Implicitly Created by CUDA Runtime
 
-| Accessor | Group Scope |
-| --- | --- |
-| `this_thread_block()` | Returns the handle to a group containing all threads in current thread block. |
-| `this_grid()` | Returns the handle to a group containing all threads in the grid. |
-| `coalesced_threads()` [^1] | Returns the handle to a group of currently active threads in a warp. |
-| `this_cluster()` [^2] | Returns the handle to a group of threads in the current cluster. |
+| Accessor                   | Group Scope                                                                   |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| `this_thread_block()`      | Returns the handle to a group containing all threads in current thread block. |
+| `this_grid()`              | Returns the handle to a group containing all threads in the grid.             |
+| `coalesced_threads()` [^1] | Returns the handle to a group of currently active threads in a warp.          |
+| `this_cluster()` [^2]      | Returns the handle to a group of threads in the current cluster.              |
 
 [^1]: The `coalesced_threads()` operator returns the set of active threads at that point in time, and makes no guarantee about which threads are returned (as long as they are active) or that they will stay coalesced throughout execution.
 
@@ -69,11 +69,11 @@ The following partitioning operations are available to developers:
 
 Table 12 Cooperative Group Partitioning Operations
 
-| Partition Type | Description |
-| --- | --- |
-| tiled\_partition | Divides parent group into a series of fixed-size subgroups arranged in a one-dimensional, row-major format. |
-| labeled\_partition | Divides parent group into one-dimensional subgroups based on a conditional label, which can be any integral type. |
-| binary\_partition | Specialized form of labeled partitioning where label can only be “0” or “1”. |
+| Partition Type    | Description                                                                                                       |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| tiled_partition   | Divides parent group into a series of fixed-size subgroups arranged in a one-dimensional, row-major format.       |
+| labeled_partition | Divides parent group into one-dimensional subgroups based on a conditional label, which can be any integral type. |
+| binary_partition  | Specialized form of labeled partitioning where label can only be “0” or “1”.                                      |
 
 The following example shows how a tiled partition is created:
 
@@ -167,14 +167,14 @@ The type of reduction must be specified by providing one of the operators shown 
 
 Table 13 Cooperative Groups Reduction Operators
 
-| Operator | Returns |
-| --- | --- |
-| plus | Sum of all values in group |
-| less | Minimum value |
-| greater | Maximum value |
-| bit\_and | Bitwise AND reduction |
-| bit\_or | Bitwise OR reduction |
-| bit\_xor | Bitwise XOR reduction |
+| Operator | Returns                    |
+| -------- | -------------------------- |
+| plus     | Sum of all values in group |
+| less     | Minimum value              |
+| greater  | Maximum value              |
+| bit_and  | Bitwise AND reduction      |
+| bit_or   | Bitwise OR reduction       |
+| bit_xor  | Bitwise XOR reduction      |
 
 Hardware acceleration is used for reductions when available (requires Compute Capability 8.0 or greater).
 A software fallback is available for older hardware where hardware acceleration is not available.

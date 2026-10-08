@@ -10,7 +10,7 @@ Initialization must happen before any thread begins participating in a barrier.
 
 **CUDA C++ cuda::barrier**
 
-```cuda
+```c
 #include <cuda/barrier>
 #include <cooperative_groups.h>
 
@@ -30,7 +30,7 @@ __global__ void init_barrier()
 
 **CUDA C++ cuda::ptx**
 
-```cuda
+```c
 #include <cuda/ptx>
 #include <cooperative_groups.h>
 
@@ -50,7 +50,7 @@ __global__ void init_barrier()
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cuda_awbarrier_primitives.h>
 #include <cooperative_groups.h>
 
@@ -70,9 +70,9 @@ __global__ void init_barrier()
 
 Before any thread can participate in a barrier, the barrier must be initialized using the `cuda::barrier::init()` friend function. This must happen before any thread arrives on the barrier. This poses a bootstrapping challenge in that threads must synchronize before participating in the barrier, but threads are creating a barrier in order to synchronize. In this example, threads that will participate are part of a cooperative group and use `block.sync()` to bootstrap initialization. Since a whole thread block is participating in the barrier, `__syncthreads()` could also be used.
 
-The second parameter of `init()` is the *expected arrival count*, i.e., the number of times `bar.arrive()` will be called by participating threads before a participating thread is unblocked from its call to `bar.wait(std::move(token))`. In this and the previous examples, the barrier is initialized with the number of threads in the thread block i.e., `cooperative_groups::this_thread_block().size()`, so that all threads within the thread block can participate in the barrier.
+The second parameter of `init()` is the _expected arrival count_, i.e., the number of times `bar.arrive()` will be called by participating threads before a participating thread is unblocked from its call to `bar.wait(std::move(token))`. In this and the previous examples, the barrier is initialized with the number of threads in the thread block i.e., `cooperative_groups::this_thread_block().size()`, so that all threads within the thread block can participate in the barrier.
 
-Asynchronous barriers are flexible in specifying *how* threads participate (split arrive/wait) and *which* threads participate. In contrast, `this_thread_block.sync()` or `__syncthreads()` is applicable to the whole thread-block and `__syncwarp(mask)` to a specified subset of a warp. Nonetheless, if the intention of the user is to synchronize a full thread block or a full warp, we recommend using `__syncthreads()` and `__syncwarp()` respectively for better performance.
+Asynchronous barriers are flexible in specifying _how_ threads participate (split arrive/wait) and _which_ threads participate. In contrast, `this_thread_block.sync()` or `__syncthreads()` is applicable to the whole thread-block and `__syncwarp(mask)` to a specified subset of a warp. Nonetheless, if the intention of the user is to synchronize a full thread block or a full warp, we recommend using `__syncthreads()` and `__syncwarp()` respectively for better performance.
 
 ## 4.10.2. A Barrier’s Phase: Arrival, Countdown, Completion, and Reset
 
@@ -104,7 +104,7 @@ In its simplest form, the `cuda::ptx::mbarrier_try_wait_parity(uint64_t* bar, co
 
 **CUDA C++ cuda::barrier**
 
-```cuda
+```c
 #include <cuda/ptx>
 #include <cooperative_groups.h>
 
@@ -147,7 +147,7 @@ __global__ void split_arrive_wait(int iteration_count, float *data)
 
 **CUDA C++ cuda::ptx**
 
-```cuda
+```c
 #include <cuda/ptx>
 #include <cooperative_groups.h>
 
@@ -187,7 +187,7 @@ __global__ void split_arrive_wait(int iteration_count, float *data)
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cuda_awbarrier_primitives.h>
 #include <cooperative_groups.h>
 
@@ -230,7 +230,7 @@ When a thread that is participating in a sequence of synchronizations must exit 
 
 **CUDA C++ cuda::barrier**
 
-```cuda
+```c
 #include <cuda/barrier>
 #include <cooperative_groups.h>
 
@@ -269,7 +269,7 @@ __global__ void early_exit_kernel(int N)
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cuda_awbarrier_primitives.h>
 #include <cooperative_groups.h>
 
@@ -310,11 +310,11 @@ The `bar.arrive_and_drop()` operation arrives on the barrier to fulfill the part
 
 ## 4.10.5. Completion Function
 
-The `cuda::barrier` API supports an optional completion function. A `CompletionFunction` of `cuda::barrier<Scope, CompletionFunction>` is executed once per phase, after the last thread *arrives* and before any thread is unblocked from the `wait`. Memory operations performed by the threads that arrived at the `barrier` during the phase are visible to the thread executing the `CompletionFunction`, and all memory operations performed within the `CompletionFunction` are visible to all threads waiting at the `barrier` once they are unblocked from the `wait`.
+The `cuda::barrier` API supports an optional completion function. A `CompletionFunction` of `cuda::barrier<Scope, CompletionFunction>` is executed once per phase, after the last thread _arrives_ and before any thread is unblocked from the `wait`. Memory operations performed by the threads that arrived at the `barrier` during the phase are visible to the thread executing the `CompletionFunction`, and all memory operations performed within the `CompletionFunction` are visible to all threads waiting at the `barrier` once they are unblocked from the `wait`.
 
 **CUDA C++ cuda::barrier**
 
-```cuda
+```c
 #include <cuda/barrier>
 #include <cooperative_groups.h>
 #include <functional>
@@ -382,11 +382,11 @@ __global__ void psum(int *data, int n, int *acc)
 
 Asynchronous barriers can be used to track [asynchronous memory copies](../03-advanced/advanced-kernel-programming.md#advanced-kernels-async-copies). When an asynchronous copy operation is bound to a barrier, the copy operation automatically increments the expected count of the current barrier phase upon initiation and decrements it upon completion. This mechanism ensures that the barrier’s `wait()` operation will block until all associated asynchronous memory copies have completed, providing a convenient way to synchronize multiple concurrent memory operations.
 
-Starting with compute capability 9.0, asynchronous barriers in shared memory with thread-block or cluster scope can **explicitly** track asynchronous memory operations. We refer to these barriers as *asynchronous transaction barriers*. In addition to the expected arrival count, a barrier object can accept a **transaction count**, which can be used for tracking the completion of asynchronous transactions. The transaction count tracks the number of asynchronous transactions that are outstanding and yet to be complete, in units specified by the asynchronous memory operation (typically bytes). The transaction count to be tracked by the current phase can be set on arrival with `cuda::device::barrier_arrive_tx()` or directly with `cuda::device::barrier_expect_tx()`. When a barrier uses a transaction count, it blocks threads at the wait operation until all the producer threads have performed an arrive *and* the sum of all the transaction counts reaches an expected value.
+Starting with compute capability 9.0, asynchronous barriers in shared memory with thread-block or cluster scope can **explicitly** track asynchronous memory operations. We refer to these barriers as _asynchronous transaction barriers_. In addition to the expected arrival count, a barrier object can accept a **transaction count**, which can be used for tracking the completion of asynchronous transactions. The transaction count tracks the number of asynchronous transactions that are outstanding and yet to be complete, in units specified by the asynchronous memory operation (typically bytes). The transaction count to be tracked by the current phase can be set on arrival with `cuda::device::barrier_arrive_tx()` or directly with `cuda::device::barrier_expect_tx()`. When a barrier uses a transaction count, it blocks threads at the wait operation until all the producer threads have performed an arrive _and_ the sum of all the transaction counts reaches an expected value.
 
 **CUDA C++ cuda::barrier**
 
-```cuda
+```c
 #include <cuda/barrier>
 #include <cooperative_groups.h>
 
@@ -409,7 +409,7 @@ __global__ void track_kernel()
 
 **CUDA C++ cuda::ptx**
 
-```cuda
+```c
 #include <cuda/ptx>
 #include <cooperative_groups.h>
 
@@ -434,22 +434,22 @@ In this example, the `cuda::device::barrier_arrive_tx()` operation constructs an
 
 ## 4.10.7. Producer-Consumer Pattern Using Barriers
 
-A thread block can be spatially partitioned to allow different threads to perform independent operations. This is most commonly done by assigning threads from different warps within the thread block to specific tasks. This technique is referred to as *warp specialization*.
+A thread block can be spatially partitioned to allow different threads to perform independent operations. This is most commonly done by assigning threads from different warps within the thread block to specific tasks. This technique is referred to as _warp specialization_.
 
 This section shows an example of spatial partitioning in a producer-consumer pattern, where one subset of threads produces data that is concurrently consumed by the other (disjoint) subset of threads. A producer-consumer spatial partitioning pattern requires two one-sided synchronizations to manage a data buffer between the producer and consumer.
 
-| Producer | Consumer |
-| --- | --- |
+| Producer                                 | Consumer                            |
+| ---------------------------------------- | ----------------------------------- |
 | wait for buffer to be ready to be filled | signal buffer is ready to be filled |
-| produce data and fill the buffer |  |
-| signal buffer is filled | wait for buffer to be filled |
-|  | consume data in filled buffer |
+| produce data and fill the buffer         |                                     |
+| signal buffer is filled                  | wait for buffer to be filled        |
+|                                          | consume data in filled buffer       |
 
 Producer threads wait for consumer threads to signal that the buffer is ready to be filled; however, consumer threads do not wait for this signal. Consumer threads wait for producer threads to signal that the buffer is filled; however, producer threads do not wait for this signal. For full producer/consumer concurrency this pattern has (at least) double buffering where each buffer requires two barriers.
 
 **CUDA C++ cuda::barrier**
 
-```cuda
+```c
 #include <cuda/barrier>
 
 using barrier_t = cuda::barrier<cuda::thread_scope_block>;
@@ -505,7 +505,7 @@ __global__ void producer_consumer_pattern(int N, float *in, float *out, int buff
 
 **CUDA C++ cuda::ptx**
 
-```cuda
+```c
 #include <cuda/ptx>
 
 __device__ void produce(barrier ready[], barrier filled[], float *buffer, int buffer_len, float *in, int N)
@@ -561,7 +561,7 @@ __global__ void producer_consumer_pattern(int N, float *in, float *out, int buff
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cuda_awbarrier_primitives.h>
 
 __device__ void produce(__mbarrier_t ready[], __mbarrier_t filled[], float *buffer, int buffer_len, float *in, int N)

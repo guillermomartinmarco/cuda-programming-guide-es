@@ -292,67 +292,67 @@ The compiler supports all language features of the supported standards, subject 
 
 Table 35 C++14 Language Features Supported by NVCC for device code
 
-| Language Feature | C++14 Proposal | NVCC/CUDA Toolkit 9.x |
-| --- | --- | --- |
-| Tweak to certain C++ contextual conversions | [N3323](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3323.pdf) | ✅ |
-| Binary literals | [N3472](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3472.pdf) | ✅ |
-| [Functions with deduced return type](cpp-language-support.md#return-type-deduction) | [N3638](https://isocpp.org/files/papers/N3638.html) | ✅ |
-| Generalized lambda capture (init-capture) | [N3648](https://isocpp.org/files/papers/N3648.html) | ✅ |
-| Generic (polymorphic) lambda expressions | [N3649](https://isocpp.org/files/papers/N3649.html) | ✅ |
-| [Variable templates](cpp-language-support.md#variable-templates) | [N3651](https://isocpp.org/files/papers/N3651.pdf) | ✅ |
-| Relaxing requirements on constexpr functions | [N3652](https://isocpp.org/files/papers/N3652.html) | ✅ |
-| Member initializers and aggregates | [N3653](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3653.html) | ✅ |
-| Clarifying memory allocation | [N3664](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3664.html) | ❌ |
-| Sized deallocation | [N3778](https://isocpp.org/files/papers/n3778.html) | ❌ |
-| `[[deprecated]]` attribute | [N3760](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3760.html) | ✅ |
-| Single-quotation-mark as a digit separator | [N3781](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3781.pdf) | ✅ |
+| Language Feature                                                                    | C++14 Proposal                                                              | NVCC/CUDA Toolkit 9.x |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------- |
+| Tweak to certain C++ contextual conversions                                         | [N3323](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3323.pdf)  | ✅                    |
+| Binary literals                                                                     | [N3472](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3472.pdf)  | ✅                    |
+| [Functions with deduced return type](cpp-language-support.md#return-type-deduction) | [N3638](https://isocpp.org/files/papers/N3638.html)                         | ✅                    |
+| Generalized lambda capture (init-capture)                                           | [N3648](https://isocpp.org/files/papers/N3648.html)                         | ✅                    |
+| Generic (polymorphic) lambda expressions                                            | [N3649](https://isocpp.org/files/papers/N3649.html)                         | ✅                    |
+| [Variable templates](cpp-language-support.md#variable-templates)                    | [N3651](https://isocpp.org/files/papers/N3651.pdf)                          | ✅                    |
+| Relaxing requirements on constexpr functions                                        | [N3652](https://isocpp.org/files/papers/N3652.html)                         | ✅                    |
+| Member initializers and aggregates                                                  | [N3653](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3653.html) | ✅                    |
+| Clarifying memory allocation                                                        | [N3664](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3664.html) | ❌                    |
+| Sized deallocation                                                                  | [N3778](https://isocpp.org/files/papers/n3778.html)                         | ❌                    |
+| `[[deprecated]]` attribute                                                          | [N3760](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3760.html) | ✅                    |
+| Single-quotation-mark as a digit separator                                          | [N3781](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3781.pdf)  | ✅                    |
 
 ## 5.3.3. C++17 Language Features
 
 Table 36 C++17 Language Features Supported by NVCC for device code
 
-| Language Feature | C++17 Proposal | NVCC/CUDA Toolkit 11.x |
-| --- | --- | --- |
-| Removing trigraphs | [N4086](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4086.html) | ✅ |
-| `u8` character literals | [N4267](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4267.html) | ✅ |
-| Folding expressions | [N4295](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4295.html) | ✅ |
-| Attributes for namespaces and enumerators | [N4266](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4266.html) | ✅ |
-| Nested namespace definitions | [N4230](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4230.html) | ✅ |
-| Allow constant evaluation for all non-type template arguments | [N4268](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4268.html) | ✅ |
-| Extending `static_assert` | [N3928](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3928.pdf) | ✅ |
-| New Rules for `auto` deduction from braced-init-list | [N3922](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3922.html) | ✅ |
-| Allow typename in a template template parameter | [N4051](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4051.html) | ✅ |
-| `[[fallthrough]]` attribute | [P0188R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0188r1.pdf) | ✅ |
-| `[[nodiscard]]` attribute | [P0189R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0189r1.pdf) | ✅ |
-| `[[maybe_unused]]` attribute | [P0212R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0212r1.pdf) | ✅ |
-| Extension to aggregate initialization | [P0017R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0017r1.html) | ✅ |
-| Wording for `constexpr` lambda | [P0170R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0170r1.pdf) | ✅ |
-| Unary Folds and Empty Parameter Packs | [P0036R0](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0036r0.pdf) | ✅ |
-| Generalizing the Range-Based For Loop | [P0184R0](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0184r0.html) | ✅ |
-| Lambda capture of `*this` by Value | [P0018R3](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0018r3.html) | ✅ |
-| Construction Rules for `enum class` variables | [P0138R2](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0138r2.pdf) | ✅ |
-| Hexadecimal floating literals for C++ | [P0245R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0245r1.html) | ✅ |
-| Dynamic memory allocation for over-aligned data | [P0035R4](https://wg21.link/p0035) | ✅ |
-| Guaranteed copy elision | [P0135R1](https://wg21.link/p0135) | ✅ |
-| Refining Expression Evaluation Order for Idiomatic C++ | [P0145R3](https://wg21.link/p0145) | ✅ |
-| `constexpr if` | [P0292R2](https://wg21.link/p0292) | ✅ |
-| Selection statements with initializer | [P0305R1](https://wg21.link/p0305) | ✅ |
-| Template argument deduction for class templates | [P0091R3](https://wg21.link/p0091)   [P0512R0](https://wg21.link/p0512r0) | ✅ |
-| Declaring non-type template parameters with `auto` | [P0127R2](https://wg21.link/p0127) | ✅ |
-| Using attribute namespaces without repetition | [P0028R4](https://wg21.link/p0028) | ✅ |
-| Ignoring unsupported non-standard attributes | [P0283R2](https://wg21.link/p0283) | ✅ |
-| [Structured bindings](cpp-language-support.md#structured-binding) | [P0217R3](https://wg21.link/p0217) | ✅ |
-| Remove Deprecated Use of the `register` Keyword | [P0001R1](https://wg21.link/p0001) | ✅ |
-| Remove Deprecated `operator++(bool)` | [P0002R1](https://wg21.link/p0002) | ✅ |
-| Make exception specifications be part of the type system | [P0012R1](https://wg21.link/p0012) | ✅ |
-| `__has_include` for C++17 | [P0061R1](https://wg21.link/p0061) | ✅ |
-| Rewording inheriting constructors (core issue 1941 et al) | [P0136R1](https://wg21.link/p0136) | ✅ |
-| [Inline variables](cpp-language-support.md#inline-variables) | [P0386R2](https://wg21.link/p0386r2) | ✅ |
-| DR 150, Matching of template template arguments | [P0522R0](https://wg21.link/p0522r0) | ✅ |
-| Removing dynamic exception specifications | [P0003R5](https://wg21.link/p0003r5) | ✅ |
-| Pack expansions in using-declarations | [P0195R2](https://wg21.link/p0195r2) | ✅ |
-| A `byte` type definition | [P0298R0](https://wg21.link/p0298r0) | ✅ |
-| DR 727, In-class explicit instantiations | [CWG727](https://cplusplus.github.io/CWG/issues/727.html) | ✅ |
+| Language Feature                                                  | C++17 Proposal                                                                   | NVCC/CUDA Toolkit 11.x |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------- |
+| Removing trigraphs                                                | [N4086](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4086.html)     | ✅                     |
+| `u8` character literals                                           | [N4267](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4267.html)     | ✅                     |
+| Folding expressions                                               | [N4295](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4295.html)     | ✅                     |
+| Attributes for namespaces and enumerators                         | [N4266](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4266.html)     | ✅                     |
+| Nested namespace definitions                                      | [N4230](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4230.html)     | ✅                     |
+| Allow constant evaluation for all non-type template arguments     | [N4268](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4268.html)     | ✅                     |
+| Extending `static_assert`                                         | [N3928](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3928.pdf)      | ✅                     |
+| New Rules for `auto` deduction from braced-init-list              | [N3922](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3922.html)     | ✅                     |
+| Allow typename in a template template parameter                   | [N4051](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4051.html)     | ✅                     |
+| `[[fallthrough]]` attribute                                       | [P0188R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0188r1.pdf)  | ✅                     |
+| `[[nodiscard]]` attribute                                         | [P0189R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0189r1.pdf)  | ✅                     |
+| `[[maybe_unused]]` attribute                                      | [P0212R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0212r1.pdf)  | ✅                     |
+| Extension to aggregate initialization                             | [P0017R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0017r1.html) | ✅                     |
+| Wording for `constexpr` lambda                                    | [P0170R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0170r1.pdf)  | ✅                     |
+| Unary Folds and Empty Parameter Packs                             | [P0036R0](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0036r0.pdf)  | ✅                     |
+| Generalizing the Range-Based For Loop                             | [P0184R0](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0184r0.html) | ✅                     |
+| Lambda capture of `*this` by Value                                | [P0018R3](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0018r3.html) | ✅                     |
+| Construction Rules for `enum class` variables                     | [P0138R2](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0138r2.pdf)  | ✅                     |
+| Hexadecimal floating literals for C++                             | [P0245R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0245r1.html) | ✅                     |
+| Dynamic memory allocation for over-aligned data                   | [P0035R4](https://wg21.link/p0035)                                               | ✅                     |
+| Guaranteed copy elision                                           | [P0135R1](https://wg21.link/p0135)                                               | ✅                     |
+| Refining Expression Evaluation Order for Idiomatic C++            | [P0145R3](https://wg21.link/p0145)                                               | ✅                     |
+| `constexpr if`                                                    | [P0292R2](https://wg21.link/p0292)                                               | ✅                     |
+| Selection statements with initializer                             | [P0305R1](https://wg21.link/p0305)                                               | ✅                     |
+| Template argument deduction for class templates                   | [P0091R3](https://wg21.link/p0091) [P0512R0](https://wg21.link/p0512r0)          | ✅                     |
+| Declaring non-type template parameters with `auto`                | [P0127R2](https://wg21.link/p0127)                                               | ✅                     |
+| Using attribute namespaces without repetition                     | [P0028R4](https://wg21.link/p0028)                                               | ✅                     |
+| Ignoring unsupported non-standard attributes                      | [P0283R2](https://wg21.link/p0283)                                               | ✅                     |
+| [Structured bindings](cpp-language-support.md#structured-binding) | [P0217R3](https://wg21.link/p0217)                                               | ✅                     |
+| Remove Deprecated Use of the `register` Keyword                   | [P0001R1](https://wg21.link/p0001)                                               | ✅                     |
+| Remove Deprecated `operator++(bool)`                              | [P0002R1](https://wg21.link/p0002)                                               | ✅                     |
+| Make exception specifications be part of the type system          | [P0012R1](https://wg21.link/p0012)                                               | ✅                     |
+| `__has_include` for C++17                                         | [P0061R1](https://wg21.link/p0061)                                               | ✅                     |
+| Rewording inheriting constructors (core issue 1941 et al)         | [P0136R1](https://wg21.link/p0136)                                               | ✅                     |
+| [Inline variables](cpp-language-support.md#inline-variables)      | [P0386R2](https://wg21.link/p0386r2)                                             | ✅                     |
+| DR 150, Matching of template template arguments                   | [P0522R0](https://wg21.link/p0522r0)                                             | ✅                     |
+| Removing dynamic exception specifications                         | [P0003R5](https://wg21.link/p0003r5)                                             | ✅                     |
+| Pack expansions in using-declarations                             | [P0195R2](https://wg21.link/p0195r2)                                             | ✅                     |
+| A `byte` type definition                                          | [P0298R0](https://wg21.link/p0298r0)                                             | ✅                     |
+| DR 727, In-class explicit instantiations                          | [CWG727](https://cplusplus.github.io/CWG/issues/727.html)                        | ✅                     |
 
 ## 5.3.4. C++20 Language Features
 
@@ -364,66 +364,66 @@ GCC version ≥ 10.0, Clang version ≥ 10.0, Microsoft Visual Studio ≥ 2022, 
 
 Table 37 C++20 Language Features Supported by NVCC for device code
 
-| Language Feature | C++20 Proposal | NVCC/CUDA Toolkit 12.x |
-| --- | --- | --- |
-| Default member initializers for bit-fields | [P0683R1](https://wg21.link/p0683r1) | ✅ |
-| Fixing `const`-qualified pointers to members | [P0704R1](https://wg21.link/p0704r1) | ✅ |
-| Allow lambda capture `[=, this]` | [P0409R2](https://wg21.link/p0409r2) | ✅ |
-| `__VA_OPT__` for preprocessor comma elision | [P0306R4](https://wg21.link/p0306r4)   [P1042R1](https://wg21.link/p1042r1) | ✅ |
-| Designated initializers | [P0329R4](https://wg21.link/p0329r4) | ✅ |
-| Familiar template syntax for generic lambdas | [P0428R2](https://wg21.link/p0428r2) | ✅ |
-| List deduction of vector | [P0702R1](https://wg21.link/p0702r1) | ✅ |
-| Concepts | [P0734R0](https://wg21.link/p0734r0)   [P0857R0](https://wg21.link/p0857r0)   [P1084R2](https://wg21.link/p1084r2)   [P1141R2](https://wg21.link/p1141r2)   [P0848R3](https://wg21.link/p0848r3)   [P1616R1](https://wg21.link/p1616r1)   [P1452R2](https://wg21.link/p1452r2)   [P1972R0](https://wg21.link/p1972r0)   [P1980R0](https://wg21.link/p1980r0)   [P2092R0](https://wg21.link/p2092r0)   [P2103R0](https://wg21.link/p2103r0)   [P2113R0](https://wg21.link/p2113r0) | ✅ |
-| Range-based for statements with initializer | [P0614R1](https://wg21.link/p0614r1) | ✅ |
-| Simplifying implicit lambda capture | [P0588R1](https://wg21.link/p0588r1) | ✅ |
-| ADL and function templates that are not visible | [P0846R0](https://wg21.link/p0846r0) | ✅ |
-| `const` mismatch with defaulted copy constructor | [P0641R2](https://wg21.link/p0641r2) | ✅ |
-| Less eager instantiation of `constexpr` functions | [P0859R0](https://wg21.link/p0859r0) | ✅ |
-| [Consistent comparison](cpp-language-support.md#cpp20-spaceship) (`operator<=>`) | [P0515R3](https://wg21.link/p0515r3)   [P0905R1](https://wg21.link/p0905r1)   [P1120R0](https://wg21.link/p1120r0)   [P1185R2](https://wg21.link/p1185r2)   [P1186R3](https://wg21.link/p1186r3)   [P1630R1](https://wg21.link/p1630r1)   [P1946R0](https://wg21.link/p1946r0)   [P1959R0](https://wg21.link/p1959r0)   [P2002R1](https://wg21.link/p2002r1)   [P2085R0](https://wg21.link/p2085r0) | ✅ |
-| Access checking on specializations | [P0692R1](https://wg21.link/p0692r1) | ✅ |
-| Default constructible and assignable stateless lambdas | [P0624R2](https://wg21.link/p0624r2) | ✅ |
-| Lambdas in unevaluated contexts | [P0315R4](https://wg21.link/p0315r4) | ✅ |
-| Language support for empty objects | [P0840R2](https://wg21.link/p0840r2) | ✅ |
-| Relaxing the range-for loop customization point finding rules | [P0962R1](https://wg21.link/p0962r1) | ✅ |
-| [Allow structured bindings to accessible members](cpp-language-support.md#structured-binding) | [P0969R0](https://wg21.link/p0969r0) | ✅ |
-| Relaxing the structured bindings customization point finding rules | [P0961R1](https://wg21.link/p0961r1) | ✅ |
-| Down with typename! | [P0634R3](https://wg21.link/p0634r3) | ✅ |
-| Allow pack expansion in lambda init-capture | [P0780R2](https://wg21.link/p0780r2)   [P2095R0](https://wg21.link/p2095r0) | ✅ |
-| Proposed wording for `likely` and `unlikely` attributes | [P0479R5](https://wg21.link/p0479r5) | ✅ |
-| Deprecate implicit capture of this via `[=]` | [P0806R2](https://wg21.link/p0806r2) | ✅ |
-| Class Types in Non-Type Template Parameters | [P0732R2](https://wg21.link/p0732r2) | ✅ |
-| Inconsistencies with non-type template parameters | [P1907R1](https://wg21.link/p1907r1) | ✅ |
-| Atomic Compare-and-Exchange with Padding Bits | [P0528R3](https://wg21.link/p0528r3) | ✅ |
-| Efficient sized delete for variable sized classes | [P0722R3](https://wg21.link/p0722r3) | ✅ |
-| Allowing Virtual Function Calls in Constant Expressions | [P1064R0](https://wg21.link/p1064r0) | ✅ |
-| Prohibit aggregates with user-declared constructors | [P1008R1](https://wg21.link/p1008r1) | ✅ |
-| `explicit(bool)` | [P0892R2](https://wg21.link/p0892r2) | ✅ |
-| Signed integers are two’s complement | [P1236R1](https://wg21.link/p1236r1) | ✅ |
-| `char8_t` | [P0482R6](https://wg21.link/p0482r6) | ✅ |
-| [Immediate functions](cpp-language-support.md#cpp20-consteval) (`consteval`) | [P1073R3](https://wg21.link/p1073r3)   [P1937R2](https://wg21.link/p1937r2) | ✅ |
-| `std::is_constant_evaluated` | [P0595R2](https://wg21.link/p0595r2) | ✅ |
-| Nested `inline` namespaces | [P1094R2](https://wg21.link/p1094r2) | ✅ |
-| Relaxations of `constexpr` restrictions | [P1002R1](https://wg21.link/p1002r1)   [P1327R1](https://wg21.link/p1327r1)   [P1330R0](https://wg21.link/p1330r0)   [P1331R2](https://wg21.link/p1331r2)   [P1668R1](https://wg21.link/p1668r1)   [P0784R7](https://wg21.link/p0784r7) | ✅ |
-| Feature test macros | [P0941R2](https://wg21.link/p0941r2) | ✅ |
-| Modules | [P1103R3](https://wg21.link/p1103r3)   [P1766R1](https://wg21.link/p1766r1)   [P1811R0](https://wg21.link/p1811r0)   [P1703R1](https://wg21.link/p1703r1)   [P1874R1](https://wg21.link/p1874r1)   [P1979R0](https://wg21.link/p1979r0)   [P1779R3](https://wg21.link/p1779r3)   [P1857R3](https://wg21.link/p1857r3)   [P2115R0](https://wg21.link/p2115r0)   [P1815R2](https://wg21.link/p1815r2) | ❌ |
-| Coroutines | [P0912R5](https://wg21.link/p0912r5) | ❌ |
-| Parenthesized initialization of aggregates | [P0960R3](https://wg21.link/p0960r3)   [P1975R0](https://wg21.link/p1975r0) | ✅ |
-| DR: array size deduction in new-expression | [P1009R2](https://wg21.link/p1009r2) | ✅ |
-| DR: Converting from `T*` to bool should be considered narrowing | [P1957R2](https://wg21.link/p1957r2) | ✅ |
-| Stronger Unicode requirements | [P1041R4](https://wg21.link/p1041r4)   [P1139R2](https://wg21.link/p1139r2) | ✅ |
-| Structured binding extensions | [P1091R3](https://wg21.link/p1091r3)   [P1381R1](https://wg21.link/p1381r1) | ✅ |
-| Deprecate `a[b,c]` | [P1161R3](https://wg21.link/p1161r3) | ✅ |
-| Deprecating some uses of `volatile` | [P1152R4](https://wg21.link/p1152r4) | ✅ |
-| `[[nodiscard("with reason")]]` | [P1301R4](https://wg21.link/p1301r4) | ✅ |
-| `using enum` | [P1099R5](https://wg21.link/p1099r5) | ✅ |
-| Class template argument deduction for aggregates | [P1816R0](https://wg21.link/p1816r0)   [P2082R1](https://wg21.link/p2082r1) | ✅ |
-| Class template argument deduction for alias templates | [P1814R0](https://wg21.link/p1814r0) | ✅ |
-| Permit conversions to arrays of unknown bound | [P0388R4](https://wg21.link/p0388r4) | ✅ |
-| `constinit` | [P1143R2](https://wg21.link/p1143r2) | ✅ |
-| Layout-compatibility and Pointer-interconvertibility Traits | [P0466R5](https://wg21.link/p0466r5) | ✅ |
-| DR: Checking for abstract class types | [P0929R2](https://wg21.link/p0929r2) | ✅ |
-| DR: More implicit moves | [P1825R0](https://wg21.link/p1825r0) | ✅ |
-| DR: Pseudo-destructors end object lifetimes | [P0593R6](https://wg21.link/p0593r6) | ✅ |
+| Language Feature                                                                              | C++20 Proposal                                                                                                                                                                                                                                                                                                                                                                                                                                              | NVCC/CUDA Toolkit 12.x |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| Default member initializers for bit-fields                                                    | [P0683R1](https://wg21.link/p0683r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Fixing `const`-qualified pointers to members                                                  | [P0704R1](https://wg21.link/p0704r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Allow lambda capture `[=, this]`                                                              | [P0409R2](https://wg21.link/p0409r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| `__VA_OPT__` for preprocessor comma elision                                                   | [P0306R4](https://wg21.link/p0306r4) [P1042R1](https://wg21.link/p1042r1)                                                                                                                                                                                                                                                                                                                                                                                   | ✅                     |
+| Designated initializers                                                                       | [P0329R4](https://wg21.link/p0329r4)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Familiar template syntax for generic lambdas                                                  | [P0428R2](https://wg21.link/p0428r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| List deduction of vector                                                                      | [P0702R1](https://wg21.link/p0702r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Concepts                                                                                      | [P0734R0](https://wg21.link/p0734r0) [P0857R0](https://wg21.link/p0857r0) [P1084R2](https://wg21.link/p1084r2) [P1141R2](https://wg21.link/p1141r2) [P0848R3](https://wg21.link/p0848r3) [P1616R1](https://wg21.link/p1616r1) [P1452R2](https://wg21.link/p1452r2) [P1972R0](https://wg21.link/p1972r0) [P1980R0](https://wg21.link/p1980r0) [P2092R0](https://wg21.link/p2092r0) [P2103R0](https://wg21.link/p2103r0) [P2113R0](https://wg21.link/p2113r0) | ✅                     |
+| Range-based for statements with initializer                                                   | [P0614R1](https://wg21.link/p0614r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Simplifying implicit lambda capture                                                           | [P0588R1](https://wg21.link/p0588r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| ADL and function templates that are not visible                                               | [P0846R0](https://wg21.link/p0846r0)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| `const` mismatch with defaulted copy constructor                                              | [P0641R2](https://wg21.link/p0641r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Less eager instantiation of `constexpr` functions                                             | [P0859R0](https://wg21.link/p0859r0)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| [Consistent comparison](cpp-language-support.md#cpp20-spaceship) (`operator<=>`)              | [P0515R3](https://wg21.link/p0515r3) [P0905R1](https://wg21.link/p0905r1) [P1120R0](https://wg21.link/p1120r0) [P1185R2](https://wg21.link/p1185r2) [P1186R3](https://wg21.link/p1186r3) [P1630R1](https://wg21.link/p1630r1) [P1946R0](https://wg21.link/p1946r0) [P1959R0](https://wg21.link/p1959r0) [P2002R1](https://wg21.link/p2002r1) [P2085R0](https://wg21.link/p2085r0)                                                                           | ✅                     |
+| Access checking on specializations                                                            | [P0692R1](https://wg21.link/p0692r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Default constructible and assignable stateless lambdas                                        | [P0624R2](https://wg21.link/p0624r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Lambdas in unevaluated contexts                                                               | [P0315R4](https://wg21.link/p0315r4)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Language support for empty objects                                                            | [P0840R2](https://wg21.link/p0840r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Relaxing the range-for loop customization point finding rules                                 | [P0962R1](https://wg21.link/p0962r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| [Allow structured bindings to accessible members](cpp-language-support.md#structured-binding) | [P0969R0](https://wg21.link/p0969r0)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Relaxing the structured bindings customization point finding rules                            | [P0961R1](https://wg21.link/p0961r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Down with typename!                                                                           | [P0634R3](https://wg21.link/p0634r3)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Allow pack expansion in lambda init-capture                                                   | [P0780R2](https://wg21.link/p0780r2) [P2095R0](https://wg21.link/p2095r0)                                                                                                                                                                                                                                                                                                                                                                                   | ✅                     |
+| Proposed wording for `likely` and `unlikely` attributes                                       | [P0479R5](https://wg21.link/p0479r5)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Deprecate implicit capture of this via `[=]`                                                  | [P0806R2](https://wg21.link/p0806r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Class Types in Non-Type Template Parameters                                                   | [P0732R2](https://wg21.link/p0732r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Inconsistencies with non-type template parameters                                             | [P1907R1](https://wg21.link/p1907r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Atomic Compare-and-Exchange with Padding Bits                                                 | [P0528R3](https://wg21.link/p0528r3)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Efficient sized delete for variable sized classes                                             | [P0722R3](https://wg21.link/p0722r3)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Allowing Virtual Function Calls in Constant Expressions                                       | [P1064R0](https://wg21.link/p1064r0)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Prohibit aggregates with user-declared constructors                                           | [P1008R1](https://wg21.link/p1008r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| `explicit(bool)`                                                                              | [P0892R2](https://wg21.link/p0892r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Signed integers are two’s complement                                                          | [P1236R1](https://wg21.link/p1236r1)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| `char8_t`                                                                                     | [P0482R6](https://wg21.link/p0482r6)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| [Immediate functions](cpp-language-support.md#cpp20-consteval) (`consteval`)                  | [P1073R3](https://wg21.link/p1073r3) [P1937R2](https://wg21.link/p1937r2)                                                                                                                                                                                                                                                                                                                                                                                   | ✅                     |
+| `std::is_constant_evaluated`                                                                  | [P0595R2](https://wg21.link/p0595r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Nested `inline` namespaces                                                                    | [P1094R2](https://wg21.link/p1094r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Relaxations of `constexpr` restrictions                                                       | [P1002R1](https://wg21.link/p1002r1) [P1327R1](https://wg21.link/p1327r1) [P1330R0](https://wg21.link/p1330r0) [P1331R2](https://wg21.link/p1331r2) [P1668R1](https://wg21.link/p1668r1) [P0784R7](https://wg21.link/p0784r7)                                                                                                                                                                                                                               | ✅                     |
+| Feature test macros                                                                           | [P0941R2](https://wg21.link/p0941r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Modules                                                                                       | [P1103R3](https://wg21.link/p1103r3) [P1766R1](https://wg21.link/p1766r1) [P1811R0](https://wg21.link/p1811r0) [P1703R1](https://wg21.link/p1703r1) [P1874R1](https://wg21.link/p1874r1) [P1979R0](https://wg21.link/p1979r0) [P1779R3](https://wg21.link/p1779r3) [P1857R3](https://wg21.link/p1857r3) [P2115R0](https://wg21.link/p2115r0) [P1815R2](https://wg21.link/p1815r2)                                                                           | ❌                     |
+| Coroutines                                                                                    | [P0912R5](https://wg21.link/p0912r5)                                                                                                                                                                                                                                                                                                                                                                                                                        | ❌                     |
+| Parenthesized initialization of aggregates                                                    | [P0960R3](https://wg21.link/p0960r3) [P1975R0](https://wg21.link/p1975r0)                                                                                                                                                                                                                                                                                                                                                                                   | ✅                     |
+| DR: array size deduction in new-expression                                                    | [P1009R2](https://wg21.link/p1009r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| DR: Converting from `T*` to bool should be considered narrowing                               | [P1957R2](https://wg21.link/p1957r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Stronger Unicode requirements                                                                 | [P1041R4](https://wg21.link/p1041r4) [P1139R2](https://wg21.link/p1139r2)                                                                                                                                                                                                                                                                                                                                                                                   | ✅                     |
+| Structured binding extensions                                                                 | [P1091R3](https://wg21.link/p1091r3) [P1381R1](https://wg21.link/p1381r1)                                                                                                                                                                                                                                                                                                                                                                                   | ✅                     |
+| Deprecate `a[b,c]`                                                                            | [P1161R3](https://wg21.link/p1161r3)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Deprecating some uses of `volatile`                                                           | [P1152R4](https://wg21.link/p1152r4)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| `[[nodiscard("with reason")]]`                                                                | [P1301R4](https://wg21.link/p1301r4)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| `using enum`                                                                                  | [P1099R5](https://wg21.link/p1099r5)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Class template argument deduction for aggregates                                              | [P1816R0](https://wg21.link/p1816r0) [P2082R1](https://wg21.link/p2082r1)                                                                                                                                                                                                                                                                                                                                                                                   | ✅                     |
+| Class template argument deduction for alias templates                                         | [P1814R0](https://wg21.link/p1814r0)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Permit conversions to arrays of unknown bound                                                 | [P0388R4](https://wg21.link/p0388r4)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| `constinit`                                                                                   | [P1143R2](https://wg21.link/p1143r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| Layout-compatibility and Pointer-interconvertibility Traits                                   | [P0466R5](https://wg21.link/p0466r5)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| DR: Checking for abstract class types                                                         | [P0929R2](https://wg21.link/p0929r2)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| DR: More implicit moves                                                                       | [P1825R0](https://wg21.link/p1825r0)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
+| DR: Pseudo-destructors end object lifetimes                                                   | [P0593R6](https://wg21.link/p0593r6)                                                                                                                                                                                                                                                                                                                                                                                                                        | ✅                     |
 
 ## 5.3.5. C++23 Language Features
 
@@ -433,57 +433,59 @@ GCC version ≥ 14.0, Clang version ≥ 18.0, Microsoft Visual Studio (Not Suppo
 >
 > Entries prefixed with “DR:” are Defect Report resolutions. They correct the standard and apply to earlier C++ standard modes (e.g., C++17, C++20) as well; they are listed here for completeness and are not specific to C++23.
 
+<!---->
+
 > [!NOTE]
 >
 > **N/A** in the NVCC column indicates that the feature is not applicable to device code (e.g., removal of unused standard wording such as garbage collection support, or host-defined behavior).
 
 Table 38 C++23 Language Features Supported by NVCC for device code
 
-| Language Feature | C++23 Proposal | NVCC/CUDA Toolkit ≥ 13.3 |
-| --- | --- | --- |
-| Proposed resolution for core issues 411, 1656, and 2333; numeric and universal character escapes in character and string literals | [P2029R4](https://wg21.link/p2029r4) | ✅ |
-| Literal Suffix for (signed) `size_t` | [P0330R8](https://wg21.link/p0330r8) | ✅ |
-| Make `()` more optional for lambdas (Down with `()`!) | [P1102R2](https://wg21.link/p1102r2) | ✅ |
-| `if consteval` | [P1938R3](https://wg21.link/p1938r3) | ✅ |
-| Removing Garbage Collection Support | [P2186R2](https://wg21.link/p2186r2) | N/A |
-| DR: C++ Identifier Syntax using Unicode Standard Annex 31 | [P1949R7](https://wg21.link/p1949r7) | ✅ |
-| DR: Allow Duplicate Attributes | [P2156R1](https://wg21.link/p2156r1) | ✅ |
-| Narrowing contextual conversions to bool | [P1401R5](https://wg21.link/p1401r5) | ❌ |
-| Trimming whitespaces before line splicing | [P2223R2](https://wg21.link/p2223r2) | ✅ |
-| Make declaration order layout mandated | [P1847R4](https://wg21.link/p1847r4) | ✅ |
-| Mixed string literal concatenation | [P2201R1](https://wg21.link/p2201r1) | N/A |
-| Non-literal variables (and labels and gotos) in constexpr functions | [P2242R3](https://wg21.link/p2242r3) | ✅ |
-| Deducing `this` | [P0847R7](https://wg21.link/p0847r7) | ✅ |
-| Consistent character literal encoding | [P2316R2](https://wg21.link/p2316r2) | ✅ |
-| Add support for preprocessing directives `elifdef` and `elifndef` | [P2334R1](https://wg21.link/p2334r1) | ✅ |
-| Character encoding of diagnostic text | [P2246R1](https://wg21.link/p2246r1) | ✅ |
-| Extend init-statement to allow alias-declaration | [P2360R0](https://wg21.link/p2360r0) | ✅ |
-| Change scope of lambda trailing-return-type | [P2036R3](https://wg21.link/p2036r3) | ✅ |
-| Multidimensional subscript operator | [P2128R6](https://wg21.link/p2128r6) | ✅ |
-| Character sets and encodings | [P2314R4](https://wg21.link/p2314r4) | ✅ |
-| `auto(x)` and `auto {x}` | [P0849R8](https://wg21.link/p0849r8) | ✅ |
-| Missing feature test macros for C++20 core papers | [P2493R0](https://wg21.link/p2493r0) | ✅ |
-| Attributes on lambda expression | [P2173R1](https://wg21.link/p2173r1) | ✅ |
-| Support for `#warning` | [P2437R1](https://wg21.link/p2437r1) | ✅ |
-| Remove non-encodable wide character literals and multicharacter wide character literals | [P2362R3](https://wg21.link/p2362r3) | ✅ |
-| Labels at the end of compound statements (C compatibility) | [P2324R2](https://wg21.link/p2324r2) | ✅ |
-| Delimited escape sequences | [P2290R3](https://wg21.link/p2290r3) | ✅ |
-| Relaxing some `constexpr` restrictions | [P2448R2](https://wg21.link/p2448r2) | ❌ |
-| Simpler implicit move | [P2266R3](https://wg21.link/p2266r3) | ✅ |
-| Named universal character escapes | [P2071R2](https://wg21.link/p2071r2) | ✅ |
-| `static operator()` | [P1169R4](https://wg21.link/p1169r4) | ✅ |
-| `static operator[]` | [P2589R1](https://wg21.link/p2589r1) | ✅ |
-| Extended floating-point types and standard names | [P1467R9](https://wg21.link/p1467r9) | ❌ |
-| Portable assumptions `[[assume]]` | [P1774R8](https://wg21.link/p1774r8) | ✅ |
-| Support for UTF-8 as a portable source file encoding | [P2295R6](https://wg21.link/p2295r6) | ✅ |
-| DR: `char8_t` Compatibility and Portability Fix | [P2513R4](https://wg21.link/p2513r4) | ✅ |
-| DR: De-deprecating volatile bitwise compound assignment operations | [P2327R1](https://wg21.link/p2327r1) | ❌ |
-| DR: Relax requirements on `wchar_t` to match existing practices | [P2460R2](https://wg21.link/p2460r2) | N/A |
-| DR: Using unknown pointers and references in constant expressions | [P2280R4](https://wg21.link/p2280r4) | ❌ |
-| DR: The Equality Operator You Are Looking For | [P2468R2](https://wg21.link/p2468r2) | ❌ |
-| Permitting `static constexpr` variables in `constexpr` functions | [P2647R1](https://wg21.link/p2647r1) | ✅ |
-| Extending the lifetime of temporaries in range-based for loop initializer | [P2644R1](https://wg21.link/p2644r1)   [P2718R0](https://wg21.link/p2718r0) | ✅ |
-| DR: `consteval` needs to propagate up | [P2564R3](https://wg21.link/p2564r3) | ✅ |
+| Language Feature                                                                                                                  | C++23 Proposal                                                            | NVCC/CUDA Toolkit ≥ 13.3 |
+| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------ |
+| Proposed resolution for core issues 411, 1656, and 2333; numeric and universal character escapes in character and string literals | [P2029R4](https://wg21.link/p2029r4)                                      | ✅                       |
+| Literal Suffix for (signed) `size_t`                                                                                              | [P0330R8](https://wg21.link/p0330r8)                                      | ✅                       |
+| Make `()` more optional for lambdas (Down with `()`!)                                                                             | [P1102R2](https://wg21.link/p1102r2)                                      | ✅                       |
+| `if consteval`                                                                                                                    | [P1938R3](https://wg21.link/p1938r3)                                      | ✅                       |
+| Removing Garbage Collection Support                                                                                               | [P2186R2](https://wg21.link/p2186r2)                                      | N/A                      |
+| DR: C++ Identifier Syntax using Unicode Standard Annex 31                                                                         | [P1949R7](https://wg21.link/p1949r7)                                      | ✅                       |
+| DR: Allow Duplicate Attributes                                                                                                    | [P2156R1](https://wg21.link/p2156r1)                                      | ✅                       |
+| Narrowing contextual conversions to bool                                                                                          | [P1401R5](https://wg21.link/p1401r5)                                      | ❌                       |
+| Trimming whitespaces before line splicing                                                                                         | [P2223R2](https://wg21.link/p2223r2)                                      | ✅                       |
+| Make declaration order layout mandated                                                                                            | [P1847R4](https://wg21.link/p1847r4)                                      | ✅                       |
+| Mixed string literal concatenation                                                                                                | [P2201R1](https://wg21.link/p2201r1)                                      | N/A                      |
+| Non-literal variables (and labels and gotos) in constexpr functions                                                               | [P2242R3](https://wg21.link/p2242r3)                                      | ✅                       |
+| Deducing `this`                                                                                                                   | [P0847R7](https://wg21.link/p0847r7)                                      | ✅                       |
+| Consistent character literal encoding                                                                                             | [P2316R2](https://wg21.link/p2316r2)                                      | ✅                       |
+| Add support for preprocessing directives `elifdef` and `elifndef`                                                                 | [P2334R1](https://wg21.link/p2334r1)                                      | ✅                       |
+| Character encoding of diagnostic text                                                                                             | [P2246R1](https://wg21.link/p2246r1)                                      | ✅                       |
+| Extend init-statement to allow alias-declaration                                                                                  | [P2360R0](https://wg21.link/p2360r0)                                      | ✅                       |
+| Change scope of lambda trailing-return-type                                                                                       | [P2036R3](https://wg21.link/p2036r3)                                      | ✅                       |
+| Multidimensional subscript operator                                                                                               | [P2128R6](https://wg21.link/p2128r6)                                      | ✅                       |
+| Character sets and encodings                                                                                                      | [P2314R4](https://wg21.link/p2314r4)                                      | ✅                       |
+| `auto(x)` and `auto {x}`                                                                                                          | [P0849R8](https://wg21.link/p0849r8)                                      | ✅                       |
+| Missing feature test macros for C++20 core papers                                                                                 | [P2493R0](https://wg21.link/p2493r0)                                      | ✅                       |
+| Attributes on lambda expression                                                                                                   | [P2173R1](https://wg21.link/p2173r1)                                      | ✅                       |
+| Support for `#warning`                                                                                                            | [P2437R1](https://wg21.link/p2437r1)                                      | ✅                       |
+| Remove non-encodable wide character literals and multicharacter wide character literals                                           | [P2362R3](https://wg21.link/p2362r3)                                      | ✅                       |
+| Labels at the end of compound statements (C compatibility)                                                                        | [P2324R2](https://wg21.link/p2324r2)                                      | ✅                       |
+| Delimited escape sequences                                                                                                        | [P2290R3](https://wg21.link/p2290r3)                                      | ✅                       |
+| Relaxing some `constexpr` restrictions                                                                                            | [P2448R2](https://wg21.link/p2448r2)                                      | ❌                       |
+| Simpler implicit move                                                                                                             | [P2266R3](https://wg21.link/p2266r3)                                      | ✅                       |
+| Named universal character escapes                                                                                                 | [P2071R2](https://wg21.link/p2071r2)                                      | ✅                       |
+| `static operator()`                                                                                                               | [P1169R4](https://wg21.link/p1169r4)                                      | ✅                       |
+| `static operator[]`                                                                                                               | [P2589R1](https://wg21.link/p2589r1)                                      | ✅                       |
+| Extended floating-point types and standard names                                                                                  | [P1467R9](https://wg21.link/p1467r9)                                      | ❌                       |
+| Portable assumptions `[[assume]]`                                                                                                 | [P1774R8](https://wg21.link/p1774r8)                                      | ✅                       |
+| Support for UTF-8 as a portable source file encoding                                                                              | [P2295R6](https://wg21.link/p2295r6)                                      | ✅                       |
+| DR: `char8_t` Compatibility and Portability Fix                                                                                   | [P2513R4](https://wg21.link/p2513r4)                                      | ✅                       |
+| DR: De-deprecating volatile bitwise compound assignment operations                                                                | [P2327R1](https://wg21.link/p2327r1)                                      | ❌                       |
+| DR: Relax requirements on `wchar_t` to match existing practices                                                                   | [P2460R2](https://wg21.link/p2460r2)                                      | N/A                      |
+| DR: Using unknown pointers and references in constant expressions                                                                 | [P2280R4](https://wg21.link/p2280r4)                                      | ❌                       |
+| DR: The Equality Operator You Are Looking For                                                                                     | [P2468R2](https://wg21.link/p2468r2)                                      | ❌                       |
+| Permitting `static constexpr` variables in `constexpr` functions                                                                  | [P2647R1](https://wg21.link/p2647r1)                                      | ✅                       |
+| Extending the lifetime of temporaries in range-based for loop initializer                                                         | [P2644R1](https://wg21.link/p2644r1) [P2718R0](https://wg21.link/p2718r0) | ✅                       |
+| DR: `consteval` needs to propagate up                                                                                             | [P2564R3](https://wg21.link/p2564r3)                                      | ✅                       |
 
 ## 5.3.6. CUDA C++ Standard Library
 
@@ -505,7 +507,7 @@ In addition, `libcu++` provides [extended features](https://nvidia.github.io/ccc
 
 ### 5.3.7.1. `clock()` and `clock64()`
 
-```cuda
+```c
 __host__ __device__ clock_t   clock();
 __device__          long long clock64();
 ```
@@ -519,7 +521,7 @@ When executed in device code, it returns the value of a per-multiprocessor count
 
 ### 5.3.7.2. `printf()`
 
-```cuda
+```c
 __host__ __device__ __tile__ int printf(const char* format[, arg, ...]);
 ```
 
@@ -592,7 +594,7 @@ The following API functions set and retrieve the size of the buffer used to tran
 
 The following code sample:
 
-```cuda
+```c
 #include <stdio.h>
 
 __global__ void helloCUDA(float value) {
@@ -624,7 +626,7 @@ See the example on [Compiler Explorer](https://cuda.godbolt.org/z/d4MPj7qG8).
 
 The following code sample:
 
-```cuda
+```c
 #include <stdio.h>
 
 __global__ void helloCUDA(float value) {
@@ -653,7 +655,7 @@ See the example on [Compiler Explorer](https://cuda.godbolt.org/z/YqEss81sf).
 
 The following code sample:
 
-```cuda
+```c
 #include "cuda_tile.h"
 #include <cstdio>
 
@@ -679,13 +681,13 @@ will output:
 
 ### 5.3.7.3. `memcpy()` and `memset()`
 
-```cuda
+```c
 __host__ __device__ __tile__ void* memcpy(void* dest, const void* src, size_t size);
 ```
 
 The function copies `size` bytes from the memory location pointed by `src` to the memory location pointed by `dest`.
 
-```cuda
+```c
 __host__ __device__ __tile__ void* memset(void* ptr, int value, size_t size);
 ```
 
@@ -697,21 +699,21 @@ The function sets `size` bytes of memory block pointed by `ptr` to `value`, inte
 
 ### 5.3.7.4. `malloc()` and `free()`
 
-```cuda
+```c
 __host__ __device__ void* malloc(size_t size);
 // or cuda::std::malloc(), cuda::std::calloc() in the <cuda/std/cstdlib> header
 ```
 
 The functions `malloc()` (device-side), `cuda::std::malloc()`, and `cuda::std::calloc()` allocate at least `size` bytes from the device heap and return a pointer to the allocated memory. If insufficient memory exists to fulfill the request, it returns `NULL`. The returned pointer is guaranteed to be aligned to a 16-byte boundary.
 
-```cuda
+```c
 __device__ void* __nv_aligned_device_malloc(size_t size, size_t align);
 // or cuda::std::aligned_alloc() in the <cuda/std/cstdlib> header
 ```
 
 The functions `__nv_aligned_device_malloc()` and [C++](https://en.cppreference.com/w/cpp/memory/c/aligned_alloc) `cuda::std::aligned_alloc()` allocate at least `size` bytes from the device heap and return a pointer to the allocated memory. If there is insufficient memory to fulfill the requested size or alignment, it returns `NULL`. The address of the allocated memory is a multiple of `align`. `align` must be a non-zero power of two.
 
-```cuda
+```c
 __host__ __device__ void free(void* ptr);
 // or cuda::std::free() in the <cuda/std/cstdlib> header
 ```
@@ -750,7 +752,7 @@ Memory allocated via the device-side functions `malloc()`, `cuda::std::malloc()`
 
 Per-Thread Allocation example:
 
-```cuda
+```c
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -774,7 +776,7 @@ int main() {
 
 will output:
 
-```cuda
+```c
 Thread 0 got pointer: 0x20d5ffe20
 Thread 1 got pointer: 0x20d5ffec0
 Thread 2 got pointer: 0x20d5fff60
@@ -790,7 +792,7 @@ See the example on [Compiler Explorer](https://cuda.godbolt.org/z/z7K191z58).
 
 Per-Thread-Block Allocation example:
 
-```cuda
+```c
 #include <stdlib.h>
 
 __global__ void block_level_allocation_kernel() {
@@ -831,7 +833,7 @@ See the example on [Compiler Explorer](https://cuda.godbolt.org/z/7s8x7oonz).
 
 Allocation Persisting Between Kernel Launches example:
 
-```cuda
+```c
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -891,7 +893,7 @@ See the example on [Compiler Explorer](https://cuda.godbolt.org/z/h7r6G3dGP).
 
 ### 5.3.7.5. `alloca()`
 
-```cuda
+```c
 __host__ __device__ void* alloca(size_t size);
 ```
 
@@ -903,7 +905,7 @@ The `alloca()` function allocates `size` bytes of memory within the caller’s s
 
 Example:
 
-```cuda
+```c
 __device__ void device_function(int num_items) {
     int4* ptr = (int4*) alloca(num_items * sizeof(int4));
     // use of ptr
@@ -919,7 +921,7 @@ The execution space can also be specified explicitly with the [extended lambda s
 
 Examples:
 
-```cuda
+```c
 auto global_lambda = [](){ return 0; }; // __host__
 
 void host_function() {
@@ -961,7 +963,7 @@ A lambda expression or a closure type can only be used as an argument to a `__gl
 
 Examples:
 
-```cuda
+```c
 template <typename T>
  __global__ void kernel(T input) {}
 
@@ -990,15 +992,15 @@ The `nvcc` flag `--extended-lambda` allows explicit annotations of execution spa
 
 `nvcc` defines the macro `__CUDACC_EXTENDED_LAMBDA__` when the `--extended-lambda` flag is specified.
 
-- An *extended lambda* is defined within the scope of an immediate or nested block of a `__host__` or `__host__ __device__` function.
-- An *extended device lambda* is a lambda expression annotated with the `__device__` keyword.
-- An *extended host-device lambda* is a lambda expression annotated with the `__host__ __device__` keywords.
+- An _extended lambda_ is defined within the scope of an immediate or nested block of a `__host__` or `__host__ __device__` function.
+- An _extended device lambda_ is a lambda expression annotated with the `__device__` keyword.
+- An _extended host-device lambda_ is a lambda expression annotated with the `__host__ __device__` keywords.
 
 Unlike standard lambda expressions, extended lambdas can be used as type arguments in `__global__` functions.
 
 Example:
 
-```cuda
+```c
 void host_function() {
     auto lambda1 = [] {};                      // NOT an extended lambda: no explicit execution space annotations
     auto lambda2 = [] __device__ {};           // extended lambda
@@ -1030,19 +1032,19 @@ auto global_lambda = [] __host__ __device__ { }; // NOT an extended lambda becau
 
 The compiler provides type traits to detect closure types for extended lambdas at compile time.
 
-```cuda
+```c
 bool __nv_is_extended_device_lambda_closure_type(type);
 ```
 
 The function returns `true` if `type` is the closure class created for an extended `__device__` lambda, `false` otherwise.
 
-```cuda
+```c
 bool __nv_is_extended_device_lambda_with_preserved_return_type(type);
 ```
 
 The function returns `true` if `type` is the closure class created for an extended `__device__` lambda and the lambda is defined with trailing return type, `false` otherwise. If the trailing return type definition refers to any lambda parameter name, the return type is not preserved.
 
-```cuda
+```c
 bool __nv_is_extended_host_device_lambda_closure_type(type);
 ```
 
@@ -1054,7 +1056,7 @@ The lambda type traits can be used in all compilation modes, regardless of wheth
 
 Example:
 
-```cuda
+```c
 auto lambda0 = [] __host__ __device__ { };
 
 void host_function() {
@@ -1112,13 +1114,12 @@ By definition, an extended lambda is present within the immediate or nested bloc
 
 - If the function is not the `operator()` of a lambda expression, it is considered the enclosing function for the extended lambda.
 - Otherwise, the extended lambda is defined within the immediate or nested block scope of the `operator()` of one or more enclosing lambda expressions.
-
   - If the outermost lambda expression is defined within the immediate or nested block scope of a function `F`, then `F` is the computed enclosing function.
   - Otherwise, the enclosing function does not exist.
 
 Example:
 
-```cuda
+```c
 void host_function() {
     auto lambda1 = [] __device__ { }; // enclosing function for lambda1 is "host_function()"
     auto lambda2 = [] {
@@ -1139,7 +1140,7 @@ Extended Lambda Restrictions
 
 1. An extended lambda cannot be defined inside another extended lambda expression. Example:
 
-   ```cuda
+   ```c
    void host_function() {
        auto lambda1 = [] __host__ __device__  {
             // ERROR, extended lambda defined within another extended lambda
@@ -1147,9 +1148,10 @@ Extended Lambda Restrictions
        };
    }
    ```
+
 2. An extended lambda cannot be defined inside a generic lambda expression. Example:
 
-   ```cuda
+   ```c
    void host_function() {
        auto lambda1 = [] (auto) {
             // ERROR, extended lambda defined within a generic lambda
@@ -1157,23 +1159,24 @@ Extended Lambda Restrictions
        };
    }
    ```
+
 3. If an extended lambda is defined within the immediate or nested block scope of one or more nested lambda expressions, then the outermost lambda expression must be defined within the immediate or nested block scope of a function. Example:
 
-   ```cuda
+   ```c
    auto lambda1 = []  {
        // ERROR, outer enclosing lambda is not defined within a non-lambda-operator() function
        auto lambda2 = [] __host__ __device__ { };
    };
    ```
-4. The enclosing function of the extended lambda must be named, and its address must be accessible. If the enclosing function is a class member, the following conditions must be met:
 
+4. The enclosing function of the extended lambda must be named, and its address must be accessible. If the enclosing function is a class member, the following conditions must be met:
    - All classes enclosing the member function must have a name.
    - The member function must not have private or protected access within its parent class.
    - All enclosing classes must not have private or protected access within their respective parent classes.
 
    Example:
 
-   ```cuda
+   ```c
    void host_function() {
        auto lambda1 = [] __device__ { return 0; }; // OK
        {
@@ -1200,9 +1203,10 @@ Extended Lambda Restrictions
        };
    };
    ```
+
 5. At the point where the extended lambda has been defined, it must be possible to unambiguously take the address of the enclosing routine. However, this may not always be feasible, for example, when an alias declaration shadows a template type argument with the same name. Example:
 
-   ```cuda
+   ```c
    template <typename T>
    struct A {
        using Bar = void;
@@ -1228,9 +1232,10 @@ Extended Lambda Restrictions
        var.test();
    }
    ```
+
 6. An extended lambda cannot be defined in a class that is local to a function. Example:
 
-   ```cuda
+   ```c
    void host_function() {
        struct MyStruct {
            void bar() {
@@ -1240,17 +1245,19 @@ Extended Lambda Restrictions
        };
    }
    ```
+
 7. The enclosing function for an extended lambda cannot have deduced return type. Example:
 
-   ```cuda
+   ```c
    auto host_function() {
        // ERROR, the return type of host_function() is deduced
        auto lambda3 = [] __host__ __device__ { return 0; };
    }
    ```
+
 8. A host-device extended lambda cannot be a generic lambda, namely a lambda with an `auto` parameter type. Example:
 
-   ```cuda
+   ```c
    void host_function() {
        // ERROR, __host__ __device__ extended lambdas cannot be a generic lambda
        auto lambda1 = [] __host__ __device__ (auto i) { return i; };
@@ -1261,15 +1268,15 @@ Extended Lambda Restrictions
        };
    }
    ```
-9. If the enclosing function is an instantiation of a function or member template, or if the function is a member of a class template, then the template(s) must satisfy the following constraints:
 
+9. If the enclosing function is an instantiation of a function or member template, or if the function is a member of a class template, then the template(s) must satisfy the following constraints:
    - The template must have at most one variadic parameter, and it must be listed last in the template parameter list.
    - The template parameters must be named.
    - The template instantiation argument types cannot involve types that are either local to a function (except for closure types for extended lambdas), or are `private` or `protected` class members.
 
    Example 1:
 
-   ```cuda
+   ```c
    template <template <typename...> class T,
              typename... P1,
              typename... P2>
@@ -1295,7 +1302,7 @@ Extended Lambda Restrictions
 
    Example 2:
 
-   ```cuda
+   ```c
    template <typename T>
    void bar4() {
        auto lambda1 = [] __device__ { return 10; };
@@ -1317,10 +1324,10 @@ Extended Lambda Restrictions
        bar4<MyStruct::MyNestedStruct>();
    }
    ```
+
 10. With Microsoft Visual Studio host compilers, the enclosing function must have external linkage. This restriction exists because the host compiler does not support using the addresses of non-extern linkage functions as template arguments. The CUDA compiler transformations require these addresses to support extended lambdas.
 11. With Microsoft Visual Studio host compilers, an extended lambda shall not be defined within the body of an `if constexpr` block.
 12. An extended lambda has the following restrictions on captured variables:
-
     - The variable may be passed by value to a sequence of helper functions in the code sent to the host compiler before being used to directly initialize the field of the class type representing the closure type for the extended lambda. However, the C++ standard specifies that the captured variable should be used for direct initialization of the closure type’s field.
     - A variable can only be captured by value.
     - A variable of array type cannot be captured if the number of array dimensions is greater than 7.
@@ -1333,7 +1340,7 @@ Extended Lambda Restrictions
 
     Examples:
 
-    ```cuda
+    ```c
     void host_function() {
         // CORRECT, an init-capture is allowed for an extended device-only lambda
         auto lambda1 = [x = 1] __device__ () { return x; };
@@ -1389,9 +1396,10 @@ Extended Lambda Restrictions
         };
     }
     ```
+
 13. When parsing a function, the CUDA compiler assigns a counter value to each extended lambda in the function. This counter value is used in the substituted named type that is passed to the host compiler. Therefore, the presence or absence of an extended lambda within a function should not depend on a particular value of `__CUDA_ARCH__`, nor on `__CUDA_ARCH__` being undefined. Example:
 
-    ```cuda
+    ```c
     template <typename T>
     __global__ void kernel(T in) { in(); }
 
@@ -1406,9 +1414,10 @@ Extended Lambda Restrictions
         kernel<<<1, 1>>>(lambda3);
     }
     ```
+
 14. As described above, the CUDA compiler replaces a device extended lambda defined in a host function with a placeholder type defined in namespace scope. The placeholder type does not define an `operator()` function equivalent to the original lambda declaration unless the trait `__nv_is_extended_device_lambda_with_preserved_return_type()` returns `true` for the closure type of the extended lambda. Therefore, an attempt to determine the return type or parameter types of the `operator()` function of such a lambda may work incorrectly in host code because the code processed by the host compiler is semantically different from the input code processed by the CUDA compiler. However, introspecting the return type or parameter types of the `operator()` function within device code is acceptable. Note that this restriction does not apply to host or device extended lambdas for which the trait `__nv_is_extended_device_lambda_with_preserved_return_type()` returns `true`. Example:
 
-    ```cuda
+    ```c
     #include <cuda/std/type_traits>
 
     const char& getRef(const char* p) { return *p; }
@@ -1436,13 +1445,14 @@ Extended Lambda Restrictions
         static_assert(!__nv_is_extended_device_lambda_with_preserved_return_type(decltype(lambda4)));
     }
     ```
-15. For an extended device-only lambda:
 
+15. For an extended device-only lambda:
     - Introspection of the parameter type of `operator()` is only supported in device code.
     - Introspection of the return type of `operator()` is supported only in device code, unless the trait function `__nv_is_extended_device_lambda_with_preserved_return_type()` returns `true`.
+
 16. If an extended lambda is passed from host to device code as an argument to a `__global__` function, for example, then any expression in the lambda’s body that captures variables must remain unchanged, regardless of whether the `__CUDA_ARCH__` macro is defined and what value it has. This restriction arises because the lambda’s closure class layout depends on the order in which the compiler encounters the captured variables when processing the lambda expression. The program may execute incorrectly if the closure class layout differs between device and host compilations. Example:
 
-    ```cuda
+    ```c
     __device__ int result;
 
     template <typename T>
@@ -1461,9 +1471,10 @@ Extended Lambda Restrictions
         kernel<<<1, 1>>>(lambda1);
     }
     ```
+
 17. As previously described, the CUDA compiler replaces an extended device-only lambda expression with a placeholder type instance in the code sent to the host compiler. The placeholder type does not define a pointer-to-function conversion operator in the host code; however, the conversion operator is provided in the device code. Note that this restriction does not apply to host-device extended lambdas. Example:
 
-    ```cuda
+    ```c
     template <typename T>
     __global__ void kernel(T in) {
         int (*fp)(double) = in;
@@ -1484,9 +1495,10 @@ Extended Lambda Restrictions
         int (*fp2)(double) = lambda_device;
     }
     ```
+
 18. As previously described, the CUDA compiler replaces an extended device-only or host-device lambda expression with a placeholder type instance in the code sent to the host compiler. This placeholder type may define C++ special member functions, such as constructors and destructors. Consequently, some standard C++ type traits may yield different results for the closure type of the extended lambda in the CUDA front-end compiler than in the host compiler. The following type traits are affected: : `std::is_trivially_copyable`, `std::is_trivially_constructible`, `std::is_trivially_copy_constructible`, `std::is_trivially_move_constructible`, `std::is_trivially_destructible`. Care must be taken to ensure that the results of these traits are not used in the instantiation of the `__global__`, `__device__`, `__constant__`, or `__managed__` function or variable templates. Example:
 
-    ```cuda
+    ```c
     #include <cstdio>
     #include <type_traits>
 
@@ -1523,7 +1535,7 @@ According to C++11/C++14 rules, when a lambda is defined within a non-`static` c
 
 Example:
 
-```cuda
+```c
 #include <cstdio>
 
 template <typename T>
@@ -1557,7 +1569,7 @@ The CUDA compiler supports the `*this` capture mode for lambdas defined within `
 
 Here’s the above example modified to use `*this` capture mode:
 
-```cuda
+```c
 #include <cstdio>
 
 template <typename T>
@@ -1588,7 +1600,7 @@ int main() {
 
 `*this` capture mode is not allowed for non-annotated lambdas defined in host code, or for extended host-device lambdas, unless `*this` capture is enabled by the selected language dialect. The following are examples of supported and unsupported usage:
 
-```cuda
+```c
 struct MyStruct {
     int var;
     __host__ __device__ MyStruct() : var(10) { };
@@ -1638,7 +1650,7 @@ As previously mentioned, the CUDA compiler replaces an extended lambda expressio
 
 Example:
 
-```cuda
+```c
 namespace N1 {
 
 struct MyStruct {};
@@ -1678,7 +1690,7 @@ The `nvfunctional` header provides a polymorphic function wrapper class template
 
 Example:
 
-```cuda
+```c
 #include <nvfunctional>
 
 __host__            int host_function()        { return 1; }
@@ -1717,7 +1729,7 @@ Invalid cases:
 
 Examples of invalid cases:
 
-```cuda
+```c
 #include <nvfunctional>
 
 __device__ int device_function() { return 1; }
@@ -1746,7 +1758,7 @@ void foo(void) {
 
 `nvstd::function` is defined in the `nvfunctional` header as follows:
 
-```cuda
+```c
 namespace nvstd {
 
 template <typename RetType, typename ...ArgTypes>
@@ -1811,10 +1823,10 @@ void swap(function<R(ArgTypes...)>&, function<R(ArgTypes...)>&);
 ### 5.3.10.1. Unsupported Features
 
 - Run-Time Type Information (RTTI) and exceptions are not supported in device code:
-
   - `typeid` keyword
   - `dynamic_cast` keyword
   - `try/catch/throw` keywords
+
 - `long double` is not supported in device code.
 - Trigraphs are not supported on any platform. Digraphs are not supported on Windows.
 - User-defined `operator new`, `operator new[]`, `operator delete`, or `operator delete[]` cannot be used to replace the corresponding built-ins provided by the compiler, and it is considered undefined behavior on both host and device.
@@ -1825,7 +1837,7 @@ Unless otherwise noted, adding definitions to top-level namespaces `cuda::`, `nv
 
 Examples:
 
-```cuda
+```c
 namespace cuda {   // same for "nv" and "cooperative_groups" namespaces
 
 struct foo;        // ERROR, class declaration in the "cuda" namespace
@@ -1837,7 +1849,7 @@ namespace utils {} // ERROR, namespace declaration in the "cuda" namespace
 } // namespace cuda
 ```
 
-```cuda
+```c
 namespace utils {
 namespace cuda {
 
@@ -1873,7 +1885,7 @@ The `__device__`, `__tile__`, `__shared__`, `__managed__`, and `__constant__` me
 
 Examples:
 
-```cuda
+```c
 __host__ void host_function() {
     int x;                   // CORRECT, __host__ variable
     __device__   int y;      // ERROR,   __device__ variable declaration within a host function
@@ -1887,7 +1899,7 @@ __host__ void host_function() {
 
 The `__device__`, `__tile__`, `__constant__`, and `__managed__` memory space specifiers are not allowed on variable declarations that are neither `extern` nor `static` within a function that executes on the device.
 
-```cuda
+```c
 __device__ void device_function() {
     int x;                   // CORRECT, __device__ variable
     __constant__      int y; // ERROR,   __constant__ variable declaration within a device function
@@ -1907,7 +1919,6 @@ The variable may be directly used in device code, if
 - it has been initialized with a constant expression before the point of use,
 - the type is not `volatile`-qualified, and
 - it has one of the following types:
-
   - built-in integral type, or
   - built-in floating point type, except when the host compiler is Microsoft Visual Studio.
 
@@ -1917,7 +1928,7 @@ Starting with C++14, it is recommended to use `constexpr` or `inline constexpr` 
 
 Examples:
 
-```cuda
+```c
 const            int   ConstVar          = 10;
 const            float ConstFloatVar     = 5.0f;
 inline constexpr float ConstexprFloatVar = 5.0f; // C++17
@@ -1959,15 +1970,15 @@ In tile code, the `volatile` keyword has no effect on the behavior of memory acc
 
 CUDA C++ `volatile` is NOT suitable for:
 
-- **Inter-Thread Synchronization**: Use atomic operations via [cuda::atomic\_ref](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic_ref.html), [cuda::atomic](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic.html), or [Atomic Functions](cpp-language-extensions.md#atomic-functions) instead.
+- **Inter-Thread Synchronization**: Use atomic operations via [cuda::atomic_ref](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic_ref.html), [cuda::atomic](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic.html), or [Atomic Functions](cpp-language-extensions.md#atomic-functions) instead.
 
   Atomic memory operations provide inter-thread synchronization guarantees and deliver better performance than `volatile` operations.
   However, CUDA C++ `volatile` operations do not provide any inter-thread synchronization guarantees and are therefore not suitable for this purpose.
   The following example shows how to pass a message between two threads using atomic operations.
 
-  **cuda::atomic\_ref**
+  **cuda::atomic_ref**
 
-  ```cuda
+  ```c
   #include <cuda/atomic>
 
   __global__ void kernel(int* flag, int* data) {
@@ -1989,7 +2000,7 @@ CUDA C++ `volatile` is NOT suitable for:
 
   **cuda::atomic**
 
-  ```cuda
+  ```c
   #include <cuda/atomic>
 
   __global__ void kernel(cuda::atomic<int, cuda::thread_scope_device>* flag, int* data) {
@@ -2010,7 +2021,7 @@ CUDA C++ `volatile` is NOT suitable for:
 
   **Atomic Functions ( atomicAdd and atomicExch )**
 
-  ```cuda
+  ```c
   __global__ void kernel(int* flag, int* data) {
       if (threadIdx.x == 0) {
           // Consumer: blocks until flag is set by producer, then reads data
@@ -2027,13 +2038,14 @@ CUDA C++ `volatile` is NOT suitable for:
       }
   }
   ```
+
 - **Memory Mapped IO** (MMIO): Use [PTX MMIO operations](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#mmio-operation) via inline PTX instead.
 
   PTX MMIO operations strictly preserve the number of memory accesses performed.
   However, CUDA C++ `volatile` operations do not preserve the number of memory accesses performed and may perform more or fewer accesses than requested in an undetermined way. This makes them unsuitable for MMIO.
   The following example shows how to read from and write to a register using PTX MMIO operations.
 
-  ```cuda
+  ```c
   __global__ void kernel(int* mmio_reg0, int* mmio_reg1) {
       // Write to MMIO register:
       int value = 13;
@@ -2065,7 +2077,7 @@ If the function has a `__host__` execution space specifier, `static` variables w
 
 Examples of legal and illegal uses of function-scope `static` variables are shown below.
 
-```cuda
+```c
 struct TrivialStruct {
     int x;
 };
@@ -2095,7 +2107,7 @@ See the example on [Compiler Explorer](https://godbolt.org/z/TdYKaTq3f).
 
 ---
 
-```cuda
+```c
 __host__ __device__ void host_device_function() {
     static            int v1; // CORRECT, implicit __device__ memory space specifier
 //  static __device__ int v2;  // ERROR, __device__-only variable inside a host-device function
@@ -2111,7 +2123,7 @@ See the example on [Compiler Explorer](https://godbolt.org/z/18qhjn8P1).
 
 ---
 
-```cuda
+```c
 #include <cassert>
 
 __host__ __device__ int host_device_function() {
@@ -2143,7 +2155,7 @@ When compiling in the [whole program compilation mode](../02-basics/nvcc.md#nvcc
 
 The only exception is for dynamically allocated `__shared__` variables as described in the [Dynamic Allocation of Shared Memory](../02-basics/writing-cuda-kernels.md#writing-cuda-kernels-dynamic-allocation-shared-memory) section.
 
-```cuda
+```c
 __device__        int x; // OK
 extern __device__ int y; // ERROR in whole program compilation mode
 extern __shared__ int z; // OK
@@ -2163,7 +2175,7 @@ In separate compilation mode, if a `__device__` or `__global__` function definit
 
 Example:
 
-```cuda
+```c
 //first.cu:
 struct S;                   // forward declaration
 __device__ void foo(S);     // ERROR, type 'S' is an incomplete type
@@ -2172,7 +2184,7 @@ __device__ auto* ptr = foo; // ODR-use, address taken
 int main() {}
 ```
 
-```cuda
+```c
 //second.cu:
 struct S {};               // struct definition
 __device__ void foo(S) {}  // function definition
@@ -2190,7 +2202,7 @@ nvlink fatal   : merge_elf failed
 
 The `__device__`, `__tile__`, `__shared__`, `__managed__` and `__constant__` memory space specifiers are not allowed on formal parameters.
 
-```cuda
+```c
 void device_function1(__device__ int x) { } // ERROR, __device__ parameter
 void device_function2(__shared__ int x) { } // ERROR, __shared__ parameter
 ```
@@ -2218,7 +2230,7 @@ When a `__global__` function is launched from host code, each argument type may 
 
    Example:
 
-   ```cuda
+   ```c
    #include <cassert>
 
    struct MyStruct {
@@ -2249,13 +2261,14 @@ When a `__global__` function is launched from host code, each argument type may 
    ```
 
    See the example on [Compiler Explorer](https://godbolt.org/z/xhqe16dec).
+
 2. **Destructor may be invoked before the** `__global__` **function has finished**
 
    Kernel launches are asynchronous with host execution. As a result, if a `__global__` function argument has a non-trivial destructor, the destructor may execute in host code even before the `__global__` function has finished execution. This may break programs where the destructor has side effects.
 
    Example:
 
-   ```cuda
+   ```c
    #include <cassert>
 
    __managed__ int var = 0;
@@ -2306,7 +2319,7 @@ The `__device__`, `__tile__`, `__shared__`, `__managed__` and `__constant__` mem
 
 Only `static` data members evaluated at compile time are supported, such as [const-qualified](cpp-language-support.md#const-variables) and `constexpr` variables.
 
-```cuda
+```c
 struct MyStruct {
    static inline constexpr int value1 = 10; // C++17
    static constexpr        int value2 = 10; // C++11
@@ -2323,7 +2336,7 @@ A `__global__` or `__tile_global__` function is allowed in a `friend` declaratio
 
 Example:
 
-```cuda
+```c
 struct MyStruct {
     friend __global__ void f();   // CORRECT, friend declaration only
 
@@ -2340,7 +2353,7 @@ Implicitly-declared special member functions are those the compiler declares for
 Let `F` denote a non-`virtual` function that is either implicitly declared or explicitly defaulted on its first declaration.
 The execution space specifiers for `F` are the union of the execution space specifiers of all functions that invoke it. Note that for this analysis, a `__global__` caller will be treated as a `__device__` caller. For example:
 
-```cuda
+```c
 class Base {
     int x;
 public:
@@ -2371,7 +2384,7 @@ Additionally, if `F` is an implicitly-declared `virtual` function (for example, 
 
 For example:
 
-```cuda
+```c
 struct Base1 {
     virtual __host__ __device__ ~Base1() {}
 };
@@ -2396,7 +2409,7 @@ Polymorphic classes, namely those with `virtual` functions, derived from other p
 
 Example:
 
-```cuda
+```c
 struct MyClass {
     virtual __host__ __device__ void f() {}
 };
@@ -2416,7 +2429,7 @@ See the example on [Compiler Explorer](https://godbolt.org/z/To39sGTrW).
 
 ---
 
-```cuda
+```c
 struct BaseClass {
     virtual __host__ __device__ void f() {}
 };
@@ -2453,7 +2466,7 @@ A type cannot be used as template argument of a `__global__` function or a `__de
 
 Example:
 
-```cuda
+```c
 template <typename T>
 __global__ void kernel() {}
 
@@ -2492,7 +2505,6 @@ See the example on [Compiler Explorer](https://godbolt.org/z/EhTn3GT3z).
 Functions annotated with `__tile__` or `__tile_global__` have the following additional restrictions:
 
 - The language constructs below are unsupported in tile code:
-
   - Return statements inside `do`, `while` or `for` loops, or inside switch statements.
   - Continue statements inside switch statements when the `continue` is not enclosed in a loop under the switch.
   - Case/default labels inside a nested if or loop block of the switch body.
@@ -2506,6 +2518,7 @@ Functions annotated with `__tile__` or `__tile_global__` have the following addi
   - Types exceeding 16 MB in size.
   - Types with virtual base classes or virtual functions.
   - Dynamic memory allocation or deallocation with non-placement operator `new` or `delete`.
+
 - A `__tile__` or `__tile_global__` function must have a function body in the same translation unit in which it is declared.
 - Annotating a virtual function with `__tile__` is unsupported.
 - A `__tile_global__` or `__tile__` function may not have a variable number of arguments using the C ellipsis syntax `...`.
@@ -2526,7 +2539,7 @@ It is not allowed to define one of the following entities within an `inline` nam
 
 Example:
 
-```cuda
+```c
 __device__ int my_var; // global scope
 
 inline namespace NS {
@@ -2551,7 +2564,7 @@ By default, a `constexpr` function cannot be called from a function with incompa
 
 - Calling a `constexpr` function that does not have an explicit or implicit `__host__` annotation from a host function during host compilation phase (when `__CUDA_ARCH__` macro is undefined) has undefined behavior. Example:
 
-  > ```cuda
+  > ```c
   > constexpr __device__             int  device_func() { return 0; }
   > constexpr __tile__               int  tile_func()   { return 0; }
   >
@@ -2564,9 +2577,10 @@ By default, a `constexpr` function cannot be called from a function with incompa
   >
   > }
   > ```
+
 - Calling a `constexpr` function that does not have an explicit or implicit `__device__` annotation from a `__device__` or `__global__` function during device compilation phase (when `__CUDA_ARCH__` macro is defined) has undefined behavior. Example:
 
-  > ```cuda
+  > ```c
   > constexpr  int host_func() { return 0; }
   >
   > __device__ void dmain()
@@ -2574,9 +2588,10 @@ By default, a `constexpr` function cannot be called from a function with incompa
   >     int x = host_func();  // UB: calling a host-only constexpr function from device code
   > }
   > ```
+
 - Calling a `constexpr` function that does not have an explicit or implicit `__tile__` annotation from a `__tile__` or `__tile_global__` function during device compilation phase (when `__CUDA_ARCH__` macro is defined) has undefined behavior. Example:
 
-  > ```cuda
+  > ```c
   > constexpr  int host_func() { return 0; }
   >
   > __tile__ void dmain()
@@ -2595,7 +2610,7 @@ When the `--expt-relaxed-constexpr` flag is specified, the compiler will support
 
 1. A cross-execution space call to a `constexpr` function is supported if it occurs in a context that requires constant evaluation, such as in the initializer of a constexpr variable. Example:
 
-   > ```cuda
+   > ```c
    > constexpr __host__ int host_func(int x) { return x + 1; };
    >
    > __global__ void doit() {
@@ -2618,11 +2633,12 @@ When the `--expt-relaxed-constexpr` flag is specified, the compiler will support
    >                                                    // requires constant evaluation.
    > }
    > ```
+
 2. Otherwise:
 
    > 1. A cross-execution space call from Tile code to a `constexpr` function that does not have an explicit or implicit `__tile__` annotation is not supported outside of a context where constant folding is required by the language rules. Example:
    >
-   >    > ```cuda
+   >    > ```c
    >    > constexpr __host__ int host_func(int x) { return x + 1; }
    >    >
    >    > __tile__ int doit(int in) {
@@ -2632,9 +2648,10 @@ When the `--expt-relaxed-constexpr` flag is specified, the compiler will support
    >    >                                          // call is  required to be evaluated at compile time
    >    > }
    >    > ```
+   >
    > 2. During SIMT device code generation, device code is generated for the body of a host-only `constexpr` function `host_func`, unless `host_func` is not used or is only called in a constant evaluation context. Example:
    >
-   >    > ```cuda
+   >    > ```c
    >    > // NOTE: "host_func" is emitted in generated device code because it is
    >    > // called from device code in a non-constexpr context
    >    > constexpr __host__ int host_func(int x) { return x + 1; }
@@ -2644,13 +2661,14 @@ When the `--expt-relaxed-constexpr` flag is specified, the compiler will support
    >    >     return in;
    >    > }
    >    > ```
+   >
    > 3. All code restrictions applicable to a `__device__` function are also applicable to the `constexpr` host-only function `H` that is called from SIMT device code. However, compiler may not emit any build time diagnostics for `H` for these restrictions. The reason is that diagnostics are usually generated during parsing, but `H` may already have been parsed before the call to `H` from device code is encountered later in the translation unit.
    >
    >    For example, the following code patterns are unsupported in the body of `H` (as with any `__device__` function), but no compiler diagnostic may be generated:
    >
    >    > - ODR-use of a host variable or host-only non-`constexpr` function. Example:
    >    >
-   >    >   > ```cuda
+   >    >   > ```c
    >    >   > int host_var1, host_var2;
    >    >   >
    >    >   > constexpr __host__ int* host_func(bool b) { return b ? &host_var1 : &host_var2; };
@@ -2662,9 +2680,10 @@ When the `--expt-relaxed-constexpr` flag is specified, the compiler will support
    >    >   >     return *ptr;
    >    >   > }
    >    >   > ```
+   >    >
    >    > - Use of exceptions (`throw/catch`) and RTTI (`typeid, dynamic_cast`). Example:
    >    >
-   >    >   > ```cuda
+   >    >   > ```c
    >    >   > struct Base { };
    >    >   > struct Derived : public Base { };
    >    >   >
@@ -2685,31 +2704,32 @@ When the `--expt-relaxed-constexpr` flag is specified, the compiler will support
    >    >   >     val = host_func(flag, &d); //UB: host_func() attempts use typeid and throw(), which are not allowed in code that executes on the GPU
    >    >   > }
    >    >   > ```
-   > > 4. During host code generation, the body of a `constexpr` non-host function `F` is preserved in the code sent to the host compiler. If the body of `F` attempts to ODR-use a namespace scope device or `__tile__` variable or a non-host non-`constexpr` function, then the call to `F` from host code is not supported (code may build without compiler diagnostics, but may behave incorrectly at run time). Example:
-   > >
-   > >    ```cuda
-   > >    __device__ int device_var1, device_var2;
-   > >
-   > >    constexpr __device__ int* device_func(bool b) { return b ? &device_var1 : &device_var2; };
-   > >
-   > >    __tile__ int tile_var1, tile_var2;
-   > >
-   > >    constexpr __tile__ int* tile_func(bool b) { return b ? &tile_var1 : &tile_var2; };
-   > >
-   > >    int doit1(bool flag) {
-   > >        int *ptr;
-   > >        ptr = device_func(flag); // UB: device_func() attempts to refer to device variables 'device_var1' and 'device_var2'
-   > >                                 // code will compile, but will NOT execute correctly.
-   > >        return *ptr;
-   > >    }
-   > >
-   > >    int doit2(bool flag) {
-   > >        int *ptr;
-   > >        ptr = tile_func(flag); // UB: tile_func() attempts to refer to __tile__ variables 'tile_var1' and 'tile_var2'
-   > >                               // code will compile, but will NOT execute correctly.
-   > >        return *ptr;
-   > >    }
-   > >    ```
+   >    >
+   >    > 4. During host code generation, the body of a `constexpr` non-host function `F` is preserved in the code sent to the host compiler. If the body of `F` attempts to ODR-use a namespace scope device or `__tile__` variable or a non-host non-`constexpr` function, then the call to `F` from host code is not supported (code may build without compiler diagnostics, but may behave incorrectly at run time). Example:
+   >    >
+   >    >    ```c
+   >    >    __device__ int device_var1, device_var2;
+   >    >
+   >    >    constexpr __device__ int* device_func(bool b) { return b ? &device_var1 : &device_var2; };
+   >    >
+   >    >    __tile__ int tile_var1, tile_var2;
+   >    >
+   >    >    constexpr __tile__ int* tile_func(bool b) { return b ? &tile_var1 : &tile_var2; };
+   >    >
+   >    >    int doit1(bool flag) {
+   >    >        int *ptr;
+   >    >        ptr = device_func(flag); // UB: device_func() attempts to refer to device variables 'device_var1' and 'device_var2'
+   >    >                                 // code will compile, but will NOT execute correctly.
+   >    >        return *ptr;
+   >    >    }
+   >    >
+   >    >    int doit2(bool flag) {
+   >    >        int *ptr;
+   >    >        ptr = tile_func(flag); // UB: tile_func() attempts to refer to __tile__ variables 'tile_var1' and 'tile_var2'
+   >    >                               // code will compile, but will NOT execute correctly.
+   >    >        return *ptr;
+   >    >    }
+   >    >    ```
 
 > [!WARNING]
 >
@@ -2722,12 +2742,12 @@ By default, a `constexpr` variable cannot be used in a function with incompatibl
 A `constexpr` variable can be directly used in device code in the following cases:
 
 - C++ scalar types, excluding pointer and pointer-to-member types:
-
   - `nullptr_t`.
   - `bool`.
   - Integral types: `char`, `signed char`, `unsigned`, `long long`, etc.
   - Floating point types: `float`, `double`.
   - Enumerators: `enum` and `enum class`.
+
 - Class types: `class`, `struct`, and `union` with a `constexpr` constructor.
 - Raw array of the types above, for example `int[]`, only when they are used inside a `constexpr` `__device__` or `__host__ __device__` function.
 
@@ -2735,7 +2755,7 @@ A `constexpr` variable can be directly used in device code in the following case
 
 Examples:
 
-```cuda
+```c
 constexpr int ConstexprVar = 4; // scalar type
 
 struct MyStruct {
@@ -2773,7 +2793,7 @@ A variadic `__global__` or `__tile_global__` function template has the following
 
 Examples:
 
-```cuda
+```c
 template <typename... Pack>
 __global__ void kernel1(); // CORRECT
 
@@ -2797,7 +2817,7 @@ Execution space specifiers on explicitly-defaulted functions are ignored by the 
 
 Examples:
 
-```cuda
+```c
 struct MyStruct1 {
     MyStruct1() = default;
 };
@@ -2848,7 +2868,7 @@ A `__global__` or `__tile_global__` function cannot have a parameter of type `[c
 
 Example:
 
-```cuda
+```c
 #include <initializer_list>
 
 __device__ void foo(std::initializer_list<int> in) {}
@@ -2885,7 +2905,7 @@ Introspection of the return type of a `__device__` function with a deduced retur
 
 Examples:
 
-```cuda
+```c
  __device__ auto device_function(int x) { // deduced return type
      return x;                            // decltype(auto) has the same behavior
  }
@@ -2928,7 +2948,7 @@ A `__device__`, `__tile__` or `__constant__` variable template cannot be `const`
 
 Examples:
 
-```cuda
+```c
 // ERROR on Windows (non-portable), const-qualified
 template <typename T>
 __device__ const T var = 0;
@@ -2958,7 +2978,7 @@ In a single translation unit, using an `inline` variable provides no additional 
 
 Examples:
 
-```cuda
+```c
 inline        __device__ int device_var1;  // CORRECT, when compiled in Separate Compilation mode (-rdc=true or -dc)
                                            // ERROR, when compiled in Whole Program Compilation mode
 
@@ -2985,7 +3005,7 @@ A structured binding cannot be declared with a memory space specifier, such as `
 
 Example:
 
-```cuda
+```c
 struct S {
     int x, y;
 };
@@ -3000,7 +3020,7 @@ The three-way comparison operator (`<=>`) is supported in `__device__` and `__gl
 
 Examples:
 
-```cuda
+```c
 #include <compare> // std::strong_ordering implementation
 
 struct S {
@@ -3029,7 +3049,7 @@ See the example on [Compiler Explorer](https://godbolt.org/z/qzs5arfx4).
 
 Examples:
 
-```cuda
+```c
 consteval int host_consteval() {
     return 10;
 }

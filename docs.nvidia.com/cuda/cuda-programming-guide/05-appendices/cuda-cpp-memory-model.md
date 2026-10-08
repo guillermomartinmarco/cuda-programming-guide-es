@@ -14,7 +14,7 @@ semantics of standard C++ by default.
 A **thread scope** specifies the kind of threads that can synchronize with each other using a synchronization primitive such
 as [cuda::atomic](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic.html) or [cuda::barrier](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/barrier.html).
 
-```cuda
+```c
 namespace cuda {
 
 enum thread_scope {
@@ -30,14 +30,11 @@ enum thread_scope {
 ### 5.7.1.1. Scope Relationships
 
 Each program thread is related to each other program thread by one or more thread scope relations:
-:   - Each thread in the system is related to each other thread in the system by the *system* thread scope:
-      `cuda::thread_scope_system`.
-    - Each GPU thread is related to each other GPU thread in the same CUDA device and within the same
-      [memory synchronization domain](../04-special-topics/memory-sync-domains.md#memory-synchronization-domains)
-      by the *device* thread scope: `cuda::thread_scope_device`.
-    - Each GPU thread is related to each other GPU thread in the same CUDA thread block by the *block* thread scope:
-      `cuda::thread_scope_block`.
-    - Each thread is related to itself by the *thread* thread scope: `cuda::thread_scope_thread`.
+: - Each thread in the system is related to each other thread in the system by the _system_ thread scope:
+`cuda::thread_scope_system`. - Each GPU thread is related to each other GPU thread in the same CUDA device and within the same
+[memory synchronization domain](../04-special-topics/memory-sync-domains.md#memory-synchronization-domains)
+by the _device_ thread scope: `cuda::thread_scope_device`. - Each GPU thread is related to each other GPU thread in the same CUDA thread block by the _block_ thread scope:
+`cuda::thread_scope_block`. - Each thread is related to itself by the _thread_ thread scope: `cuda::thread_scope_thread`.
 
 ## 5.7.2. Synchronization primitives
 
@@ -50,14 +47,12 @@ An atomic operation is atomic at the scope it specifies if:
 
 - it specifies a scope other than `cuda::thread_scope_system`, **or**
 - the scope is `cuda::thread_scope_system` **and**:
-
   - it affects an object in [system allocated memory](../04-special-topics/unified-memory.md#um-details-intro) and [pageableMemoryAccess](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html#structcudaDeviceProp_146116bab1064b5d7d0642d78f6c27ce1) is `1` [0,1], **or**
   - it affects an object in [managed memory](../04-special-topics/unified-memory.md#um-details-intro) and [concurrentManagedAccess](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html#structcudaDeviceProp_116f9619ccc85e93bc456b8c69c80e78b) is `1` [1], **or**
   - it affects an object in [mapped memory](../02-basics/understanding-memory.md#memory-mapped-memory) and [hostNativeAtomicSupported](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html#structcudaDeviceProp_1ef82fd7d1d0413c7d6f33287e5b6306f) is `1`, **or**
   - it is a load or store that affects a naturally-aligned object of
     sizes `1`, `2`, `4`, `8`, or `16` bytes on [mapped memory](../02-basics/understanding-memory.md#memory-mapped-memory) [2], **or**
   - it affects an object in GPU memory, only GPU threads access it, **and**
-
     - [cudaDeviceGetP2PAttribute](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html#group__CUDART__TYPES_1g2f597e2acceab33f60bd61c41fea0c1b) `(&val, cudaDevP2PAttrNativeAtomicSupported, srcDev, dstDev)`
       between each accessing `srcDev` and the GPU where the object resides, `dstDev`, is `1` [1], **or**
     - only GPU threads from a single GPU concurrently access it.
@@ -89,19 +84,19 @@ Modify [thread.barrier.class paragraph 4](https://eel.is/c++draft/thread.barrier
 14882 (the C++ Standard) as follows
 
 > 4. Concurrent invocations of the member functions of `barrier`, other than its destructor, do not introduce data
-> races **as if they were atomic operations**. […]
+>    races **as if they were atomic operations**. […]
 
 Modify [thread.latch.class paragraph 2](https://eel.is/c++draft/thread.latch.class#2) of ISO/IEC IS 14882
 (the C++ Standard) as follows:
 
 > 2. Concurrent invocations of the member functions of `latch`, other than its destructor, do not introduce data
-> races **as if they were atomic operations**. […]
+>    races **as if they were atomic operations**. […]
 
 Modify [thread.sema.cnt paragraph 3](https://eel.is/c++draft/thread.sema.cnt#3) of ISO/IEC IS 14882
 (the C++ Standard) as follows:
 
 > 3. Concurrent invocations of the member functions of `counting_semaphore`, other than its destructor, do not
-> introduce data races **as if they were atomic operations**.
+>    introduce data races **as if they were atomic operations**.
 
 Modify [thread.stoptoken.intro paragraph 5](https://eel.is/c++draft/thread#stoptoken.intro-5) of ISO/IEC IS
 14882 (the C++ Standard) as follows:

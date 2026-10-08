@@ -77,6 +77,8 @@ memory address space on all sockets.
 > Multi-node, multi-GPU platforms require interprocess
 > communication. Therefore we encourage the reader to see [Chapter 4.16](inter-process-communication.md#interprocess-communication).
 
+<!---->
+
 > [!NOTE]
 >
 > We encourage readers to read CUDA Programming Guide’s [Chapter 4.17](virtual-memory-management.md#virtual-memory-management) and [Chapter 4.3](stream-ordered-memory-allocation.md#stream-ordered-memory-allocator) for a better understanding.
@@ -85,10 +87,10 @@ New CUDA property types have been added to APIs for allowing those
 approaches to understand allocation locations using NUMA-like node
 identifiers:
 
-| **CUDA Type** | **Used with** |
-| --- | --- |
-| `CU_MEM_LOCATION_TYPE_HOST_NUMA` | `CUmemAllocationProp` for `cuMemCreate` |
-| `cudaMemLocationTypeHostNuma` | `cudaMemPoolProps` for `cudaMemPoolCreate` |
+| **CUDA Type**                    | **Used with**                              |
+| -------------------------------- | ------------------------------------------ |
+| `CU_MEM_LOCATION_TYPE_HOST_NUMA` | `CUmemAllocationProp` for `cuMemCreate`    |
+| `cudaMemLocationTypeHostNuma`    | `cudaMemPoolProps` for `cudaMemPoolCreate` |
 
 > [!NOTE]
 >
@@ -296,11 +298,11 @@ cuMemSetAccess(dptr, size, accessDesc, 8);
 
 > [!NOTE]
 >
-> The cross-node sharing shown here is *address-centric*: the imported allocation is
+> The cross-node sharing shown here is _address-centric_: the imported allocation is
 > mapped into the local virtual address space and accessed with ordinary loads and
 > stores. For GPUs connected by an NVLink fabric,
 > [Compute fabric transport](compute-fabric-transport.md#compute-fabric-transport) provides a
-> *resource-centric* alternative that moves data with asynchronous fabric operations
-> against a named *logical endpoint* rather than a mapped address. It reports an explicit
+> _resource-centric_ alternative that moves data with asynchronous fabric operations
+> against a named _logical endpoint_ rather than a mapped address. It reports an explicit
 > per-operation completion status, so it suits large fabrics where fabric-error recovery
 > is a concern.

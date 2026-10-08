@@ -1,19 +1,20 @@
 # 4.13. Work Stealing with Cluster Launch Control
 
-Dealing with problems of variable data and computation sizes is essential when developing CUDA applications. Traditionally, CUDA developers have used two main approaches to determine the number of kernel thread blocks to launch: *fixed work per thread block* and *fixed number of thread blocks*. Both approaches have their advantages and disadvantages.
+Dealing with problems of variable data and computation sizes is essential when developing CUDA applications. Traditionally, CUDA developers have used two main approaches to determine the number of kernel thread blocks to launch: _fixed work per thread block_ and _fixed number of thread blocks_. Both approaches have their advantages and disadvantages.
 
 **Fixed Work per Thread Block:** In this approach, the number of thread blocks is determined by the problem size, while the amount of work done by each thread block remains constant.
 
 Key advantages of this approach:
 
-- *Load balancing between SMs*
+- _Load balancing between SMs_
 
   When thread block run-times exhibit variability
   and/or when the number of thread blocks is much larger than what
   the GPU can execute simultaneously (resulting in a low-tail effect),
   this approach allows the GPU scheduler to run more thread blocks
   on some SMs than others.
-- *Preemption*
+
+- _Preemption_
 
   The GPU scheduler can start executing a
   [higher-priority kernel](../02-basics/asynchronous-execution.md#async-execution-stream-priorities),
@@ -33,7 +34,7 @@ and the desired occupancy.
 
 Key advantages of this approach:
 
-- *Reduced thread block overheads*
+- _Reduced thread block overheads_
 
   This approach not only reduces amortized thread block launch latency
   but also minimizes the computational overhead associated with shared
@@ -52,7 +53,7 @@ processors, rather than wait for work to be assigned.
 
 ![Cluster Launch Control Flow](../_images/cluster_launch_control.png)
 
-**Figure 54.** *Cluster Launch Control Flow*
+**Figure 54.** _Cluster Launch Control Flow_
 
 With cluster launch control, a thread block attempts to cancel the launch of
 another thread block that has not started executing yet. If the cancellation request
@@ -69,11 +70,11 @@ flow of this procedure.
 The table below summarizes advantages and disadvantages of the three
 approaches:
 
-|  | **Fixed Work per Thread Block** | **Fixed Number of Thread Blocks** | **Cluster Launch Control** |
-| --- | --- | --- | --- |
-| Reduced overheads | **$\textcolor{red}{\textbf{X}}$** | **$\textcolor{lime}{\textbf{V}}$** | **$\textcolor{lime}{\textbf{V}}$** |
-| Preemption | **$\textcolor{lime}{\textbf{V}}$** | **$\textcolor{red}{\textbf{X}}$** | **$\textcolor{lime}{\textbf{V}}$** |
-| Load balancing | **$\textcolor{lime}{\textbf{V}}$** | **$\textcolor{red}{\textbf{X}}$** | **$\textcolor{lime}{\textbf{V}}$** |
+|                   | **Fixed Work per Thread Block**    | **Fixed Number of Thread Blocks**  | **Cluster Launch Control**         |
+| ----------------- | ---------------------------------- | ---------------------------------- | ---------------------------------- |
+| Reduced overheads | **$\textcolor{red}{\textbf{X}}$**  | **$\textcolor{lime}{\textbf{V}}$** | **$\textcolor{lime}{\textbf{V}}$** |
+| Preemption        | **$\textcolor{lime}{\textbf{V}}$** | **$\textcolor{red}{\textbf{X}}$**  | **$\textcolor{lime}{\textbf{V}}$** |
+| Load balancing    | **$\textcolor{lime}{\textbf{V}}$** | **$\textcolor{red}{\textbf{X}}$**  | **$\textcolor{lime}{\textbf{V}}$** |
 
 ## 4.13.1. API Details
 
@@ -106,6 +107,7 @@ The cancellation process involves five steps:
    __shared__ uint64_t bar; // Synchronization barrier.
    int phase = 0;           // Synchronization barrier phase.
    ```
+
 2. Initialize shared memory barrier with a single arrival count:
 
    ```cpp
@@ -113,6 +115,7 @@ The cancellation process involves five steps:
        ptx::mbarrier_init(&bar, 1);
    __syncthreads();
    ```
+
 3. Submit asynchronous cancellation request by a single thread and
    set transaction count:
 
@@ -127,8 +130,9 @@ The cancellation process involves five steps:
    >
    > Since thread block cancellation is a uniform instruction,
    > it is recommended to submit it inside
-   > [invoke\_one](cooperative-groups.md#cooperative-groups-invoke-one) thread selector.
+   > [invoke_one](cooperative-groups.md#cooperative-groups-invoke-one) thread selector.
    > This allows the compiler to optimize out the peeling loop.
+
 4. Synchronize (complete) asynchronous cancellation request:
 
    ```cpp
@@ -136,6 +140,7 @@ The cancellation process involves five steps:
    {}
    phase ^= 1;
    ```
+
 5. Retrieve cancellation status and cancelled thread block index:
 
    ```cpp
@@ -147,6 +152,7 @@ The cancellation process involves five steps:
        int bz = ptx::clusterlaunchcontrol_query_cancel_get_first_ctaid_z(result);
    }
    ```
+
 6. Ensure visibility of shared memory operations between async and generic
    [proxies](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#proxies),
    and protect against data races between iterations of the work-stealing loop.
@@ -156,7 +162,7 @@ The cancellation process involves five steps:
 The constraints are related to failed cancellation requests:
 
 - Submitting another cancellation request after **observing** a
-  previously failed request is *undefined behavior*.
+  previously failed request is _undefined behavior_.
 
   In the two code examples below, assuming the first cancellation request
   fails, only the first example exhibits undefined behavior.
@@ -192,13 +198,13 @@ The constraints are related to failed cancellation requests:
   bool success0 = ptx::clusterlaunchcontrol_query_cancel_is_canceled(result0);
   assert(!success0); // Observed failure; second cancellation was valid.
   ```
+
 - Retrieving the thread block index of a failed cancellation request
   is Undefined Behavior.
 - Submitting a cancellation request from multiple threads is not recommended.
   It results in the cancellation of multiple thread blocks
   and requires careful handling,
   such as:
-
   - Each submitting thread must provide a unique `__shared__` result
     pointer to avoid data races.
   - If the same barrier is used for synchronization, the arrival and
@@ -210,8 +216,8 @@ In the following subsections, we demonstrate work stealing through cluster launc
 
 ### 4.13.2.1. Use-case: Thread Blocks
 
-The three kernels below demonstrate the *Fixed Work per Thread Block*,
-*Fixed Number of Thread Blocks*, and *Cluster Launch Control* approaches
+The three kernels below demonstrate the _Fixed Work per Thread Block_,
+_Fixed Number of Thread Blocks_, and _Cluster Launch Control_ approaches
 for vector-scalar multiplication
 $\overline{v} := \alpha \overline{v}$.
 
@@ -232,6 +238,7 @@ $\overline{v} := \alpha \overline{v}$.
 
   // Launch: kernel_fixed_work<<<(n + 1023) / 1024, 1024>>>(data, n);
   ```
+
 - Fixed Number of Thread Blocks:
 
   ```cpp
@@ -251,6 +258,7 @@ $\overline{v} := \alpha \overline{v}$.
 
   // Launch: kernel_fixed_blocks<<<SM_COUNT, 1024>>>(data, n);
   ```
+
 - Cluster Launch Control:
 
   ```cpp

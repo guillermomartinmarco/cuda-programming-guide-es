@@ -22,7 +22,7 @@ As mentioned in the introduction to the [CUDA Programming Model](../01-introduct
 
 The code for a kernel is specified using the `__global__` declaration specifier. This indicates to the compiler that this function will be compiled for the GPU in a way that allows it to be invoked from a kernel launch. A kernel launch is an operation which starts a kernel running, usually from the CPU. Kernels are functions with a `void` return type.
 
-```cuda
+```c
 // Kernel definition
 __global__ void vecAdd(float* A, float* B, float* C)
 {
@@ -40,7 +40,7 @@ There are two ways of launching kernels from CPU code, [triple chevron notation]
 
 Triple chevron notation is a [CUDA C++ Language Extension](../05-appendices/cpp-language-extensions.md#execution-configuration) which is used to launch kernels. It is called triple chevron because it uses three chevron characters to encapsulate the execution configuration for the kernel launch, i.e. `<<< >>>`. Execution configuration parameters are specified as a comma separated list inside the chevrons, similar to parameters to a function call. The syntax for a kernel launch of the `vecAdd` kernel is shown below.
 
-```cuda
+```c
  __global__ void vecAdd(float* A, float* B, float* C)
  {
 
@@ -65,7 +65,7 @@ Kernel launches are asynchronous with respect to the host thread. That is, the k
 
 When using 2 or 3-dimensional grids or thread blocks, the CUDA type `dim3` is used as the grid and thread block dimension parameters. The code fragment below shows a kernel launch of a `MatAdd` kernel using 16 by 16 grid of thread blocks, each thread block is 8 by 8.
 
-```cuda
+```c
 int main()
 {
     ...
@@ -92,7 +92,7 @@ Similarly, `blockIdx.x` will have values from 0 up to and including `gridDim.x-1
 
 These allow an individual thread to identify what work it should carry out. Returning to the `vecAdd` kernel, the kernel takes three parameters, each is a vector of floats. The kernel performs an element-wise addition of `A` and `B` and stores the result in `C`. The kernel is parallelized such that each thread will perform one addition. Which element it computes is determined by its thread and grid index.
 
-```cuda
+```c
 __global__ void vecAdd(float* A, float* B, float* C)
 {
    // calculate which element this thread is responsible for computing
@@ -119,7 +119,7 @@ This computation of `workIndex` is very common for 1-dimensional parallelization
 
 The example given above assumes that the length of the vector is a multiple of the thread block size, 256 threads in this case. To make the kernel handle any vector length, we can add checks that the memory access is not exceeding the bounds of the arrays as shown below, and then launch one thread block which will have some inactive threads.
 
-```cuda
+```c
 __global__ void vecAdd(float* A, float* B, float* C, int vectorLength)
 {
      // calculate which element this thread is responsible for computing
@@ -137,7 +137,7 @@ With the above kernel code, more threads than needed can be launched without cau
 
 The number of thread blocks which are needed can be calculated as the ceiling of the number of threads needed, the vector length in this case, divided by the number of threads per block. That is, the integer division of the number of threads needed by the number of threads per block, rounded up. A common way of expressing this as a single integer division is given below. By adding `threads - 1` before the integer division, this behaves like a ceiling function, adding another thread block only if the vector length is not divisible by the number of threads per block.
 
-```cuda
+```c
 // vectorLength is an integer storing number of elements in the vector
 int threads = 256;
 int blocks = (vectorLength + threads-1)/threads;
@@ -146,7 +146,7 @@ vecAdd<<<blocks, threads>>>(devA, devB, devC, vectorLength);
 
 The [CUDA Core Compute Library (CCCL)](https://nvidia.github.io/cccl/unstable/) provides a convenient utility, `cuda::ceil_div`, for doing this ceiling divide to calculate the number of blocks needed for a kernel launch. This utility is available by including the header `<cuda/cmath>`.
 
-```cuda
+```c
 // vectorLength is an integer storing number of elements in the vector
 int threads = 256;
 int blocks = cuda::ceil_div(vectorLength, threads);
@@ -165,7 +165,7 @@ Unified memory is a feature of the CUDA runtime which lets the NVIDIA Driver man
 
 The code below shows a complete function to launch the `vecAdd` kernel which uses unified memory for the input and output vectors that will be used on the GPU. `cudaMallocManaged` allocates buffers which can be accessed from either the CPU or the GPU. These buffers are released using `cudaFree`.
 
-```cuda
+```c
 void unifiedMemExample(int vectorLength)
 {
     // Pointers to memory vectors
@@ -219,7 +219,7 @@ Unified memory is supported on all operating systems and GPUs supported by CUDA,
 
 Explicitly managing memory allocation and data migration between memory spaces can help improve application performance, though it does make for more verbose code. The code below explicitly allocates memory on the GPU using `cudaMalloc`. Memory on the GPU is freed using the same `cudaFree` API as was used for unified memory in the previous example.
 
-```cuda
+```c
 void explicitMemExample(int vectorLength)
 {
     // Pointers for host memory
@@ -319,7 +319,7 @@ The following listings show the entire code for the simple vector addition kerne
 
 **Unified Memory**
 
-```cuda
+```c
 #include <cuda_runtime_api.h>
 #include <memory.h>
 #include <cstdlib>
@@ -428,7 +428,7 @@ int main(int argc, char** argv)
 
 **Explicit Memory Management**
 
-```cuda
+```c
 #include <cuda_runtime_api.h>
 #include <memory.h>
 #include <cstdlib>
@@ -607,7 +607,7 @@ As of CUDA 12.0, the `cudaInitDevice` and `cudaSetDevice` calls initialize the r
 
 Every CUDA API returns a value of an enumerated type, `cudaError_t`. In example code these errors are often not checked. In production applications, it is best practice to always check and manage the return value of every CUDA API call. When there are no errors, the value returned is `cudaSuccess`. Many applications choose to implement a utility macro such as the one shown below
 
-```cuda
+```c
 #define CUDA_CHECK(expr_to_check) do {            \
     cudaError_t result  = expr_to_check;          \
     if(result != cudaSuccess)                     \
@@ -624,7 +624,7 @@ Every CUDA API returns a value of an enumerated type, `cudaError_t`. In example 
 
 This macro uses the `cudaGetErrorString` API, which returns a human readable string describing the meaning of a specific `cudaError_t` value. Using the above macro, an application would call CUDA runtime API calls within a `CUDA_CHECK(expression)` macro, as shown below:
 
-```cuda
+```c
     CUDA_CHECK(cudaMalloc(&devA, vectorLength*sizeof(float)));
     CUDA_CHECK(cudaMalloc(&devB, vectorLength*sizeof(float)));
     CUDA_CHECK(cudaMalloc(&devC, vectorLength*sizeof(float)));
@@ -648,7 +648,7 @@ CUDA kernel launches and many runtime APIs are asynchronous. Asynchronous CUDA r
 
 When errors are returned by CUDA runtime API functions, the error state is not cleared. This means that error code from an asynchronous error, such as an invalid memory access by a kernel, will be returned by every CUDA runtime API until the error state has been cleared by calling `cudaGetLastError`.
 
-```cuda
+```c
     vecAdd<<<blocks, threads>>>(devA, devB, devC);
     // check error state after kernel launch
     CUDA_CHECK(cudaGetLastError());
@@ -665,7 +665,7 @@ When errors are returned by CUDA runtime API functions, the error state is not c
 
 Another good way to identify CUDA errors is with the `CUDA_LOG_FILE` environment variable. When this environment variable is set, the CUDA driver will write error messages encountered out to a file whose path is specified in the environment variable. For example, take the following incorrect CUDA code, which attempts to launch a thread block which is larger than the maximum supported by any architecture.
 
-```cuda
+```c
 __global__ void k()
 { }
 
@@ -724,14 +724,14 @@ When a function is specified with `__host__ __device__`, the compiler is instruc
 
 From compute capability 9.0 onward, the CUDA programming model includes an optional level of hierarchy called thread block clusters that are made up of thread blocks. Similar to how threads in a thread block are guaranteed to be co-scheduled on a streaming multiprocessor, thread blocks in a cluster are also guaranteed to be co-scheduled on a GPU Processing Cluster (GPC) in the GPU.
 
-Similar to thread blocks, clusters are also organized into a one-dimension, two-dimension, or three-dimension grid of thread block clusters as illustrated by [Figure 5](../01-introduction/programming-model.md#figure-thread-block-clusters).
+Similar to thread blocks, clusters are also organized into a one-dimension, two-dimension, or three-dimension grid of thread block clusters as illustrated by [Figure 5](../01-introduction/programming-model.md#f005).
 
 The number of thread blocks in a cluster can be user-defined, and a maximum of 8 thread blocks in a cluster is supported as a portable cluster size in CUDA.
 Note that on GPU hardware or MIG configurations which are too small to support 8 multiprocessors the maximum cluster size will be reduced accordingly. Identification of these smaller configurations, as well as of larger configurations supporting a thread block cluster size beyond 8, is architecture-specific and can be queried using the `cudaOccupancyMaxPotentialClusterSize` API.
 
 All the thread blocks in the cluster are guaranteed to be co-scheduled to execute simultaneously on a single GPU Processing Cluster (GPC) and allow thread blocks in the cluster to perform hardware-supported synchronization using the [cooperative groups](../04-special-topics/cooperative-groups.md#cooperative-groups) API `cluster.sync()`. Cluster group also provides member functions to query cluster group size in terms of number of threads or number of blocks using `num_threads()` and `num_blocks()` API respectively. The rank of a thread or block in the cluster group can be queried using `dim_threads()` and `dim_blocks()` API respectively.
 
-Thread blocks that belong to a cluster have access to the *distributed shared memory*, which is the combined shared memory of all thread blocks in the cluster. Thread blocks in a cluster have the ability to read, write, and perform atomics to any address in the distributed shared memory. [Distributed Shared Memory](writing-cuda-kernels.md#writing-cuda-kernels-distributed-shared-memory) gives an example of performing histograms in distributed shared memory.
+Thread blocks that belong to a cluster have access to the _distributed shared memory_, which is the combined shared memory of all thread blocks in the cluster. Thread blocks in a cluster have the ability to read, write, and perform atomics to any address in the distributed shared memory. [Distributed Shared Memory](writing-cuda-kernels.md#writing-cuda-kernels-distributed-shared-memory) gives an example of performing histograms in distributed shared memory.
 
 > [!NOTE]
 >

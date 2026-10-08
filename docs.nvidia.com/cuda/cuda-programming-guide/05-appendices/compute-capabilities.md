@@ -48,11 +48,11 @@ Most compute features introduced with a compute architecture are intended to be 
 
 ### 5.1.2.1. Architecture-Specific Features
 
-Beginning with devices of Compute Capability 9.0, specialized compute features that are introduced with an architecture may not be guaranteed to be available on all subsequent compute capabilities. These features are called *architecture-specific* features and target acceleration of specialized operations, such as Tensor Core operations, which are not intended for all classes of compute capabilities or may significantly change in future generations. Code must be compiled with an architecture-specific compiler target (see [Feature Set Compiler Targets](compute-capabilities.md#compute-capabilities-feature-set-compiler-targets)) to enable architecture-specific features. Code compiled with an architecture-specific compiler target can only be run on the exact compute capability it was compiled for.
+Beginning with devices of Compute Capability 9.0, specialized compute features that are introduced with an architecture may not be guaranteed to be available on all subsequent compute capabilities. These features are called _architecture-specific_ features and target acceleration of specialized operations, such as Tensor Core operations, which are not intended for all classes of compute capabilities or may significantly change in future generations. Code must be compiled with an architecture-specific compiler target (see [Feature Set Compiler Targets](compute-capabilities.md#compute-capabilities-feature-set-compiler-targets)) to enable architecture-specific features. Code compiled with an architecture-specific compiler target can only be run on the exact compute capability it was compiled for.
 
 ### 5.1.2.2. Family-Specific Features
 
-Beginning with devices of Compute Capability 10.0, some architecture-specific features are common to devices of more than one compute capability. The devices that contain these features are part of the same family and these features can also be called *family-specific* features. Family-specific features are guaranteed to be available on all devices in the same family. A family-specific compiler target is required to enable family-specific features. See [Section 5.1.2.3](compute-capabilities.md#compute-capabilities-feature-set-compiler-targets). Code compiled for a family-specific target can only be run on GPUs which are members of that family.
+Beginning with devices of Compute Capability 10.0, some architecture-specific features are common to devices of more than one compute capability. The devices that contain these features are part of the same family and these features can also be called _family-specific_ features. Family-specific features are guaranteed to be available on all devices in the same family. A family-specific compiler target is required to enable family-specific features. See [Section 5.1.2.3](compute-capabilities.md#compute-capabilities-feature-set-compiler-targets). Code compiled for a family-specific target can only be run on GPUs which are members of that family.
 
 ### 5.1.2.3. Feature Set Compiler Targets
 
@@ -69,8 +69,8 @@ All devices starting from compute capability 9.0 have a set of features that are
 For example:
 
 - The `compute_100` compilation target does not allow the use of architecture-specific features. This target will be compatible with all devices of compute capability 10.0 and later.
-- The `compute_100f` *family-specific* compilation target allows the use of the subset of architecture-specific features that are common across the GPU family. This target will only be compatible with devices that are part of the GPU family. In this example, it is compatible with devices of Compute Capability 10.0, 10.3, and 10.7. The features available in the family-specific `compute_100f` target are a superset of the features available in the baseline `compute_100` target.
-- The `compute_100a` *architecture-specific* compilation target allows the use of the complete set of architecture-specific features in Compute Capability 10.0 devices. This target will only be compatible with devices of Compute Capability 10.0 and no others. The features available in the `compute_100a` target form a superset of the features available in the `compute_100f` target.
+- The `compute_100f` _family-specific_ compilation target allows the use of the subset of architecture-specific features that are common across the GPU family. This target will only be compatible with devices that are part of the GPU family. In this example, it is compatible with devices of Compute Capability 10.0, 10.3, and 10.7. The features available in the family-specific `compute_100f` target are a superset of the features available in the baseline `compute_100` target.
+- The `compute_100a` _architecture-specific_ compilation target allows the use of the complete set of architecture-specific features in Compute Capability 10.0 devices. This target will only be compatible with devices of Compute Capability 10.0 and no others. The features available in the `compute_100a` target form a superset of the features available in the `compute_100f` target.
 
 <table>
 <caption><span>Table 28 </span><span>Family-Specific Compatibility</span></caption>
@@ -428,19 +428,19 @@ KB</td>
 
 Table 32 Shared Memory Capacity per Compute Capability
 
-| Compute Capability | Unified Data Cache Size (KB) | SMEM Capacity Sizes (KB) |
-| --- | --- | --- |
-| 7.5 | 96 | 32, 64 |
-| 8.0 | 192 | 0, 8, 16, 32, 64, 100, 132, 164 |
-| 8.6 | 128 | 0, 8, 16, 32, 64, 100 |
-| 8.7 | 192 | 0, 8, 16, 32, 64, 100, 132, 164 |
-| 8.9 | 128 | 0, 8, 16, 32, 64, 100 |
-| 9.0 | 256 | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228 |
-| 10.0 | 256 | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228 |
-| 10.3 | 256 | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228 |
-| 10.7 [^4] | 336 | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228, 328 |
-| 11.0 | 256 | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228 |
-| 12.x | 128 | 0, 8, 16, 32, 64, 100 |
+| Compute Capability | Unified Data Cache Size (KB) | SMEM Capacity Sizes (KB)                       |
+| ------------------ | ---------------------------- | ---------------------------------------------- |
+| 7.5                | 96                           | 32, 64                                         |
+| 8.0                | 192                          | 0, 8, 16, 32, 64, 100, 132, 164                |
+| 8.6                | 128                          | 0, 8, 16, 32, 64, 100                          |
+| 8.7                | 192                          | 0, 8, 16, 32, 64, 100, 132, 164                |
+| 8.9                | 128                          | 0, 8, 16, 32, 64, 100                          |
+| 9.0                | 256                          | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228      |
+| 10.0               | 256                          | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228      |
+| 10.3               | 256                          | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228      |
+| 10.7 [^4]          | 336                          | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228, 328 |
+| 11.0               | 256                          | 0, 8, 16, 32, 64, 100, 132, 164, 196, 228      |
+| 12.x               | 128                          | 0, 8, 16, 32, 64, 100                          |
 
 [^4]: For devices of compute capability 10.7, kernels that use the 328 KB shared-memory configuration must explicitly enable `cudaSharedMemoryModeAllowOversizedSharedMemory` by setting either the `cudaFuncAttributeSharedMemoryMode` function attribute or the `cudaLaunchAttributeSharedMemoryMode` launch attribute.
 

@@ -48,7 +48,7 @@ The following code sample uses a kernel to dynamically modify a 2D `width` x `he
 
 The full example, simpleGL, of this section can be found here, [NVIDIA/cuda-samples](https://github.com/NVIDIA/cuda-samples/tree/master/Samples/5_Domain_Specific/simpleGL) .
 
-```cuda
+```c
 __global__ void simple_vbo_kernel(float4 *pos, unsigned int width, unsigned int height, float time)
 {
     unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -216,7 +216,7 @@ The following code snippets are from the simpleD3D11Texture example, [NVIDIA/cud
 The CUDA kernel `cuda_kernel_texture_2d` paints a 2D texture with a moving red/green hatch pattern on a strobing blue background, it is dependent on the previous texture values.
 The underlying data is a 2D CUDA array, where the row offsets are defined by the pitch.
 
-```cuda
+```c
 /*
  * Paint a 2D texture with a moving red/green hatch pattern on a
  * strobing blue background.  Note that this kernel reads to and
@@ -266,7 +266,7 @@ extern "C" void cuda_texture_2d(void *surface, int width, int height,
 
 To keep the pointers and data buffers belonging together the following data structure is used:
 
-```cuda
+```c
 // Data structure for 2D texture shared between DX11 and CUDA
 struct {
   ID3D11Texture2D *pTexture;
@@ -283,7 +283,7 @@ struct {
 After the initialization of the Direct3D device and the textures, the resources are registered with CUDA once.
 To match the Direct3D pixel format, the CUDA array is allocated with the same width and height, and a pitch matching the Direct3D texture row pitch.
 
-```cuda
+```c
     // register the Direct3D resources that are used in the CUDA kernel
     // we'll read to and write from g_texture_2d, so don't set any special map flags for it
     cudaGraphicsD3D11RegisterResource(&g_texture_2d.cudaResource,
@@ -305,7 +305,7 @@ To match the Direct3D pixel format, the CUDA array is allocated with the same wi
 In the rendering loop, the resources are mapped, the CUDA kernel is launched to update the texture data, and then the resources are unmapped.
 After this step the Direct3D device is used to draw the updated textures on the screen.
 
-```cuda
+```c
     cudaStream_t stream = 0;
     const int nbResources = 3;
     cudaGraphicsResource *ppResources[nbResources] = {
@@ -325,7 +325,7 @@ After this step the Direct3D device is used to draw the updated textures on the 
 
 Finally, once the resources are no longer needed in CUDA, they are unregistered and the device array freed.
 
-```cuda
+```c
   // unregister the Cuda resources
   cudaGraphicsUnregisterResource(g_texture_2d.cudaResource);
   getLastCudaError("cudaGraphicsUnregisterResource (g_texture_2d) failed");
@@ -352,13 +352,13 @@ This allows to efficiently share the resource between other APIs and CUDA withou
 There are two types of resources that can be imported:
 
 - **Memory objects**
-  :   can be imported into CUDA using `cudaImportExternalMemory()`. An imported memory object can then be accessed from within kernels using device pointers mapped onto the memory object with `cudaExternalMemoryGetMappedBuffer()` or CUDA mipmapped arrays mapped with `cudaExternalMemoryGetMappedMipmappedArray()`. Depending on the type of memory object, it may be possible for more than one mapping to be setup on a single memory object. The mappings must match the mappings setup of the exporting API.
-      Any mismatched mappings result in undefined behavior.
-      Imported memory objects must be freed using `cudaDestroyExternalMemory()`. Freeing a memory object does not free any mappings to that object. Therefore, any device pointers mapped onto that object must be explicitly freed using `cudaFree()` and any CUDA mipmapped arrays mapped onto that object must be explicitly freed using `cudaFreeMipmappedArray()`.
-      It is illegal to access mappings to an object after it has been destroyed.
+  : can be imported into CUDA using `cudaImportExternalMemory()`. An imported memory object can then be accessed from within kernels using device pointers mapped onto the memory object with `cudaExternalMemoryGetMappedBuffer()` or CUDA mipmapped arrays mapped with `cudaExternalMemoryGetMappedMipmappedArray()`. Depending on the type of memory object, it may be possible for more than one mapping to be setup on a single memory object. The mappings must match the mappings setup of the exporting API.
+  Any mismatched mappings result in undefined behavior.
+  Imported memory objects must be freed using `cudaDestroyExternalMemory()`. Freeing a memory object does not free any mappings to that object. Therefore, any device pointers mapped onto that object must be explicitly freed using `cudaFree()` and any CUDA mipmapped arrays mapped onto that object must be explicitly freed using `cudaFreeMipmappedArray()`.
+  It is illegal to access mappings to an object after it has been destroyed.
 - **Synchronization objects**
-  :   can be imported into CUDA using `cudaImportExternalSemaphore()`. An imported synchronization object can then be signaled using `cudaSignalExternalSemaphoresAsync()` and waited on using `cudaWaitExternalSemaphoresAsync()`. It is illegal to issue a wait before the corresponding signal has been issued. Also, depending on the type of the imported synchronization object, there may be additional constraints imposed on how they can be signaled and waited on, as described in subsequent sections. Imported semaphore objects must be freed using `cudaDestroyExternalSemaphore()`.
-      All outstanding signals and waits must have completed before the semaphore object is destroyed.
+  : can be imported into CUDA using `cudaImportExternalSemaphore()`. An imported synchronization object can then be signaled using `cudaSignalExternalSemaphoresAsync()` and waited on using `cudaWaitExternalSemaphoresAsync()`. It is illegal to issue a wait before the corresponding signal has been issued. Also, depending on the type of the imported synchronization object, there may be additional constraints imposed on how they can be signaled and waited on, as described in subsequent sections. Imported semaphore objects must be freed using `cudaDestroyExternalSemaphore()`.
+  All outstanding signals and waits must have completed before the semaphore object is destroyed.
 
 ### 4.21.2.1. Vulkan interoperability
 
@@ -374,7 +374,7 @@ The main steps to get a Vulkan-CUDA interoperability working involve:
 5. Map the device pointer or mipmapped array onto the memory object
 6. Use the imported memory objects in CUDA and Vulkan interchangeably by defining an order of execution through signaling and waiting on the synchronization objects.
 
-In this section the steps above are explained with the help of the *simpleVulkan* example, [NVIDIA/cuda-samples](https://github.com/NVIDIA/cuda-samples/tree/master/Samples/5_Domain_Specific/simpleVulkan).
+In this section the steps above are explained with the help of the _simpleVulkan_ example, [NVIDIA/cuda-samples](https://github.com/NVIDIA/cuda-samples/tree/master/Samples/5_Domain_Specific/simpleVulkan).
 We walk through the example step by step, focusing on the parts needed for the CUDA interoperability.
 Some variation are explained with standalone snippets.
 
@@ -382,11 +382,11 @@ Some variation are explained with standalone snippets.
 >
 > The code example used in this section, uses the direct memory allocation and resource creation. Which is not state of the art due to several reasons, including the limitation to the number of instances that can be created.
 > However, to understand the interoperability, one needs to know the underlying Vulkan code and the specific flags.
-> For a more state of the art example, using the [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) please refer to the *sample\_cuda\_interop* in the [NVProSamples](https://github.com/nvpro-samples) repository.
+> For a more state of the art example, using the [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) please refer to the _sample_cuda_interop_ in the [NVProSamples](https://github.com/nvpro-samples) repository.
 
 The following data structure is used throughout the example:
 
-```cuda
+```c
 class VulkanCudaSineWave : public VulkanBaseApp {
   typedef struct UniformBufferObject_st {
     mat4x4 modelViewProj;
@@ -412,9 +412,9 @@ In addition to the platform specific handle types must be enabled, for Windows `
 Similarly for exporting synchronization objects, on the device level `VK_KHR_external_semaphore_capabilities` and `VK_KHR_external_semaphore` on the instance level need to be enabled.
 As well as the platform specific extensions for the handles, that is `VK_KHR_external_semaphore_win32` for Windows and `VK_KHR_external_semaphore_fd` for Unix based systems.
 
-In the *simpleVulkan* example these extensions are enabled with the following enums.
+In the _simpleVulkan_ example these extensions are enabled with the following enums.
 
-```cuda
+```c
   std::vector<const char *> getRequiredExtensions() const {
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
@@ -438,7 +438,7 @@ In the *simpleVulkan* example these extensions are enabled with the following en
   }
 ```
 
-These are then added to the Vulkan instance and device creation info, please see the *simpleVulkan* example for details.
+These are then added to the Vulkan instance and device creation info, please see the _simpleVulkan_ example for details.
 
 #### 4.21.2.1.2. Initializing CUDA with matching device UUIDs
 
@@ -446,7 +446,7 @@ When importing memory and synchronization objects exported by Vulkan, they must 
 The CUDA device that corresponds to the Vulkan physical device on which the objects were created can be determined by comparing the UUID of a CUDA device with that of the Vulkan physical device,
 as shown in the following code snippet from the simpleVulkan example, where `vkDeviceUUID` is the member of the Vulkan API structure `vkPhysicalDeviceIDProperties.deviceUUID` and defines the physical devices id of the current Vulkan instance.
 
-```cuda
+```c
 // from the CUDA example `simpleVulkan`
 int SineWaveSimulation::initCuda(uint8_t *vkDeviceUUID, size_t UUID_SIZE) {
   int current_device = 0;
@@ -503,7 +503,7 @@ That is, the device group as returned by `vkEnumeratePhysicalDeviceGroups` that 
 
 In order to export a Vulkan memory object, a buffer with the according export flags must be created. Note that the enums for the handle types are platform specific.
 
-```cuda
+```c
 void VulkanBaseApp::createExternalBuffer(
     VkDeviceSize size, VkBufferUsageFlags usage,
     VkMemoryPropertyFlags properties,
@@ -575,9 +575,9 @@ void VulkanBaseApp::createExternalBuffer(
 Vulkan API calls which are executed on the GPU are asynchronous. To define an order of execution there are semaphores and fences available in Vulkan which can be shared with CUDA.
 Similar to the memory objects, semaphores can be exported by Vulkan, they need to be created with the export flags depending on the type of semaphore.
 There are binary and timeline semaphores. Binary semaphores only have a 1 bit counter, either signaled or not. Timeline semaphores have a 64 bit counter, which can be used to define an order of execution with the same semaphore.
-In the *simpleVulkan* example there are code paths for both timeline and binary semaphores.
+In the _simpleVulkan_ example there are code paths for both timeline and binary semaphores.
 
-```cuda
+```c
 void VulkanBaseApp::createExternalSemaphore(
     VkSemaphore &semaphore, VkExternalSemaphoreHandleTypeFlagBits handleType) {
   VkSemaphoreCreateInfo semaphoreInfo = {};
@@ -619,7 +619,7 @@ The NT handle holds a reference to the resource, so it must be explicitly freed 
 In Linux, a Vulkan memory object exported using `VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT` can be imported into CUDA using the file descriptor associated with that object as shown below.
 Note that CUDA assumes ownership of the file descriptor once it is imported. Using the file descriptor after a successful import results in undefined behavior.
 
-```cuda
+```c
   // from the CUDA example `simpleVulkan`
   void importCudaExternalMemory(void **cudaPtr, cudaExternalMemory_t &cudaMem,
                                 VkDeviceMemory &vkMem, VkDeviceSize size,
@@ -654,7 +654,7 @@ Note that CUDA assumes ownership of the file descriptor once it is imported. Usi
 
 A Vulkan memory object exported using `VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT` can also be imported using a named handle if one exists as shown in the standalone snippet below.
 
-```cuda
+```c
 cudaExternalMemory_t importVulkanMemoryObjectFromNamedNTHandle(LPCWSTR name, unsigned long long size, bool isDedicated) {
    cudaExternalMemory_t extMem = NULL;
    cudaExternalMemoryHandleDesc desc = {};
@@ -680,7 +680,7 @@ After importing a memory object, they have to be mapped before they can be used.
 A device pointer can be mapped onto an imported memory object as shown below. The offset and size of the mapping must match that specified when creating the mapping using the corresponding Vulkan API.
 All mapped device pointers must be freed using `cudaFree()`.
 
-```cuda
+```c
     // from the CUDA example `simpleVulkan`, continuation of function `importCudaExternalMemory`
     cudaExternalMemoryBufferDesc externalMemBufferDesc = {};
     externalMemBufferDesc.offset = 0;
@@ -698,7 +698,7 @@ A CUDA mipmapped array can be mapped onto an imported memory object as shown bel
 Additionally, if the mipmapped array is bound as a color target in Vulkan, the flag`cudaArrayColorAttachment` must be set. All mapped mipmapped arrays must be freed using `cudaFreeMipmappedArray()`.
 The following code standalone snippet shows how to convert Vulkan parameters into the corresponding CUDA parameters when mapping mipmapped arrays onto imported memory objects.
 
-```cuda
+```c
 cudaMipmappedArray_t mapMipmappedArrayOntoExternalMemory(cudaExternalMemory_t extMem, unsigned long long offset, cudaChannelFormatDesc *formatDesc, cudaExtent *extent, unsigned int flags, unsigned int numLevels) {
     cudaMipmappedArray_t mipmap = NULL;
     cudaExternalMemoryMipmappedArrayDesc desc = {};
@@ -808,7 +808,7 @@ Note that CUDA does not assume ownership of the NT handle and it is the applicat
 And, a Vulkan semaphore object exported using `VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT` can be imported into CUDA using the globally shared D3DKMT handle associated with that object as shown below.
 Since a globally shared D3DKMT handle does not hold a reference to the underlying semaphore it is automatically destroyed when all other references to the resource are destroyed.
 
-```cuda
+```c
   void importCudaExternalSemaphore(
       cudaExternalSemaphore_t &cudaSem, VkSemaphore &vkSem,
       VkExternalSemaphoreHandleTypeFlagBits handleType) {
@@ -867,10 +867,10 @@ The corresponding wait that waits on this signal must be issued in Vulkan. Addit
 Waiting on a semaphore waits until it reaches the signaled state or the assigned wait value. A signaled binary semaphore then resets it back to the unsignaled state.
 The corresponding signal that this wait is waiting on must be issued in Vulkan. Additionally, in the case of a binary semaphore, the signal must be issued before this wait can be issued.
 
-In the following code extract from the *simpleVulkan* example the simulation step / the CUDA kernel is only called once the semaphore around the vertex buffers is signaled by Vulkan.
+In the following code extract from the _simpleVulkan_ example the simulation step / the CUDA kernel is only called once the semaphore around the vertex buffers is signaled by Vulkan.
 After the simulation step another semaphore is signaled, or in the case of the timeline semaphore the same one is increased by CUDA, such that the Vulkan part that is waiting on this semaphore can continue rendering with the updated vertex buffers.
 
-```cuda
+```c
 #ifdef _VK_TIMELINE_SEMAPHORE
     static uint64_t waitValue = 1;
     static uint64_t signalValue = 2;
@@ -936,7 +936,7 @@ The CUDA device that corresponds to the Direct3D12 device on which the objects w
 as shown in the following code sample.
 Note that the Direct3D12 device must not be created on a linked node adapter, i.e. the node count as returned by `ID3D12Device::GetNodeCount` must be 1.
 
-```cuda
+```c
 int getCudaDeviceForD3D12Device(ID3D12Device *d3d12Device) {
     LUID d3d12Luid = d3d12Device->GetAdapterLuid();
 
@@ -966,7 +966,7 @@ When importing a Direct3D resource, the flag `cudaExternalMemoryDedicated` must 
 A shareable Direct3D12 heap memory object, created by setting the flag `D3D12_HEAP_FLAG_SHARED` in the call to `ID3D12Device::CreateHeap`,
 can be imported into CUDA using the NT handle associated with that object as shown below.
 
-```cuda
+```c
 cudaExternalMemory_t importD3D12HeapFromNTHandle(HANDLE handle, unsigned long long size) {
     cudaExternalMemory_t extMem = NULL;
     cudaExternalMemoryHandleDesc desc = {};
@@ -988,7 +988,7 @@ cudaExternalMemory_t importD3D12HeapFromNTHandle(HANDLE handle, unsigned long lo
 
 A shareable Direct3D12 heap memory object can also be imported using a named handle if one exists:
 
-```cuda
+```c
 cudaExternalMemory_t importD3D12HeapFromNamedNTHandle(LPCWSTR name, unsigned long long size) {
     cudaExternalMemory_t extMem = NULL;
     cudaExternalMemoryHandleDesc desc = {};
@@ -1008,7 +1008,7 @@ cudaExternalMemory_t importD3D12HeapFromNamedNTHandle(LPCWSTR name, unsigned lon
 A shareable Direct3D12 committed resource, created by setting the flag `D3D12_HEAP_FLAG_SHARED` in the call to `D3D12Device::CreateCommittedResource`,
 can be imported into CUDA using the NT handle associated with that object as shown below. When importing a Direct3D12 committed resource, the flag `cudaExternalMemoryDedicated` must be set.
 
-```cuda
+```c
 cudaExternalMemory_t importD3D12CommittedResourceFromNTHandle(HANDLE handle, unsigned long long size) {
     cudaExternalMemory_t extMem = NULL;
     cudaExternalMemoryHandleDesc desc = {};
@@ -1031,7 +1031,7 @@ cudaExternalMemory_t importD3D12CommittedResourceFromNTHandle(HANDLE handle, uns
 
 A shareable Direct3D12 committed resource can also be imported using a named handle if one exists as shown below.
 
-```cuda
+```c
 cudaExternalMemory_t importD3D12CommittedResourceFromNamedNTHandle(LPCWSTR name, unsigned long long size) {
     cudaExternalMemory_t extMem = NULL;
     cudaExternalMemoryHandleDesc desc = {};
@@ -1055,7 +1055,7 @@ A device pointer can be mapped onto an imported memory object as shown below.
 The offset and size of the mapping must match that specified when creating the mapping using the corresponding Direct3D12 API.
 All mapped device pointers must be freed using `cudaFree()`.
 
-```cuda
+```c
 void * mapBufferOntoExternalMemory(cudaExternalMemory_t extMem, unsigned long long offset, unsigned long long size) {
     void *ptr = NULL;
     cudaExternalMemoryBufferDesc desc = {};
@@ -1080,7 +1080,7 @@ Additionally, if the mipmapped array can be bound as a render target in Direct3D
 must be set. All mapped mipmapped arrays must be freed using `cudaFreeMipmappedArray()`.
 The following code sample shows how to convert parameters into the corresponding CUDA parameters when mapping mipmapped arrays onto imported memory objects.
 
-```cuda
+```c
 cudaMipmappedArray_t mapMipmappedArrayOntoExternalMemory(cudaExternalMemory_t extMem, unsigned long long offset, cudaChannelFormatDesc *formatDesc, cudaExtent *extent, unsigned int flags, unsigned int numLevels) {
     cudaMipmappedArray_t mipmap = NULL;
     cudaExternalMemoryMipmappedArrayDesc desc = {};
@@ -1177,7 +1177,7 @@ A shareable Direct3D12 fence object, created by setting the flag `D3D12_FENCE_FL
 can be imported into CUDA using the NT handle associated with that object as shown below. Note that it is the application’s responsibility to close the handle when it is not required anymore.
 The NT handle holds a reference to the resource, so it must be explicitly freed before the underlying semaphore can be freed.
 
-```cuda
+```c
 cudaExternalSemaphore_t importD3D12FenceFromNTHandle(HANDLE handle) {
     cudaExternalSemaphore_t extSem = NULL;
     cudaExternalSemaphoreHandleDesc desc = {};
@@ -1198,7 +1198,7 @@ cudaExternalSemaphore_t importD3D12FenceFromNTHandle(HANDLE handle) {
 
 A shareable Direct3D12 fence object can also be imported using a named handle if one exists as shown below.
 
-```cuda
+```c
 cudaExternalSemaphore_t importD3D12FenceFromNamedNTHandle(LPCWSTR name) {
     cudaExternalSemaphore_t extSem = NULL;
     cudaExternalSemaphoreHandleDesc desc = {};
@@ -1221,7 +1221,7 @@ Once the semaphores with fences have been imported from Direct3D12 they can be s
 Signaling a fence object sets its value. The corresponding wait that waits on this signal must be issued in Direct3D12.
 Note that the wait that waits on this signal must be issued after this signal has been issued.
 
-```cuda
+```c
 void signalExternalSemaphore(cudaExternalSemaphore_t extSem, unsigned long long value, cudaStream_t stream) {
     cudaExternalSemaphoreSignalParams params = {};
 
@@ -1236,7 +1236,7 @@ void signalExternalSemaphore(cudaExternalSemaphore_t extSem, unsigned long long 
 A fence object waits until its value becomes greater than or equal to the specified value. The corresponding signal that it is waiting on must be issued in Direct3D12.
 Note that, the signal must be issued before this wait can be issued.
 
-```cuda
+```c
 void waitExternalSemaphore(cudaExternalSemaphore_t extSem, unsigned long long value, cudaStream_t stream) {
     cudaExternalSemaphoreWaitParams params = {};
 
@@ -1480,7 +1480,7 @@ cudaExternalSemaphore_t importNvSciSyncObject(void* nvSciSyncObj) {
 
 #### 4.21.2.3.5. Signaling/Waiting on Imported Synchronization Objects
 
-An imported `NvSciSyncObj` object can be signaled as outlined below. Signaling NvSciSync backed semaphore object initializes the *fence* parameter passed as input. This fence parameter is waited upon by a wait operation that corresponds to the aforementioned signal. Additionally, the wait that waits on this signal must be issued after this signal has been issued. If the flags are set to `cudaExternalSemaphoreSignalSkipNvSciBufMemSync` then memory synchronization operations (over all the imported NvSciBuf in this process) that are executed as a part of the signal operation by default are skipped. When `NvsciBufGeneralAttrKey_GpuSwNeedCacheCoherency` is FALSE, this flag should be set.
+An imported `NvSciSyncObj` object can be signaled as outlined below. Signaling NvSciSync backed semaphore object initializes the _fence_ parameter passed as input. This fence parameter is waited upon by a wait operation that corresponds to the aforementioned signal. Additionally, the wait that waits on this signal must be issued after this signal has been issued. If the flags are set to `cudaExternalSemaphoreSignalSkipNvSciBufMemSync` then memory synchronization operations (over all the imported NvSciBuf in this process) that are executed as a part of the signal operation by default are skipped. When `NvsciBufGeneralAttrKey_GpuSwNeedCacheCoherency` is FALSE, this flag should be set.
 
 ```cpp
 void signalExternalSemaphore(cudaExternalSemaphore_t extSem, cudaStream_t stream, void *fence) {
@@ -1496,7 +1496,7 @@ void signalExternalSemaphore(cudaExternalSemaphore_t extSem, cudaStream_t stream
 }
 ```
 
-An imported `NvSciSyncObj` object can be waited upon as outlined below. Waiting on NvSciSync backed semaphore object waits until the input *fence* parameter is signaled by the corresponding signaler. Additionally, the signal must be issued before the wait can be issued. If the flags are set to `cudaExternalSemaphoreWaitSkipNvSciBufMemSync` then memory synchronization operations (over all the imported NvSciBuf in this process) that are executed as a part of the signal operation by default are skipped. When `NvsciBufGeneralAttrKey_GpuSwNeedCacheCoherency` is FALSE, this flag should be set.
+An imported `NvSciSyncObj` object can be waited upon as outlined below. Waiting on NvSciSync backed semaphore object waits until the input _fence_ parameter is signaled by the corresponding signaler. Additionally, the signal must be issued before the wait can be issued. If the flags are set to `cudaExternalSemaphoreWaitSkipNvSciBufMemSync` then memory synchronization operations (over all the imported NvSciBuf in this process) that are executed as a part of the signal operation by default are skipped. When `NvsciBufGeneralAttrKey_GpuSwNeedCacheCoherency` is FALSE, this flag should be set.
 
 ```cpp
 void waitExternalSemaphore(cudaExternalSemaphore_t extSem, cudaStream_t stream, void *fence) {

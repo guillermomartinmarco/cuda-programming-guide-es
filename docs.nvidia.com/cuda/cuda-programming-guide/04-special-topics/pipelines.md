@@ -22,7 +22,7 @@ __shared__ cuda::pipeline_shared_state<scope, stages_count> shared_state;
 auto pipeline = cuda::make_pipeline(group, &shared_state);
 ```
 
-Pipelines can be either *unified* or *partitioned*. In a unified pipeline, all the participating threads are both producers and consumers. In a partitioned pipeline, each participating thread is either a producer or a consumer and its role cannot change during the lifetime of the pipeline object. A thread-local pipeline cannot be partitioned. To create a partitioned pipeline, we need to provide either the number of producers or the role of the thread to `cuda::make_pipeline()`.
+Pipelines can be either _unified_ or _partitioned_. In a unified pipeline, all the participating threads are both producers and consumers. In a partitioned pipeline, each participating thread is either a producer or a consumer and its role cannot change during the lifetime of the pipeline object. A thread-local pipeline cannot be partitioned. To create a partitioned pipeline, we need to provide either the number of producers or the role of the thread to `cuda::make_pipeline()`.
 
 ```cpp
 // Create a partitioned pipeline at block scope where only thread 0 is a producer
@@ -39,9 +39,9 @@ To support partitioning, a shared `cuda::pipeline` incurs additional overheads, 
 
 Committing work to a pipeline stage involves:
 
-> - Collectively *acquiring* the pipeline *head* from a set of producer threads using `pipeline.producer_acquire()`.
+> - Collectively _acquiring_ the pipeline _head_ from a set of producer threads using `pipeline.producer_acquire()`.
 > - Submitting asynchronous operations, e.g., `memcpy_async`, to the pipeline head.
-> - Collectively *committing* (advancing) the pipeline head using `pipeline.producer_commit()`.
+> - Collectively _committing_ (advancing) the pipeline head using `pipeline.producer_commit()`.
 
 If all resources are in use, `pipeline.producer_acquire()` blocks producer threads until the resources of the next pipeline stage are released by consumer threads.
 
@@ -50,7 +50,7 @@ If all resources are in use, `pipeline.producer_acquire()` blocks producer threa
 Consuming work from a previously committed stage involves:
 
 > - Collectively waiting for the stage to complete, e.g., using `pipeline.consumer_wait()` to wait on the tail (oldest) stage, from a set of consumer threads.
-> - Collectively *releasing* the stage using `pipeline.consumer_release()`.
+> - Collectively _releasing_ the stage using `pipeline.consumer_release()`.
 
 With `cuda::pipeline<cuda:thread_scope_thread>` one can also use the `cuda::pipeline_consumer_wait_prior<N>()` friend function to wait for all except the last N stages to complete, similar to `__pipeline_wait_prior(N)` in the primitives API.
 
@@ -60,14 +60,15 @@ The pipeline mechanism is shared among CUDA threads in the same warp. This shari
 
 **Commit**. The commit operation is coalesced such that the pipeline’s sequence is incremented once for all converged threads that invoke the commit operation and their submitted operations are batched together. If the warp is fully converged, the sequence is incremented by one and all submitted operations will be batched in the same stage of the pipeline; if the warp is fully diverged, the sequence is incremented by 32 and all submitted operations will be spread to different stages.
 
-- Let *PB* be the warp-shared pipeline’s *actual* sequence of operations.
+- Let _PB_ be the warp-shared pipeline’s _actual_ sequence of operations.
 
   `PB = {BP0, BP1, BP2, …, BPL}`
-- Let *TB* be a thread’s *perceived* sequence of operations, as if the sequence were only incremented by this thread’s invocation of the commit operation.
+
+- Let _TB_ be a thread’s _perceived_ sequence of operations, as if the sequence were only incremented by this thread’s invocation of the commit operation.
 
   `TB = {BT0, BT1, BT2, …, BTL}`
 
-> The `pipeline::producer_commit()` return value is from the thread’s *perceived* batch sequence.
+> The `pipeline::producer_commit()` return value is from the thread’s _perceived_ batch sequence.
 
 - An index in a thread’s perceived sequence always aligns to an equal or larger index in the actual warp-shared sequence. The sequences are equal only when all commit operations are invoked from fully converged threads.
 
@@ -77,15 +78,14 @@ For example, when a warp is fully diverged:
 
 - The warp-shared pipeline’s actual sequence would be: `PB = {0, 1, 2, 3, ..., 31}` (`PL=31`).
 - The perceived sequence for each thread of this warp would be:
-
   - Thread 0: `TB = {0}` (`TL=0`)
   - Thread 1: `TB = {0}` (`TL=0`)
   - `…`
   - Thread 31: `TB = {0}` (`TL=0`)
 
-**Wait**. A CUDA thread invokes `pipeline::consumer_wait()` or `pipeline_consumer_wait_prior<N>()` to wait for batches in the *perceived* sequence `TB` to complete. Note that `pipeline::consumer_wait()` is equivalent to `pipeline_consumer_wait_prior<N>()`, where `N = PL`.
+**Wait**. A CUDA thread invokes `pipeline::consumer_wait()` or `pipeline_consumer_wait_prior<N>()` to wait for batches in the _perceived_ sequence `TB` to complete. Note that `pipeline::consumer_wait()` is equivalent to `pipeline_consumer_wait_prior<N>()`, where `N = PL`.
 
-The *wait prior* variants wait for batches in the *actual* sequence at least up to and including `PL-N`. Since `TL <= PL`, waiting for batch up to and including `PL-N` includes waiting for batch `TL-N`. Thus, when `TL < PL`, the thread will unintentionally wait for additional, more recent batches. In the extreme fully-diverged warp example above, each thread could wait for all 32 batches.
+The _wait prior_ variants wait for batches in the _actual_ sequence at least up to and including `PL-N`. Since `TL <= PL`, waiting for batch up to and including `PL-N` includes waiting for batch `TL-N`. Thus, when `TL < PL`, the thread will unintentionally wait for additional, more recent batches. In the extreme fully-diverged warp example above, each thread could wait for all 32 batches.
 
 > [!NOTE]
 >
@@ -103,7 +103,7 @@ The following example demonstrates how to collectively copy data from global to 
 
 **CUDA C++ cuda::pipeline**
 
-```cuda
+```c
 #include <cuda/pipeline>
 
 __global__ void example_kernel(const float *in)
@@ -158,7 +158,7 @@ __global__ void example_kernel(const float *in)
 
 **CUDA C primitives**
 
-```cuda
+```c
 #include <cuda_pipeline.h>
 
 __global__ void example_kernel(const float *in)
@@ -208,7 +208,7 @@ In [Section 4.10.7](async-barriers.md#asynchronous-barriers-producer-consumer), 
 
 **CUDA C++ cuda::pipeline**
 
-```cuda
+```c
 #include <cuda/pipeline>
 #include <cooperative_groups.h>
 

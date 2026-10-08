@@ -129,7 +129,7 @@ Toma solo el contenido de la página (`<article class="bd-article">`) y descarta
 | En el HTML                                                        | En el Markdown                                                                  |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | Títulos con su numeración                                         | `#`, `##`, `###`… con la numeración (`## 1.2.1. Heterogeneous Systems`)         |
-| Código con resaltado (`highlight-cuda`, `c++`, `python`, `bash`…) | Bloques ` ```cuda ` y similares, con el texto limpio                            |
+| Código con resaltado (`highlight-cuda`, `c++`, `python`, `bash`…) | Bloques ` ```c ` y similares, con el texto limpio                            |
 | Note, Hint, Warning…                                              | Avisos de GitHub: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`                       |
 | Figuras                                                           | `![texto alternativo](../_images/x.png)` y debajo **Figure N.** _pie de figura_ |
 | Fórmulas                                                          | `$...$` en línea y `$$...$$` en bloque                                          |

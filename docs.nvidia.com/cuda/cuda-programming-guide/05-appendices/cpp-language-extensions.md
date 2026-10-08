@@ -90,7 +90,7 @@ Calls to a `__global__` and `__tile_global__` function are asynchronous. They re
 
 Functions declared with multiple execution spaces (for example, `__host__ __device__`) are compiled for each context. The `__CUDA_ARCH__` [macro](cpp-language-extensions.md#cuda-arch-macro) can be used to differentiate the host and device code paths:
 
-```cuda
+```c
 __host__ __device__ void func() {
 #if defined(__CUDA_ARCH__)
     // Device code path
@@ -108,14 +108,14 @@ The following table summarizes the memory space properties:
 
 Table 40 Memory Space Specifier
 
-| Memory Space Specifier | Location | Accessible by | Lifetime | Unique instance |
-| --- | --- | --- | --- | --- |
-| `__device__` | Device global memory | Device Threads (grid) / CUDA Runtime API | Program/[CUDA context](../03-advanced/driver-api.md#driver-api-context) | Per device |
-| `__tile__` | Device global memory | Tile blocks / CUDA Runtime API | Program/[CUDA context](../03-advanced/driver-api.md#driver-api-context) | Per device |
-| `__constant__` | Device constant memory | Device Threads (grid) / CUDA Runtime API | Program/[CUDA context](../03-advanced/driver-api.md#driver-api-context) | Per device |
-| `__managed__` | Host and Device (automatic) | Host/Device Threads | Program | Per program |
-| `__shared__` | Device (streaming multiprocessor) | Block Threads | Block | Block |
-| no specifier | Device (registers) | Single Thread | Single Thread | Single Thread |
+| Memory Space Specifier | Location                          | Accessible by                            | Lifetime                                                                | Unique instance |
+| ---------------------- | --------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------- | --------------- |
+| `__device__`           | Device global memory              | Device Threads (grid) / CUDA Runtime API | Program/[CUDA context](../03-advanced/driver-api.md#driver-api-context) | Per device      |
+| `__tile__`             | Device global memory              | Tile blocks / CUDA Runtime API           | Program/[CUDA context](../03-advanced/driver-api.md#driver-api-context) | Per device      |
+| `__constant__`         | Device constant memory            | Device Threads (grid) / CUDA Runtime API | Program/[CUDA context](../03-advanced/driver-api.md#driver-api-context) | Per device      |
+| `__managed__`          | Host and Device (automatic)       | Host/Device Threads                      | Program                                                                 | Per program     |
+| `__shared__`           | Device (streaming multiprocessor) | Block Threads                            | Block                                                                   | Block           |
+| no specifier           | Device (registers)                | Single Thread                            | Single Thread                                                           | Single Thread   |
 
 ---
 
@@ -124,7 +124,7 @@ Table 40 Memory Space Specifier
 
 The following example illustrates how to use these APIs:
 
-```cuda
+```c
 __device__   float device_var       = 4.0f; // Variable in device memory
 __constant__ float constant_mem_var = 4.0f; // Variable in constant memory
                                             // For readability, the following example focuses on a device variable.
@@ -156,7 +156,7 @@ Shared memory constraints:
 
 The following example illustrates how to declare and size `__shared__` variables:
 
-```cuda
+```c
 extern __shared__ char dynamic_smem_pointer[];
 // extern __shared__ char* dynamic_smem_pointer; alternative syntax
 
@@ -181,17 +181,17 @@ See the example on [Compiler Explorer](https://godbolt.org/z/nPjvd1frb).
 - The address of a `__managed__` variable is not a constant expression.
 - A `__managed__` variable shall not have a reference type `T&`.
 - The address or value of a `__managed__` variable shall not be used when the CUDA runtime may not be in a valid state, including the following cases:
-
   - In static/dynamic initialization or destruction of an object with `static` or `thread_local` storage duration.
   - In code that executes after `exit()` has been called. For example, a function marked with `__attribute__((destructor))`.
   - In code that executes when the CUDA runtime may not be initialized. For example, a function marked with `__attribute__((constructor))`.
+
 - A `__managed__` variable cannot be used as an unparenthesized id-expression argument to a `decltype()` expression.
 - `__managed__` variables have the same coherence and consistency behavior as specified for [dynamically allocated managed memory](../02-basics/understanding-memory.md#memory-unified-memory).
 - See also the restrictions for [local variables](cpp-language-support.md#local-variables).
 
 Here are examples of legal and illegal uses of `__managed__` variables:
 
-```cuda
+```c
 #include <cassert>
 
 __device__ __managed__ int global_var = 10; // OK
@@ -245,7 +245,7 @@ In general, `__device__` variables may not be directly accessed by name from `__
 
 The following example shows legal and illegal uses of tile variables:
 
-```cuda
+```c
 __device__ int x_device = 0;
 __tile__   int x_tile = 0;
 
@@ -285,7 +285,7 @@ int main() {
 
 A `__tile__` variable may not contain a subobject of pointer or reference type. For example:
 
-```cuda
+```c
 __tile__ int* ptr; // ERROR
 
 struct S1 { int* ptr; };
@@ -315,7 +315,7 @@ A restrict-qualified pointer is a promise from the programmer that for the lifet
 
 The following example illustrates an aliasing issue and demonstrates how using a restricted pointer can help the compiler reduce the number of instructions:
 
-```cuda
+```c
 __device__
 void device_function(const float* a, const float* b, float* c) {
     c[0] = a[0] * b[0];
@@ -332,14 +332,14 @@ Because the pointers `a`, `b`, and `c` may be aliased, any write through `c` cou
 
 By declaring `a`, `b`, and `c` as restricted pointers, the programmer informs the compiler that the pointers are not aliased. This means that writing to `c` will never overwrite the elements of `a` or `b`. This changes the function prototype as follows:
 
-```cuda
+```c
 __device__
 void device_function(const float* __restrict__ a, const float* __restrict__ b, float* __restrict__ c);
 ```
 
 Note that all pointer arguments must be restricted for the compiler optimizer to be effective. With the addition of the `__restrict__` keywords, the compiler can reorder and perform common sub-expression elimination at will while maintaining identical functionality to the abstract execution model.
 
-```cuda
+```c
 __device__
 void device_function(const float* __restrict__ a, const float* __restrict__ b, float* __restrict__ c) {
     float t0 = a[0];
@@ -366,7 +366,7 @@ Since register pressure is a critical issue in many CUDA codes, the use of restr
 
 Accesses to `__global__` function `const` pointers marked with `__restrict__` are compiled as read-only cache loads, similar to the [PTX](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-ld-global-nc) `ld.global.nc` or `__ldg()` [low-level load and store functions](cpp-language-extensions.md#low-level-load-store-functions) instructions.
 
-```cuda
+```c
 __global__
 void kernel1(const float* in, float* out) {
     *out = *in; // PTX: ld.global
@@ -401,7 +401,7 @@ Requirements:
 
 Examples:
 
-```cuda
+```c
 struct MyStruct {
     int         x;
     mutable int y;
@@ -426,14 +426,14 @@ The following table summarizes the CUDA annotations and reports which execution 
 
 Table 41 Annotation Summary
 
-| Annotation | `__host__` / `__device__` / `__host__  __device__` | `__global__` |
-| --- | --- | --- |
-| [\_\_noinline\_\_](cpp-language-extensions.md#inline-specifiers), [\_\_forceinline\_\_](cpp-language-extensions.md#inline-specifiers), [\_\_inline\_hint\_\_](cpp-language-extensions.md#inline-specifiers) | Function | ❌ |
-| [\_\_restrict\_\_](cpp-language-extensions.md#restrict) | Pointer Parameter | Pointer Parameter |
-| [\_\_grid\_constant\_\_](cpp-language-extensions.md#grid-constant) | ❌ | Parameter |
-| [\_\_launch\_bounds\_\_](cpp-language-extensions.md#launch-bounds) | ❌ | Function |
-| [\_\_maxnreg\_\_](cpp-language-extensions.md#maximum-number-of-registers-per-thread) | ❌ | Function |
-| [\_\_cluster\_dims\_\_](cpp-language-extensions.md#cluster-dimensions) | ❌ | Function |
+| Annotation                                                                                                                                                                                                 | `__host__` / `__device__` / `__host__  __device__` | `__global__`      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ----------------- |
+| [\_\_noinline\_\_](cpp-language-extensions.md#inline-specifiers), [\_\_forceinline\_\_](cpp-language-extensions.md#inline-specifiers), [\_\_inline_hint\_\_](cpp-language-extensions.md#inline-specifiers) | Function                                           | ❌                |
+| [\_\_restrict\_\_](cpp-language-extensions.md#restrict)                                                                                                                                                    | Pointer Parameter                                  | Pointer Parameter |
+| [\_\_grid_constant\_\_](cpp-language-extensions.md#grid-constant)                                                                                                                                          | ❌                                                 | Parameter         |
+| [\_\_launch_bounds\_\_](cpp-language-extensions.md#launch-bounds)                                                                                                                                          | ❌                                                 | Function          |
+| [\_\_maxnreg\_\_](cpp-language-extensions.md#maximum-number-of-registers-per-thread)                                                                                                                       | ❌                                                 | Function          |
+| [\_\_cluster_dims\_\_](cpp-language-extensions.md#cluster-dimensions)                                                                                                                                      | ❌                                                 | Function          |
 
 ## 5.4.2. Built-in Types and Variables
 
@@ -442,11 +442,11 @@ Table 41 Annotation Summary
 The use of non-standard arithmetic types is permitted by CUDA, as long as the host compiler supports it. The following types are supported:
 
 - 128-bit integer type `__int128`.
-
   - Supported on Linux when the host compiler defines the `__SIZEOF_INT128__` macro.
-- 128-bit floating-point types `__float128` and `_Float128` are available on GPU devices with compute capability 10.0 and later. A constant expression of `__float128` type may be processed by the compiler in a floating-point representation with lower precision.
 
+- 128-bit floating-point types `__float128` and `_Float128` are available on GPU devices with compute capability 10.0 and later. A constant expression of `__float128` type may be processed by the compiler in a floating-point representation with lower precision.
   - Supported on Linux x86 when the host compiler defines the `__SIZEOF_FLOAT128__` or `__FLOAT128__` macros.
+
 - `_Complex` [types](https://www.gnu.org/software/c-intro-and-ref/manual/html_node/Complex-Data-Types.html) are only supported in host code.
 
 The 128-bit integer and floating point types are not supported in tile code.
@@ -471,20 +471,20 @@ CUDA provides vector types derived from basic integer and floating-point types t
 
 Table 42 Vector Types
 
-| C++ Fundamental Type | Vector X1 | Vector X2 | Vector X3 | Vector X4 |
-| --- | --- | --- | --- | --- |
-| `signed char` | `char1` | `char2` | `char3` | `char4` |
-| `unsigned char` | `uchar1` | `uchar2` | `uchar3` | `uchar4` |
-| `signed short` | `short1` | `short2` | `short3` | `short4` |
-| `unsigned short` | `ushort1` | `ushort2` | `ushort3` | `ushort4` |
-| `signed int` | `int1` | `int2` | `int3` | `int4` |
-| `unsigned` | `uint1` | `uint2` | `uint3` | `uint4` |
-| `signed long` | `long1` | `long2` | `long3` | `long4_16a/long4_32a` |
-| `unsigned long` | `ulong1` | `ulong2` | `ulong3` | `ulong4_16a/ulong4_32a` |
-| `signed long long` | `longlong1` | `longlong2` | `longlong3` | `longlong4_16a/longlong4_32a` |
+| C++ Fundamental Type | Vector X1    | Vector X2    | Vector X3    | Vector X4                       |
+| -------------------- | ------------ | ------------ | ------------ | ------------------------------- |
+| `signed char`        | `char1`      | `char2`      | `char3`      | `char4`                         |
+| `unsigned char`      | `uchar1`     | `uchar2`     | `uchar3`     | `uchar4`                        |
+| `signed short`       | `short1`     | `short2`     | `short3`     | `short4`                        |
+| `unsigned short`     | `ushort1`    | `ushort2`    | `ushort3`    | `ushort4`                       |
+| `signed int`         | `int1`       | `int2`       | `int3`       | `int4`                          |
+| `unsigned`           | `uint1`      | `uint2`      | `uint3`      | `uint4`                         |
+| `signed long`        | `long1`      | `long2`      | `long3`      | `long4_16a/long4_32a`           |
+| `unsigned long`      | `ulong1`     | `ulong2`     | `ulong3`     | `ulong4_16a/ulong4_32a`         |
+| `signed long long`   | `longlong1`  | `longlong2`  | `longlong3`  | `longlong4_16a/longlong4_32a`   |
 | `unsigned long long` | `ulonglong1` | `ulonglong2` | `ulonglong3` | `ulonglong4_16a/ulonglong4_32a` |
-| `float` | `float1` | `float2` | `float3` | `float4` |
-| `double` | `double1` | `double2` | `double3` | `double4_16a/double4_32a` |
+| `float`              | `float1`     | `float2`     | `float3`     | `float4`                        |
+| `double`             | `double1`    | `double2`    | `double3`    | `double4_16a/double4_32a`       |
 
 Note that `long4`, `ulong4`, `longlong4`, `ulonglong4`, and `double4` have been deprecated in CUDA 13, and may be removed in a future release.
 
@@ -494,42 +494,42 @@ The following table details the byte size and alignment requirements of the vect
 
 Table 43 Alignment Requirements
 
-| Type | Size | Alignment |
-| --- | --- | --- |
-| `char1`, `uchar1` | 1 | 1 |
-| `char2`, `uchar2` | 2 | 2 |
-| `char3`, `uchar3` | 3 | 1 |
-| `char4`, `uchar4` | 4 | 4 |
-| `short1`, `ushort1` | 2 | 2 |
-| `short2`, `ushort2` | 4 | 4 |
-| `short3`, `ushort3` | 6 | 2 |
-| `short4`, `ushort4` | 8 | 8 |
-| `int1`, `uint1` | 4 | 4 |
-| `int2`, `uint2` | 8 | 8 |
-| `int3`, `uint3` | 12 | 4 |
-| `int4`, `uint4` | 16 | 16 |
-| `long1`, `ulong1` | 4/8 **\*** | 4/8 **\*** |
-| `long2`, `ulong2` | 8/16 **\*** | 8/16 **\*** |
-| `long3`, `ulong3` | 12/24 **\*** | 4/8 **\*** |
-| `long4`, `ulong4` (deprecated) | 16/32 **\*** | 16 **\*** |
-| `long4_16a`, `ulong4_16a` | 16/32 **\*** | 16 |
-| `long4_32a`, `ulong4_32a` | 16/32 **\*** | 32 |
-| `longlong1`, `ulonglong1` | 8 | 8 |
-| `longlong2`, `ulonglong2` | 16 | 16 |
-| `longlong3`, `ulonglong3` | 24 | 8 |
-| `longlong4`, `ulonglong4` (deprecated) | 32 | 16 |
-| `longlong4_16a`, `ulonglong4_16a` | 32 | 16 |
-| `longlong4_32a`, `ulonglong4_32a` | 32 | 32 |
-| `float1` | 4 | 4 |
-| `float2` | 8 | 8 |
-| `float3` | 12 | 4 |
-| `float4` | 16 | 16 |
-| `double1` | 8 | 8 |
-| `double2` | 16 | 16 |
-| `double3` | 24 | 8 |
-| `double4` (deprecated) | 32 | 16 |
-| `double4_16a` | 32 | 16 |
-| `double4_32a` | 32 | 32 |
+| Type                                   | Size         | Alignment   |
+| -------------------------------------- | ------------ | ----------- |
+| `char1`, `uchar1`                      | 1            | 1           |
+| `char2`, `uchar2`                      | 2            | 2           |
+| `char3`, `uchar3`                      | 3            | 1           |
+| `char4`, `uchar4`                      | 4            | 4           |
+| `short1`, `ushort1`                    | 2            | 2           |
+| `short2`, `ushort2`                    | 4            | 4           |
+| `short3`, `ushort3`                    | 6            | 2           |
+| `short4`, `ushort4`                    | 8            | 8           |
+| `int1`, `uint1`                        | 4            | 4           |
+| `int2`, `uint2`                        | 8            | 8           |
+| `int3`, `uint3`                        | 12           | 4           |
+| `int4`, `uint4`                        | 16           | 16          |
+| `long1`, `ulong1`                      | 4/8 **\***   | 4/8 **\***  |
+| `long2`, `ulong2`                      | 8/16 **\***  | 8/16 **\*** |
+| `long3`, `ulong3`                      | 12/24 **\*** | 4/8 **\***  |
+| `long4`, `ulong4` (deprecated)         | 16/32 **\*** | 16 **\***   |
+| `long4_16a`, `ulong4_16a`              | 16/32 **\*** | 16          |
+| `long4_32a`, `ulong4_32a`              | 16/32 **\*** | 32          |
+| `longlong1`, `ulonglong1`              | 8            | 8           |
+| `longlong2`, `ulonglong2`              | 16           | 16          |
+| `longlong3`, `ulonglong3`              | 24           | 8           |
+| `longlong4`, `ulonglong4` (deprecated) | 32           | 16          |
+| `longlong4_16a`, `ulonglong4_16a`      | 32           | 16          |
+| `longlong4_32a`, `ulonglong4_32a`      | 32           | 32          |
+| `float1`                               | 4            | 4           |
+| `float2`                               | 8            | 8           |
+| `float3`                               | 12           | 4           |
+| `float4`                               | 16           | 16          |
+| `double1`                              | 8            | 8           |
+| `double2`                              | 16           | 16          |
+| `double3`                              | 24           | 8           |
+| `double4` (deprecated)                 | 32           | 16          |
+| `double4_16a`                          | 32           | 16          |
+| `double4_32a`                          | 32           | 32          |
 
 **\*** `long` is 4 bytes on C++ LLP64 data model (Windows 64-bit), while it is 8 bytes on C++ LP64 data model (Linux 64-bit).
 
@@ -537,7 +537,7 @@ Table 43 Alignment Requirements
 
 Vector types are structures. Their first, second, third, and fourth components are accessible through the `x`, `y`, `z`, and `w` fields, respectively.
 
-```cuda
+```c
 int sum(int4 value) {
     return value.x + value.y + value.z + value.w;
 }
@@ -545,7 +545,7 @@ int sum(int4 value) {
 
 They all have a factory function of the form `make_<type_name>()`; for example:
 
-```cuda
+```c
 int4 add_one(int x, int y, int z, int w) {
     return make_int4(x + 1, y + 1, z + 1, w + 1);
 }
@@ -555,7 +555,7 @@ If host code is not compiled with `nvcc`, the vector types and related functions
 
 ## 5.4.3. Kernel Configuration
 
-Any call to a `__global__` or `__tile_global__` function must specify an *execution configuration* for that call. This execution configuration defines the dimensions of the grid and blocks that will be used to execute the function on the device, as well as the associated [stream](../02-basics/asynchronous-execution.md#cuda-streams).
+Any call to a `__global__` or `__tile_global__` function must specify an _execution configuration_ for that call. This execution configuration defines the dimensions of the grid and blocks that will be used to execute the function on the device, as well as the associated [stream](../02-basics/asynchronous-execution.md#cuda-streams).
 
 The execution configuration is specified by inserting an expression in the form `<<<grid_dim, block_dim, dynamic_smem_bytes, stream>>>` between the function name and the parenthesized argument list, where:
 
@@ -566,7 +566,7 @@ The execution configuration is specified by inserting an expression in the form 
 
 The following example shows a kernel function declaration and call:
 
-```cuda
+```c
 __global__ void kernel(float* parameter);
 
 kernel<<<grid_dim, block_dim, dynamic_smem_bytes>>>(parameter);
@@ -580,7 +580,7 @@ The function call fails if `grid_dim` or `block_dim` exceeds the maximum sizes a
 
 Compute capability 9.0 and higher allow users to specify compile-time thread block cluster dimensions so that the kernels can use the [cluster hierarchy](../02-basics/intro-to-cuda-cpp.md#thread-block-clusters) in CUDA. The compile-time cluster dimension can be specified using the `__cluster_dims__` attribute with the following syntax: `__cluster_dims__([x, [y, [z]]])`. The example below shows a compile-time cluster size of 2 in the X dimension and 1 in the Y and Z dimensions.
 
-```cuda
+```c
 __global__ void __cluster_dims__(2, 1, 1) kernel(float* parameter);
 ```
 
@@ -588,7 +588,7 @@ The default form of `__cluster_dims__()` specifies that a kernel is to be launch
 
 The dimensions of the thread block cluster can also be specified at runtime, and the kernel with the cluster can be launched using the `cudaLaunchKernelEx` API. This API takes a configuration argument of type `cudaLaunchConfig_t`, a kernel function pointer, and kernel arguments. The example below shows runtime kernel configuration.
 
-```cuda
+```c
 __global__ void kernel(float parameter1, int parameter2) {}
 
 int main() {
@@ -622,7 +622,7 @@ As discussed in the [Kernel Launch and Occupancy](../02-basics/writing-cuda-kern
 
 Therefore, the compiler uses heuristics to minimize register usage while keeping [register spilling](../02-basics/writing-cuda-kernels.md#writing-cuda-kernels-registers) and instruction count to a minimum. Applications can optionally aid these heuristics by providing additional information to the compiler in the form of launch bounds that are specified using the `__launch_bounds__()` qualifier in the definition of a `__global__` function:
 
-```cuda
+```c
 __global__ void
 __launch_bounds__(maxThreadsPerBlock, minBlocksPerMultiprocessor, maxBlocksPerCluster)
 MyKernel(...) {
@@ -638,7 +638,6 @@ If launch bounds are specified, the compiler first derives the upper limit, `L`,
 
 - If the initial register usage exceeds `L`, the compiler reduces it until it is less than or equal to `L`. This usually results in increased local memory usage and/or a higher number of instructions.
 - If the initial register usage is lower than `L`
-
   - If `maxThreadsPerBlock` is specified but `minBlocksPerMultiprocessor` is not, the compiler uses `maxThreadsPerBlock` to determine the register usage thresholds for the transitions between `n` and `n + 1` resident blocks. This occurs when using one less register makes room for an additional resident block. Then, the compiler applies similar heuristics as when no launch bounds are specified.
   - If both `minBlocksPerMultiprocessor` and `maxThreadsPerBlock` are specified, the compiler may increase register usage up to `L` in order to reduce the number of instructions and better hide the latency of single-threaded instructions.
 
@@ -651,7 +650,7 @@ The per-thread resources required by a CUDA kernel may limit the maximum block s
 
 The optimal launch bounds for a kernel typically differ across major architecture revisions. The following code sample illustrates how this is managed in device code with the `__CUDA_ARCH__` [macro](cpp-language-extensions.md#cuda-arch-macro).
 
-```cuda
+```c
 #define THREADS_PER_BLOCK  256
 
 #if __CUDA_ARCH__ >= 900
@@ -671,7 +670,7 @@ MyKernel(...) {
 
 When `MyKernel` is invoked with the maximum number of threads per block, which is specified as the first parameter of `__launch_bounds__()`, it is tempting to use `MY_KERNEL_MAX_THREADS` as the number of threads per block in the execution configuration:
 
-```cuda
+```c
 // Host code
 MyKernel<<<blocksPerGrid, MY_KERNEL_MAX_THREADS>>>(...);
 ```
@@ -680,13 +679,14 @@ However, this will not work, since `__CUDA_ARCH__` is undefined in host code as 
 
 - Either at compile time using a macro or constant that does not depend on `__CUDA_ARCH__`, for example
 
-  ```cuda
+  ```c
   // Host code
   MyKernel<<<blocksPerGrid, THREADS_PER_BLOCK>>>(...);
   ```
+
 - Or at runtime based on the compute capability
 
-  ```cuda
+  ```c
   // Host code
   cudaGetDeviceProperties(&deviceProp, device);
   int threadsPerBlock = (deviceProp.major >= 9) ? 2 * THREADS_PER_BLOCK : THREADS_PER_BLOCK;
@@ -699,7 +699,7 @@ The `--resource-usage` compiler option reports register usage. The [CUDA profile
 
 To enable low-level performance tuning, CUDA C++ offers the `__maxnreg__()` function qualifier, which passes performance tuning information to the backend optimizing compiler. The `__maxnreg__()` qualifier specifies the maximum number of registers that can be allocated to a single thread in a thread block. In the definition of a `__global__` function:
 
-```cuda
+```c
 __global__ void
 __maxnreg__(maxNumberRegistersPerThread)
 MyKernel(...) {
@@ -717,7 +717,7 @@ The `--maxrregcount <N>` compiler option can be used to control register usage f
 
 ### 5.4.4.1. Thread Block Synchronization Functions
 
-```cuda
+```c
 void __syncthreads();
 int  __syncthreads_count(int predicate);
 int  __syncthreads_and(int predicate);
@@ -733,7 +733,7 @@ The intrinsics have the following semantics:
 
 The following example shows how to use `__syncthreads()` to synchronize threads within a thread block and safely sum the elements of an array shared among the threads:
 
-```cuda
+```c
 #include <cuda_runtime_api.h>
 #include <memory.h>
 #include <cstdlib>
@@ -817,7 +817,7 @@ The `__syncthreads*()` intrinsics are permitted in conditional code, but only if
 
 The following example demonstrates a valid behavior:
 
-```cuda
+```c
 // assuming blockDim.x is 128
 __global__ void syncthreads_valid_behavior(int* input_data, int* output_data) {
     __shared__ int shared_data[128];
@@ -831,7 +831,7 @@ __global__ void syncthreads_valid_behavior(int* input_data, int* output_data) {
 
 while the following examples exhibit invalid behavior, such as kernel hang, or undefined behavior:
 
-```cuda
+```c
 // assuming blockDim.x is 128
 __global__ void syncthreads_invalid_behavior1(int* input_data, int* output_data) {
     __shared__ int shared_data[256];
@@ -843,7 +843,7 @@ __global__ void syncthreads_invalid_behavior1(int* input_data, int* output_data)
 }
 ```
 
-```cuda
+```c
 // assuming blockDim.x is 128
 __global__ void syncthreads_invalid_behavior2(int* input_data, int* output_data) {
     __shared__ int shared_data[256];
@@ -861,19 +861,19 @@ __global__ void syncthreads_invalid_behavior2(int* input_data, int* output_data)
 
 `__syncthreads()` **variants with predicate**:
 
-```cuda
+```c
 int __syncthreads_count(int predicate);
 ```
 
 is identical to `__syncthreads()` except that it evaluates a predicate for all non-exited threads in the block and returns the number of threads for which the predicate evaluates to a non-zero value.
 
-```cuda
+```c
 int __syncthreads_and(int predicate);
 ```
 
 is identical to `__syncthreads()` except that it evaluates the predicate for all non-exited threads in the block. It returns a non-zero value if and only if the predicate evaluates to a non-zero value for all of them.
 
-```cuda
+```c
 int __syncthreads_or(int predicate);
 ```
 
@@ -881,7 +881,7 @@ is identical to `__syncthreads()` except that it evaluates the predicate for all
 
 ### 5.4.4.2. Warp Synchronization Function
 
-```cuda
+```c
 void __syncwarp(unsigned mask = 0xFFFFFFFF);
 ```
 
@@ -893,7 +893,7 @@ The functions are subject to the [Warp \_\_sync Intrinsic Constraints](cpp-langu
 
 The following example demonstrates how to use `__syncwarp()` to synchronize threads within a warp to safely access a shared memory array:
 
-```cuda
+```c
 __global__ void example_syncwarp(int* input_data, int* output_data) {
     if (threadIdx.x < warpSize) {
         __shared__ int shared_data[warpSize];
@@ -912,7 +912,7 @@ The CUDA programming model assumes a weakly ordered memory model. In other words
 
 In the following example, thread 1 executes `writeXY()`, while thread 2 executes `readXY()`.
 
-```cuda
+```c
 __device__ int X = 1, Y = 2;
 
 __device__ void writeXY() {
@@ -938,7 +938,7 @@ Memory fence and synchronization functions enforce a [sequentially consistent or
 
 **CUDA C++**
 
-```cuda
+```c
 // <cuda/atomic> header
 cuda::atomic_thread_fence(cuda::memory_order_seq_cst, cuda::thread_scope_block);
 ```
@@ -950,7 +950,7 @@ ensures that:
 
 **Intrinsics**
 
-```cuda
+```c
 void __threadfence_block();
 ```
 
@@ -963,7 +963,7 @@ ensures that:
 
 **CUDA C++**
 
-```cuda
+```c
 cuda::atomic_thread_fence(cuda::memory_order_seq_cst, cuda::thread_scope_device);
 ```
 
@@ -973,7 +973,7 @@ ensures that:
 
 **Intrinsics**
 
-```cuda
+```c
 void __threadfence();
 ```
 
@@ -985,7 +985,7 @@ ensures that:
 
 **CUDA C++**
 
-```cuda
+```c
 cuda::atomic_thread_fence(cuda::memory_order_seq_cst, cuda::thread_scope_system);
 ```
 
@@ -995,7 +995,7 @@ ensures that:
 
 **Intrinsics**
 
-```cuda
+```c
 void __threadfence_system();
 ```
 
@@ -1007,7 +1007,7 @@ In the previous code sample, we can insert memory fences in the code as follows:
 
 **CUDA C++**
 
-```cuda
+```c
 #include <cuda/atomic>
 
 __device__ int X = 1, Y = 2;
@@ -1027,7 +1027,7 @@ __device__ void readXY() {
 
 **Intrinsics**
 
-```cuda
+```c
 __device__ int X = 1, Y = 2;
 
 __device__ void writeXY() {
@@ -1066,7 +1066,7 @@ Without a fence between storing the partial sum and incrementing the counter, th
 
 In the code sample below, the visibility of the memory operations on the `result` variable is ensured by declaring it as `volatile`. For more details, see the `volatile`-[qualified variables](cpp-language-support.md#volatile-qualifier) section.
 
-```cuda
+```c
 #include <cuda/atomic>
 
 __device__ int count = 0;
@@ -1121,36 +1121,20 @@ Atomic functions perform read-modify-write operations on shared data, making the
 
 CUDA provides atomic functions in five ways:
 
-Extended CUDA C++ atomic functions, [cuda::atomic](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic.html) and [cuda::atomic\_ref](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic_ref.html).
-:   - They are allowed in both host and device code.
-    - They follow the [C++ standard atomic operations](https://en.cppreference.com/w/cpp/atomic/atomic.html) semantics.
-    - They allow specifying the [thread scope](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes) of the atomic operations.
+Extended CUDA C++ atomic functions, [cuda::atomic](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic.html) and [cuda::atomic_ref](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/synchronization_primitives/atomic_ref.html).
+: - They are allowed in both host and device code. - They follow the [C++ standard atomic operations](https://en.cppreference.com/w/cpp/atomic/atomic.html) semantics. - They allow specifying the [thread scope](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes) of the atomic operations.
 
-Standard C++ atomic functions, [cuda::std::atomic](https://en.cppreference.com/w/cpp/atomic/atomic.html) and [cuda::std::atomic\_ref](https://en.cppreference.com/w/cpp/atomic/atomic_ref.html).
-:   - They are allowed in both host and device code.
-    - They follow the [C++ standard atomic operations](https://en.cppreference.com/w/cpp/atomic/atomic.html) semantics.
-    - They do not allow specifying the [thread scope](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes) of the atomic operations.
+Standard C++ atomic functions, [cuda::std::atomic](https://en.cppreference.com/w/cpp/atomic/atomic.html) and [cuda::std::atomic_ref](https://en.cppreference.com/w/cpp/atomic/atomic_ref.html).
+: - They are allowed in both host and device code. - They follow the [C++ standard atomic operations](https://en.cppreference.com/w/cpp/atomic/atomic.html) semantics. - They do not allow specifying the [thread scope](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes) of the atomic operations.
 
 Compiler [built-in atomic functions](cpp-language-extensions.md#built-in-atomic-functions), `__nv_atomic_<op>()`.
-:   - They have been available since CUDA 12.8.
-    - They are only allowed in device code.
-    - They follow the [C++ standard atomic memory order](https://en.cppreference.com/w/cpp/atomic/memory_order.html) semantics.
-    - They allow specifying the [thread scope](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes) of the atomic operations.
-    - They have the same memory ordering semantics as [C++ standard atomic operations](https://en.cppreference.com/w/cpp/atomic/atomic.html).
-    - They support a subset of the data types allowed by [cuda::std::atomic](https://nvidia.github.io/cccl/libcudacxx/extended_api/synchronization_primitives/atomic.html) and [cuda::std::atomic\_ref](https://nvidia.github.io/cccl/libcudacxx/extended_api/synchronization_primitives/atomic_ref.html), except for 128-bit data types.
-    - They are not supported in tile code.
+: - They have been available since CUDA 12.8. - They are only allowed in device code. - They follow the [C++ standard atomic memory order](https://en.cppreference.com/w/cpp/atomic/memory_order.html) semantics. - They allow specifying the [thread scope](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes) of the atomic operations. - They have the same memory ordering semantics as [C++ standard atomic operations](https://en.cppreference.com/w/cpp/atomic/atomic.html). - They support a subset of the data types allowed by [cuda::std::atomic](https://nvidia.github.io/cccl/libcudacxx/extended_api/synchronization_primitives/atomic.html) and [cuda::std::atomic_ref](https://nvidia.github.io/cccl/libcudacxx/extended_api/synchronization_primitives/atomic_ref.html), except for 128-bit data types. - They are not supported in tile code.
 
 CUDA Tile C++ atomic functions (for example, `cuda::tiles::atomic_load`):
-:   - They are allowed only in tile code.
-    - They follow the [C++ standard atomic memory order](https://en.cppreference.com/w/cpp/atomic/memory_order.html) semantics.
-    - They allow specifying a thread scope through `cuda::tiles::thread_scope`.
+: - They are allowed only in tile code. - They follow the [C++ standard atomic memory order](https://en.cppreference.com/w/cpp/atomic/memory_order.html) semantics. - They allow specifying a thread scope through `cuda::tiles::thread_scope`.
 
 [Legacy atomic functions](cpp-language-extensions.md#legacy-atomic-functions), `atomic<Op>()`.
-:   - They are only allowed in device code.
-    - They only support `memory_order_relaxed` [C++ atomic memory semantics](https://en.cppreference.com/w/cpp/atomic/memory_order.html).
-    - They allow specifying the [thread scope](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes) of the atomic operations as part of the function name.
-    - Unlike [built-in atomic functions](cpp-language-extensions.md#built-in-atomic-functions), legacy atomic functions only ensure atomicity and do not introduce synchronization points (fences).
-    - They support a subset of the data types allowed by [built-in atomic functions](cpp-language-extensions.md#built-in-atomic-functions). The atomic `add` operation supports additional data types.
+: - They are only allowed in device code. - They only support `memory_order_relaxed` [C++ atomic memory semantics](https://en.cppreference.com/w/cpp/atomic/memory_order.html). - They allow specifying the [thread scope](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes) of the atomic operations as part of the function name. - Unlike [built-in atomic functions](cpp-language-extensions.md#built-in-atomic-functions), legacy atomic functions only ensure atomicity and do not introduce synchronization points (fences). - They support a subset of the data types allowed by [built-in atomic functions](cpp-language-extensions.md#built-in-atomic-functions). The atomic `add` operation supports additional data types.
 
 > [!TIP]
 >
@@ -1171,7 +1155,7 @@ The atomic functions described in this section have a [memory ordering](https://
 
 The following example shows the CPU and GPU atomically updating an integer value at address `addr`:
 
-```cuda
+```c
 #include <cuda_runtime.h>
 
 __global__ void atomicAdd_kernel(int* addr) {
@@ -1198,7 +1182,7 @@ void test_atomicAdd(int device_id) {
 
 Note that any atomic operation can be implemented based on `atomicCAS()` (Compare and Swap). For example, `atomicAdd()` for single-precision floating-point numbers can be implemented as follows:
 
-```cuda
+```c
 #include <cuda/memory>
 #include <cuda/std/bit>
 
@@ -1222,7 +1206,7 @@ See the example on [Compiler Explorer](https://godbolt.org/z/676e5bc7a).
 
 #### 5.4.5.1.1. `atomicAdd()`
 
-```cuda
+```c
 T atomicAdd(T* address, T val);
 ```
 
@@ -1244,7 +1228,7 @@ The atomicity of `atomicAdd()` applied to vector types, for example `__half2` or
 
 #### 5.4.5.1.2. `atomicSub()`
 
-```cuda
+```c
 T atomicSub(T* address, T val);
 ```
 
@@ -1262,7 +1246,7 @@ The function returns the `old` value.
 
 #### 5.4.5.1.3. `atomicInc()`
 
-```cuda
+```c
 unsigned atomicInc(unsigned* address, unsigned val);
 ```
 
@@ -1276,7 +1260,7 @@ The function returns the `old` value.
 
 #### 5.4.5.1.4. `atomicDec()`
 
-```cuda
+```c
 unsigned atomicDec(unsigned* address, unsigned val);
 ```
 
@@ -1290,7 +1274,7 @@ The function returns the `old` value.
 
 #### 5.4.5.1.5. `atomicAnd()`
 
-```cuda
+```c
 T atomicAnd(T* address, T val);
 ```
 
@@ -1308,7 +1292,7 @@ The function returns the `old` value.
 
 #### 5.4.5.1.6. `atomicOr()`
 
-```cuda
+```c
 T atomicOr(T* address, T val);
 ```
 
@@ -1326,7 +1310,7 @@ The function returns the `old` value.
 
 #### 5.4.5.1.7. `atomicXor()`
 
-```cuda
+```c
 T atomicXor(T* address, T val);
 ```
 
@@ -1344,7 +1328,7 @@ The function returns the `old` value.
 
 #### 5.4.5.1.8. `atomicMin()`
 
-```cuda
+```c
 T atomicMin(T* address, T val);
 ```
 
@@ -1362,7 +1346,7 @@ The function returns the `old` value.
 
 #### 5.4.5.1.9. `atomicMax()`
 
-```cuda
+```c
 T atomicMax(T* address, T val);
 ```
 
@@ -1380,11 +1364,11 @@ The function returns the `old` value.
 
 #### 5.4.5.1.10. `atomicExch()`
 
-```cuda
+```c
 T atomicExch(T* address, T val);
 ```
 
-```cuda
+```c
 template<typename T>
 T atomicExch(T* address, T val); // only 128-bit types, compute capability 9.x and higher
 ```
@@ -1409,11 +1393,11 @@ The C++ template function `atomicExch()` supports 128-bit types with the followi
 
 #### 5.4.5.1.11. `atomicCAS()`
 
-```cuda
+```c
 T atomicCAS(T* address, T compare, T val);
 ```
 
-```cuda
+```c
 template<typename T>
 T atomicCAS(T* address, T compare, T val);  // only 128-bit types, compute capability 9.x and higher
 ```
@@ -1445,7 +1429,7 @@ CUDA 12.8 and later support CUDA compiler built-in functions for atomic operatio
 
 Below are listed the raw enumerators for the [memory orders](https://en.cppreference.com/w/cpp/atomic/atomic.html) and [thread scopes](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory_model.html#libcudacxx-extended-api-memory-model-thread-scopes), which are used as the `order` and `scope` arguments of the built-in atomic functions:
 
-```cuda
+```c
 // atomic memory orders
 enum {
    __NV_ATOMIC_RELAXED,
@@ -1457,7 +1441,7 @@ enum {
 };
 ```
 
-```cuda
+```c
 // thread scopes
 enum {
    __NV_THREAD_SCOPE_THREAD,
@@ -1475,7 +1459,7 @@ enum {
 
 Example:
 
-```cuda
+```c
 __device__ T __nv_atomic_load_n(T*  pointer,
                                 int memory_order,
                                 int thread_scope = __NV_THREAD_SCOPE_SYSTEM);
@@ -1491,7 +1475,7 @@ Atomic built-in functions have the following restrictions:
 
 Example of unsupported cases:
 
-```cuda
+```c
  // Not permitted in a host function
  __host__ void bar() {
      unsigned u1 = 1, u2 = 2;
@@ -1521,7 +1505,7 @@ __device__ void foo() {
 
 #### 5.4.5.2.1. `__nv_atomic_fetch_add()`, `__nv_atomic_add()`
 
-```cuda
+```c
 __device__ T    __nv_atomic_fetch_add(T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_add      (T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1541,7 +1525,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.2. `__nv_atomic_fetch_sub()`, `__nv_atomic_sub()`
 
-```cuda
+```c
 __device__ T    __nv_atomic_fetch_sub(T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_sub      (T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1561,7 +1545,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.3. `__nv_atomic_fetch_and()`, `__nv_atomic_and()`
 
-```cuda
+```c
 __device__ T    __nv_atomic_fetch_and(T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_and      (T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1581,7 +1565,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.4. `__nv_atomic_fetch_or()`, `__nv_atomic_or()`
 
-```cuda
+```c
 __device__ T    __nv_atomic_fetch_or(T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_or      (T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1601,7 +1585,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.5. `__nv_atomic_fetch_xor()`, `__nv_atomic_xor()`
 
-```cuda
+```c
 __device__ T    __nv_atomic_fetch_xor(T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_xor      (T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1621,7 +1605,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.6. `__nv_atomic_fetch_min()`, `__nv_atomic_min()`
 
-```cuda
+```c
 __device__ T    __nv_atomic_fetch_min(T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_min      (T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1641,7 +1625,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.7. `__nv_atomic_fetch_max()`, `__nv_atomic_max()`
 
-```cuda
+```c
 __device__ T    __nv_atomic_fetch_max(T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_max      (T* address, T val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1661,7 +1645,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.8. `__nv_atomic_exchange()`, `__nv_atomic_exchange_n()`
 
-```cuda
+```c
 __device__ T    __nv_atomic_exchange_n(T* address, T val,          int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_exchange  (T* address, T* val, T* ret, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1683,7 +1667,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.9. `__nv_atomic_compare_exchange()`, `__nv_atomic_compare_exchange_n()`
 
-```cuda
+```c
 __device__ bool __nv_atomic_compare_exchange  (T* address, T* expected, T* desired, bool weak, int success_order, int failure_order,
                                                int scope = __NV_THREAD_SCOPE_SYSTEM);
 
@@ -1706,7 +1690,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.10. `__nv_atomic_load()`, `__nv_atomic_load_n()`
 
-```cuda
+```c
 __device__ void __nv_atomic_load  (T* address, T* ret, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ T    __nv_atomic_load_n(T* address,         int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1726,7 +1710,7 @@ The functions support the following data types:
 
 #### 5.4.5.2.11. `__nv_atomic_store()`, `__nv_atomic_store_n()`
 
-```cuda
+```c
 __device__ void __nv_atomic_store  (T* address, T* val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 __device__ void __nv_atomic_store_n(T* address, T  val, int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
@@ -1742,7 +1726,7 @@ The functions perform the following operations in one atomic transaction:
 
 #### 5.4.5.2.12. `__nv_atomic_thread_fence()`
 
-```cuda
+```c
 __device__ void __nv_atomic_thread_fence(int order, int scope = __NV_THREAD_SCOPE_SYSTEM);
 ```
 
@@ -1758,7 +1742,7 @@ The following section describes the warp functions that allow threads within a w
 
 ### 5.4.6.1. Warp Active Mask
 
-```cuda
+```c
 unsigned __activemask();
 ```
 
@@ -1768,7 +1752,7 @@ The function returns a 32-bit integer mask representing all currently active thr
 >
 > `__activemask()` cannot be used to determine which warp lanes execute a given branch. This function is intended for opportunistic warp-level programming and only provides an instantaneous snapshot of the active threads within a warp.
 >
-> ```cuda
+> ```c
 > // Check whether at least one thread's predicate evaluates to true
 > if (pred) {
 >     // Invalid: the value of 'at_least_one' is non-deterministic
@@ -1781,7 +1765,7 @@ Note that threads convergent at an `__activemask()` call are not guaranteed to r
 
 For example, the compiler could reorder instructions, and the set of active threads might not be preserved:
 
-```cuda
+```c
 unsigned mask      = __activemask();              // Assume mask == 0xFFFFFFFF (all bits set, all threads active)
 int      predicate = threadIdx.x % 2 == 0;        // 1 for even threads, 0 for odd threads
 int      result    = __any_sync(mask, predicate); // Active threads might not be preserved
@@ -1789,7 +1773,7 @@ int      result    = __any_sync(mask, predicate); // Active threads might not be
 
 ### 5.4.6.2. Warp Vote Functions
 
-```cuda
+```c
 int      __all_sync   (unsigned mask, int predicate);
 int      __any_sync   (unsigned mask, int predicate);
 unsigned __ballot_sync(unsigned mask, int predicate);
@@ -1798,13 +1782,13 @@ unsigned __ballot_sync(unsigned mask, int predicate);
 The warp vote functions enable the threads of a given [warp](../01-introduction/programming-model.md#programming-model-warps-simt) to perform a reduction-and-broadcast operation. These functions take an integer `predicate` as input from each non-exited thread in the warp and compare those values with zero. The results of the comparisons are then combined (reduced) across the [active threads](../03-advanced/advanced-kernel-programming.md#simt-architecture-notes) of the warp in one of the following ways, broadcasting a single return value to each participating thread:
 
 `__all_sync(unsigned mask, predicate)`:
-:   Evaluates `predicate` for all non-exited threads in `mask` and returns non-zero if `predicate` evaluates to non-zero for all of them.
+: Evaluates `predicate` for all non-exited threads in `mask` and returns non-zero if `predicate` evaluates to non-zero for all of them.
 
 `__any_sync(unsigned mask, predicate)`:
-:   Evaluates `predicate` for all non-exited threads in `mask` and returns non-zero if `predicate` evaluates to non-zero for one or more of them.
+: Evaluates `predicate` for all non-exited threads in `mask` and returns non-zero if `predicate` evaluates to non-zero for one or more of them.
 
 `__ballot_sync(unsigned mask, predicate)`:
-:   Evaluates `predicate` for all non-exited threads in `mask` and returns an integer whose Nth bit is set if `predicate` evaluates to non-zero for the Nth thread of the warp and the Nth thread is active. Otherwise, the Nth bit is zero.
+: Evaluates `predicate` for all non-exited threads in `mask` and returns an integer whose Nth bit is set if `predicate` evaluates to non-zero for the Nth thread of the warp and the Nth thread is active. Otherwise, the Nth bit is zero.
 
 The functions are subject to the [Warp \_\_sync Intrinsic Constraints](cpp-language-extensions.md#warp-sync-intrinsic-constraints).
 
@@ -1818,7 +1802,7 @@ The functions are subject to the [Warp \_\_sync Intrinsic Constraints](cpp-langu
 >
 > It is suggested to use the [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/warp/warp_match_all.html) `cuda::device::warp_match_all()` function as a generalized and safer alternative to `__match_all_sync` function.
 
-```cuda
+```c
 unsigned __match_any_sync(unsigned mask, T value);
 unsigned __match_all_sync(unsigned mask, T value, int *pred);
 ```
@@ -1826,10 +1810,10 @@ unsigned __match_all_sync(unsigned mask, T value, int *pred);
 The warp match functions perform a broadcast-and-compare operation of a variable between non-exited threads within a [warp](../01-introduction/programming-model.md#programming-model-warps-simt).
 
 `__match_any_sync`
-:   Returns the mask of non-exited threads that have the same bitwise `value` in `mask`.
+: Returns the mask of non-exited threads that have the same bitwise `value` in `mask`.
 
 `__match_all_sync`
-:   Returns `mask` if all non-exited threads in `mask` have the same bitwise `value`; otherwise 0 is returned. Predicate `pred` is set to `true` if all non-exited threads in `mask` have the same bitwise `value`; otherwise the predicate is set to false.
+: Returns `mask` if all non-exited threads in `mask` have the same bitwise `value`; otherwise 0 is returned. Predicate `pred` is set to `true` if all non-exited threads in `mask` have the same bitwise `value`; otherwise the predicate is set to false.
 
 `T` can be `int`, `unsigned`, `long`, `unsigned long`, `long long`, `unsigned long long`, `float` or `double`.
 
@@ -1847,7 +1831,7 @@ The functions are subject to the [Warp \_\_sync Intrinsic Constraints](cpp-langu
 
 Supported by devices of compute capability 8.x or higher.
 
-```cuda
+```c
 T        __reduce_add_sync(unsigned mask, T value);
 T        __reduce_min_sync(unsigned mask, T value);
 T        __reduce_max_sync(unsigned mask, T value);
@@ -1860,10 +1844,10 @@ unsigned __reduce_xor_sync(unsigned mask, unsigned value);
 The `__reduce_<op>_sync` intrinsics perform a reduction operation on the data provided in `value` after synchronizing all non-exited threads named in `mask`.
 
 `__reduce_add_sync`, `__reduce_min_sync`, `__reduce_max_sync`
-:   Returns the result of applying an arithmetic add, min, or max reduction operation on the values provided in `value` by each non-exited thread named in `mask`. `T` can be an `unsigned` or `signed` integer.
+: Returns the result of applying an arithmetic add, min, or max reduction operation on the values provided in `value` by each non-exited thread named in `mask`. `T` can be an `unsigned` or `signed` integer.
 
 `__reduce_and_sync`, `__reduce_or_sync`, `__reduce_xor_sync`
-:   Returns the result of applying a bitwise AND, OR, or XOR reduction operation on the values provided in `value` by each non-exited thread named in `mask`.
+: Returns the result of applying a bitwise AND, OR, or XOR reduction operation on the values provided in `value` by each non-exited thread named in `mask`.
 
 The functions are subject to the [Warp \_\_sync Intrinsic Constraints](cpp-language-extensions.md#warp-sync-intrinsic-constraints).
 
@@ -1877,7 +1861,7 @@ The functions are subject to the [Warp \_\_sync Intrinsic Constraints](cpp-langu
 >
 > It is suggested to use the [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/warp/warp_shuffle.html#libcudacxx-extended-api-warp-warp-shuffle) `cuda::device::warp_shuffle()` functions as a generalized and safer alternative to `__shfl_sync()` and `__shfl_<op>_sync()` intrinsics.
 
-```cuda
+```c
 T __shfl_sync     (unsigned mask, T value, int      srcLane,  int width=warpSize);
 T __shfl_up_sync  (unsigned mask, T value, unsigned delta,    int width=warpSize);
 T __shfl_down_sync(unsigned mask, T value, unsigned delta,    int width=warpSize);
@@ -1887,7 +1871,7 @@ T __shfl_xor_sync (unsigned mask, T value, int      laneMask, int width=warpSize
 Warp shuffle functions exchange a value between non-exited threads within a [warp](../01-introduction/programming-model.md#programming-model-warps-simt) without the use of shared memory.
 
 `__shfl_sync()`: Direct copy from indexed lane.
-:   The intrinsic function returns the value of `value` held by the thread whose ID is given by `srcLane`.
+: The intrinsic function returns the value of `value` held by the thread whose ID is given by `srcLane`.
 
     - If `width` is less than `warpSize`, then each subsection of the warp behaves as a separate entity with a starting logical lane ID of 0.
     - If `srcLane` is outside the range `[0, width - 1]`, the result corresponds to the value held by the `srcLane % width`, which is within the same subsection.
@@ -1895,7 +1879,7 @@ Warp shuffle functions exchange a value between non-exited threads within a [war
 ---
 
 `__shfl_up_sync()`: Copy from a lane with a lower ID than the caller’s.
-:   The intrinsic function calculates a source lane ID by subtracting `delta` from the caller’s lane ID. The value of `value` held by the resulting lane ID is returned: in effect, `value` is shifted up the warp by `delta` lanes.
+: The intrinsic function calculates a source lane ID by subtracting `delta` from the caller’s lane ID. The value of `value` held by the resulting lane ID is returned: in effect, `value` is shifted up the warp by `delta` lanes.
 
     - If `width` is less than `warpSize`, then each subsection of the warp behaves as a separate entity with a starting logical lane ID of 0.
     - The source lane index will not wrap around the value of `width`, so the lower `delta` lanes will remain unchanged.
@@ -1903,7 +1887,7 @@ Warp shuffle functions exchange a value between non-exited threads within a [war
 ---
 
 `__shfl_down_sync()`: Copy from a lane with a higher ID than the caller’s.
-:   The intrinsic function calculates a source lane ID by adding `delta` to the caller’s lane ID. The value of `value` held by the resulting lane ID is returned: this has the effect of shifting `value` down the warp by `delta` lanes.
+: The intrinsic function calculates a source lane ID by adding `delta` to the caller’s lane ID. The value of `value` held by the resulting lane ID is returned: this has the effect of shifting `value` down the warp by `delta` lanes.
 
     - If `width` is less than `warpSize`, then each subsection of the warp behaves as a separate entity with a starting logical lane ID of 0.
     - As for `__shfl_up_sync()`, the ID number of the source lane will not wrap around the value of width and so the upper `delta` lanes will effectively remain unchanged.
@@ -1911,7 +1895,7 @@ Warp shuffle functions exchange a value between non-exited threads within a [war
 ---
 
 `__shfl_xor_sync()`: Copy from a lane based on bitwise XOR of own lane ID.
-:   The intrinsic function calculates a source lane ID by performing a bitwise XOR of the caller’s lane ID and `laneMask`: the value of `value` held by the resulting lane ID is returned. This mode implements a butterfly addressing pattern, which is used in tree reduction and broadcast.
+: The intrinsic function calculates a source lane ID by performing a bitwise XOR of the caller’s lane ID and `laneMask`: the value of `value` held by the resulting lane ID is returned. This mode implements a butterfly addressing pattern, which is used in tree reduction and broadcast.
 
     - If `width` is less than `warpSize`, then each group of `width` consecutive threads are able to access elements from earlier groups. However, if they attempt to access elements from later groups of threads their own value of `value` will be returned.
 
@@ -1931,7 +1915,7 @@ The functions are subject to the [Warp \_\_sync Intrinsic Constraints](cpp-langu
 
 Examples of valid warp shuffle usage:
 
-```cuda
+```c
 int laneId = threadIdx.x % warpSize;
 int data   = ...
 
@@ -1954,7 +1938,7 @@ int result4 = __shfl_down_sync(0xFFFFFFFF, data, 2);
 
 Examples of invalid warp shuffle usage:
 
-```cuda
+```c
 int laneId = threadIdx.x % warpSize;
 int value  = ...
  // undefined behavior: lane 0 does not participate in the call
@@ -1977,7 +1961,7 @@ Example 1: Broadcast of a single value across a warp
 
 **CUDA C++**
 
-```cuda
+```c
 #include <cassert>
 #include <cuda/warp>
 
@@ -2000,7 +1984,7 @@ int main() {
 
 **Intrinsics**
 
-```cuda
+```c
 #include <assert.h>
 
 __global__ void warp_broadcast_kernel(int input) {
@@ -2030,7 +2014,7 @@ Example 2: Inclusive plus-scan across sub-partitions of 8 threads
 
 **CUDA C++**
 
-```cuda
+```c
 #include <cstdio>
 #include <cub/cub.cuh>
 
@@ -2055,7 +2039,7 @@ int main() {
 
 **Intrinsics**
 
-```cuda
+```c
 #include <stdio.h>
 
 __global__ void scan_sub_partition_with_8_threads_kernel() {
@@ -2089,7 +2073,7 @@ Example 3: Reduction across a warp
 
 **CUDA C++**
 
-```cuda
+```c
 #include <cstdio>
 #include <cub/cub.cuh>
 #include <cuda/warp>
@@ -2115,7 +2099,7 @@ int main() {
 
 **Intrinsics**
 
-```cuda
+```c
 #include <stdio.h>
 
 __global__ void warp_reduce_kernel() {
@@ -2170,7 +2154,7 @@ The behavior of warp `__sync` functions is invalid, such as kernel hang, or unde
 
 Examples of valid warp intrinsics usage:
 
-```cuda
+```c
 __global__ void valid_examples() {
     if (threadIdx.x < 4) {        // threads 0, 1, 2, 3 are active
         __all_sync(0b1111, pred); // CORRECT, threads 0, 1, 2, 3 participate in the call
@@ -2185,7 +2169,7 @@ __global__ void valid_examples() {
 
 Disjoint `mask` examples:
 
-```cuda
+```c
 __global__ void example_syncwarp_with_mask(int* input_data, int* output_data) {
     if (threadIdx.x < warpSize) {
         __shared__ int shared_data[warpSize];
@@ -2199,7 +2183,7 @@ __global__ void example_syncwarp_with_mask(int* input_data, int* output_data) {
 }
 ```
 
-```cuda
+```c
 __global__ void example_syncwarp_with_mask_branches(int* input_data, int* output_data) {
     if (threadIdx.x < warpSize) {
         __shared__ int shared_data[warpSize];
@@ -2221,7 +2205,7 @@ __global__ void example_syncwarp_with_mask_branches(int* input_data, int* output
 
 Examples of invalid warp intrinsics usage:
 
-```cuda
+```c
 if (threadIdx.x < 4) {           // threads 0, 1, 2, 3 are active
     __all_sync(0b0000011, pred); // WRONG, threads 2, 3 are active but not set in mask
     __all_sync(0b1111111, pred); // WRONG, threads 4, 5, 6 are not active but set in mask
@@ -2259,7 +2243,7 @@ defines `__CUDA_ARCH__` as `800`.
 
 Example:
 
-```cuda
+```c
 #if !defined(__CUDA_ARCH__)
     typedef int my_type;
 #else
@@ -2273,11 +2257,11 @@ __global__ void kernel(my_type in) { // ERROR: kernel's type depends on __CUDA_A
 }
 ```
 
-**2.** Instantiations of `__global__` function templates must not depend on whether `__CUDA_ARCH__` is defined or its value. That is, the same instantiations, with equivalent template arguments, must be present in *all* device programs and the host program (irrespective of whether any of those instantiations are ever launched at runtime).
+**2.** Instantiations of `__global__` function templates must not depend on whether `__CUDA_ARCH__` is defined or its value. That is, the same instantiations, with equivalent template arguments, must be present in _all_ device programs and the host program (irrespective of whether any of those instantiations are ever launched at runtime).
 
 Example:
 
-```cuda
+```c
 __device__ int result;
 
 template <typename T>
@@ -2305,7 +2289,7 @@ This issue can be avoided by instead moving the computation proper from the `__g
 
 Example:
 
-```cuda
+```c
 #if !defined(__CUDA_ARCH__)
     void host_function(void) {} // ERROR: The definition of host_function()
                                 //        is only present when __CUDA_ARCH__
@@ -2317,7 +2301,7 @@ Example:
 
 For example, if a header file `a.h` contains:
 
-```cuda
+```c
 template<typename T>
 __device__ T* get_ptr() {
 #if __CUDA_ARCH__ == 900
@@ -2396,7 +2380,7 @@ In C/C++, a pure function has no side effects on its parameters and can access g
 
 CUDA provides `__nv_pure__` attribute supported for both host and device functions. The compiler translates `__nv_pure__` to the `pure` GNU attribute or to the Microsoft Visual Studio `noalias` attribute.
 
-```cuda
+```c
 __device__ __nv_pure__
 int add(int a, int b) {
     return a + b;
@@ -2413,7 +2397,7 @@ Address space predicate functions are used to determine the address space of a p
 >
 > It is suggested to use the `cuda::device::is_address_from()` and `cuda::device::is_object_from()` functions provided by [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/extended_api/memory/is_address_from.html) as a portable and safer alternative to Address Space Predicate intrinsic functions.
 
-```cuda
+```c
 __device__ unsigned __isGlobal      (const void* ptr);
 __device__ unsigned __isShared      (const void* ptr);
 __device__ unsigned __isConstant    (const void* ptr);
@@ -2436,14 +2420,14 @@ CUDA pointers (`T*`) can access objects regardless of where the objects are stor
 Address space conversion functions are used to convert between generic addresses and addresses in specific address spaces.
 These functions are useful when the compiler cannot determine a pointer’s address space, for example, when crossing translation units or interacting with PTX instructions.
 
-```cuda
+```c
 __device__ size_t __cvta_generic_to_global  (const void* ptr); // PTX: cvta.to.global
 __device__ size_t __cvta_generic_to_shared  (const void* ptr); // PTX: cvta.to.shared
 __device__ size_t __cvta_generic_to_constant(const void* ptr); // PTX: cvta.to.const
 __device__ size_t __cvta_generic_to_local   (const void* ptr); // PTX: cvta.to.local
 ```
 
-```cuda
+```c
 __device__ void* __cvta_global_to_generic  (size_t raw_ptr); // PTX: cvta.global
 __device__ void* __cvta_shared_to_generic  (size_t raw_ptr); // PTX: cvta.shared
 __device__ void* __cvta_constant_to_generic(size_t raw_ptr); // PTX: cvta.const
@@ -2453,7 +2437,7 @@ __device__ void* __cvta_local_to_generic   (size_t raw_ptr); // PTX: cvta.local
 As an example of inter-operating with PTX instructions, the `ld.shared.s32 r0, [ptr];` PTX instruction expects `ptr` to refer to the shared memory address space.
 A CUDA program with an `int*` pointer to an object in `__shared__` memory needs to convert this pointer to the shared address space before passing it to the PTX instruction by calling `__cvta_generic_to_shared` as follows:
 
-```cuda
+```c
 __shared__ int smem_var;
 smem_var        = 42;
 size_t smem_ptr = __cvta_generic_to_shared(&smem_var);
@@ -2465,14 +2449,14 @@ assert(output == 42);
 A common optimization that exploits these address representations is reducing data structure size by leveraging the fact that the address ranges of shared, local, and constant spaces are smaller than 32 bits, which allows storing 32-bit addresses instead of 64-bit pointers and save registers. Additionally, 32-bit arithmetic is faster than 64-bit arithmetic.
 To obtain the 32-bit integer representation of these addresses, truncate the 64-bit value to 32 bits by casting from an unsigned 64-bit integer to an unsigned 32-bit integer:
 
-```cuda
+```c
 __shared__ int smem_var;
 uint32_t       smem_ptr_32bit = static_cast<uint32_t>(__cvta_generic_to_shared(&smem_var));
 ```
 
 To recover a generic address from such a 32-bit representation, zero-extend the address back to an unsigned 64-bit integer and then call the corresponding address space conversion function:
 
-```cuda
+```c
 size_t smem_ptr_64bit = static_cast<size_t>(smem_ptr_32bit); // zero-extend to 64 bits
 void*  generic_ptr    = __cvta_shared_to_generic(smem_ptr_64bit);
 assert(generic_ptr == &smem_var);
@@ -2482,7 +2466,7 @@ assert(generic_ptr == &smem_var);
 
 ### 5.4.8.3. Low-Level Load and Store Functions
 
-```cuda
+```c
 T __ldg(const T* address);
 ```
 
@@ -2490,7 +2474,7 @@ The function `__ldg()` performs a read-only L1/Tex cache load. It supports all C
 
 ---
 
-```cuda
+```c
 T __ldcg(const T* address);
 T __ldca(const T* address);
 T __ldcs(const T* address);
@@ -2502,7 +2486,7 @@ The functions perform a load using the cache operator specified in the [PTX ISA]
 
 ---
 
-```cuda
+```c
 void __stwb(T* address, T value);
 void __stcg(T* address, T value);
 void __stcs(T* address, T value);
@@ -2519,7 +2503,7 @@ The functions perform a store using the cache operator specified in the [PTX ISA
 
 A trap operation can be initiated by calling the `__trap()` function from any device thread.
 
-```cuda
+```c
 void __trap();
 ```
 
@@ -2527,7 +2511,7 @@ Execution of the kernel is aborted, raising an interrupt in the host program. Ca
 
 ### 5.4.8.5. `__nanosleep()`
 
-```cuda
+```c
 __device__ void __nanosleep(unsigned nanoseconds);
 ```
 
@@ -2537,7 +2521,7 @@ Example:
 
 The following code implements a mutex with exponential back-off.
 
-```cuda
+```c
 __device__ void mutex_lock(unsigned* mutex) {
     unsigned ns = 8;
     while (atomicCAS(mutex, 0, 1) == 1) {
@@ -2561,7 +2545,7 @@ Comparison functions:
 
 - Three parameters. Semantic: `max(a, b, c)`, `min(a, b, c)`.
 
-```cuda
+```c
      int __vimax3_s32  (     int,      int,      int);
 unsigned __vimax3_s16x2(unsigned, unsigned, unsigned);
 unsigned __vimax3_u32  (unsigned, unsigned, unsigned);
@@ -2575,7 +2559,7 @@ unsigned __vimin3_u16x2(unsigned, unsigned, unsigned);
 
 - Two parameters, with ReLU. Semantic: `max(a, b, 0)`, `max(min(a, b), 0)`.
 
-```cuda
+```c
      int __vimax_s32_relu  (     int,      int);
 unsigned __vimax_s16x2_relu(unsigned, unsigned);
 
@@ -2585,7 +2569,7 @@ unsigned __vimin_s16x2_relu(unsigned, unsigned);
 
 - Three parameters, with ReLU. Semantic: `max(a, b, c, 0)`, `max(min(a, b, c), 0)`.
 
-```cuda
+```c
      int __vimax3_s32_relu  (     int,      int,      int);
 unsigned __vimax3_s16x2_relu(unsigned, unsigned, unsigned);
 
@@ -2595,7 +2579,7 @@ unsigned __vimin3_s16x2_relu(unsigned, unsigned, unsigned);
 
 - Two parameters, also returning which parameter was smaller/larger:
 
-```cuda
+```c
      int __vibmax_s32  (     int,      int, bool* pred);
 unsigned __vibmax_u32  (unsigned, unsigned, bool* pred);
 unsigned __vibmax_s16x2(unsigned, unsigned, bool* pred);
@@ -2611,7 +2595,7 @@ Fused addition and minimum/maximum:
 
 - Three parameters, comparing (first + second) with the third. Semantic: `max(a + b, c)`, `min(a + b, c)`
 
-```cuda
+```c
      int __viaddmax_s32  (     int,     int,       int);
 unsigned __viaddmax_s16x2(unsigned, unsigned, unsigned);
 unsigned __viaddmax_u32  (unsigned, unsigned, unsigned);
@@ -2625,7 +2609,7 @@ unsigned __viaddmin_u16x2(unsigned, unsigned, unsigned);
 
 - Three parameters, with ReLU, comparing (first + second) with the third and a zero. Semantic: `max(a + b, c, 0)`, `max(min(a + b, c), 0)`
 
-```cuda
+```c
      int __viaddmax_s32_relu  (     int,      int,      int);
 unsigned __viaddmax_s16x2_relu(unsigned, unsigned, unsigned);
 
@@ -2643,7 +2627,7 @@ The DPX is an exceptionally useful tool for implementing dynamic programming alg
 
 Maximum value of three signed 32-bit integers, with ReLU:
 
-```cuda
+```c
 int a           = -15;
 int b           = 8;
 int c           = 5;
@@ -2655,7 +2639,7 @@ int max_value_1 = __vimax3_s32_relu(a, d, e); // max(-15, -2, -4, 0) = 0
 
 Minimum value of the sum of two 32-bit signed integers, another 32-bit signed integer and a zero (ReLU):
 
-```cuda
+```c
 int a           = -5;
 int b           = 6;
 int c           = -2;
@@ -2666,7 +2650,7 @@ int max_value_1 = __viaddmax_s32_relu(a, d, c); // max(-5 + 4, -2, 0) = max(-1, 
 
 Minimum value of two unsigned 32-bit integers and determining which value is smaller:
 
-```cuda
+```c
 unsigned a = 9;
 unsigned b = 6;
 bool     smaller_value;
@@ -2675,7 +2659,7 @@ unsigned min_value = __vibmin_u32(a, b, &smaller_value); // min_value is 6, smal
 
 Maximum values of three pairs of unsigned 16-bit integers:
 
-```cuda
+```c
 unsigned a         = 0x00050002;
 unsigned b         = 0x00070004;
 unsigned c         = 0x00020006;
@@ -2701,7 +2685,7 @@ An integral constant expression may optionally follow. The following are cases f
 
 Examples:
 
-```cuda
+```c
 struct MyStruct {
     static constexpr int value = 4;
 };
@@ -2744,7 +2728,7 @@ See the example on [Compiler Explorer](https://godbolt.org/z/fPMK55PxE).
 >
 > It is suggested to use the `cuda::std::assume_aligned()` function provided by [libcu++](https://nvidia.github.io/cccl/unstable/libcudacxx/standard_api.html) ([C++ reference](https://en.cppreference.com/w/cpp/memory/assume_aligned.html)) as a portable and safer alternative to the built-in functions.
 
-```cuda
+```c
 void* __builtin_assume_aligned(const void* ptr, size_t align)
 void* __builtin_assume_aligned(const void* ptr, size_t align, <integral type> offset)
 ```
@@ -2757,14 +2741,14 @@ The built-in functions enable the compiler to assume that the returned pointer i
 
 Examples:
 
-```cuda
+```c
 void* res1 = __builtin_assume_aligned(ptr, 32);    // compiler can assume 'res1' is at least 32-byte aligned
 void* res2 = __builtin_assume_aligned(ptr, 32, 8); // compiler can assume 'res2 = (char*) ptr - 8' is at least 32-byte aligned
 ```
 
 ### 5.4.9.3. `__builtin_assume()` and `__assume()`
 
-```cuda
+```c
 void __builtin_assume(bool predicate)
 void __assume        (bool predicate) // only with Microsoft Compiler
 ```
@@ -2773,7 +2757,7 @@ The built-in function enables the compiler to assume that the boolean argument i
 
 Example:
 
-```cuda
+```c
 __device__ bool is_greater_than_zero(int value) {
     return value > 0;
 }
@@ -2786,7 +2770,7 @@ __device__ bool f(int value) {
 
 ### 5.4.9.4. `__builtin_constant_p()`
 
-```cuda
+```c
 int __builtin_constant_p(expression)
 ```
 
@@ -2794,7 +2778,7 @@ The built-in function returns `1` if the compiler can determine that `expression
 
 Example:
 
-```cuda
+```c
 __device__ int select(int value) {
     return __builtin_constant_p(value) ? value * 2 : value;
 }
@@ -2809,7 +2793,7 @@ __global__ void kernel(int* out) {
 
 ### 5.4.9.5. `__builtin_expect()`
 
-```cuda
+```c
 long __builtin_expect(long input, long expected)
 ```
 
@@ -2818,7 +2802,7 @@ It behaves like the C++20 `[[likely]]` and `[[unlikely]]` [attributes](https://e
 
 Example:
 
-```cuda
+```c
 // indicate to the compiler that likely "var == 0"
 if (__builtin_expect(var, 0))
     doit();
@@ -2826,7 +2810,7 @@ if (__builtin_expect(var, 0))
 
 ### 5.4.9.6. `__builtin_unreachable()`
 
-```cuda
+```c
 void __builtin_unreachable(void)
 ```
 
@@ -2836,7 +2820,7 @@ This function is useful for avoiding code generation of unreachable branches and
 
 Example:
 
-```cuda
+```c
 // indicates to the compiler that the default case label is never reached.
 switch (in) {
     case 1:  return 4;
@@ -2851,19 +2835,18 @@ The `#pragma nv_abi` directive enables applications compiled in [separate compil
 
 The syntax for using this pragma is as follows, where `EXPR` refers to any integral constant expression:
 
-```cuda
+```c
 #pragma nv_abi preserve_n_data(EXPR) preserve_n_control(EXPR)
 ```
 
 - The arguments that follow `#pragma nv_abi` are optional and may be provided in any order; however, at least one argument is required.
 - The `preserve_n` arguments limit the number of registers preserved during a function call:
-
   - `preserve_n_data(EXPR)` limits the number of data registers.
   - `preserve_n_control(EXPR)` limits the number of control registers.
 
 The `#pragma nv_abi` directive can be placed immediately before a device function declaration or definition.
 
-```cuda
+```c
 #pragma nv_abi preserve_n_data(16)
 __device__ void dev_func();
 
@@ -2875,7 +2858,7 @@ __device__ int dev_func() {
 
 Alternatively, it can be placed directly before an indirect function call within a C++ expression statement inside a device function. Note that while indirect function calls to free functions are supported, indirect calls to function references or class member functions are not supported.
 
-```cuda
+```c
 __device__ int dev_func1();
 
 struct MyStruct {
@@ -2905,7 +2888,7 @@ __device__ void test() {
 
 When applied to a device function’s declaration or definition, the pragma modifies the custom ABI properties for any calls to that function. When placed at an indirect function call site, it affects the ABI properties only for that specific call. Note that the pragma only affects indirect function calls when placed at a call site; it has no effect on direct function calls.
 
-```cuda
+```c
 #pragma nv_abi preserve_n_control(8)
 __device__ int dev_func3();
 
@@ -2931,7 +2914,7 @@ It is valid only at entry-function scope, that is, on a `__global__` function. E
 
 Example:
 
-```cuda
+```c
 #pragma nv_mma_throughput
 __global__  void kernel(){
 ...
@@ -2946,7 +2929,7 @@ __global__  void kernel(){
 
 ### 5.4.10.1. Assertion
 
-```cuda
+```c
 #define assert(expression) /* unspecified */
 ```
 
@@ -2965,7 +2948,7 @@ The kernel execution is unaffected if `expression` is different from zero.
 
 For example, the following program from source file `test.cu`
 
-```cuda
+```c
 #include <assert.h>
 
  __global__ void testAssert(void) {
@@ -3000,7 +2983,7 @@ The `assert()` macro is available in both `__device__` and `__tile__` code.
 
 The execution of a kernel function can be suspended by calling the `__brkpt()` function from any device thread.
 
-```cuda
+```c
 void __brkpt();
 ```
 
@@ -3008,7 +2991,7 @@ void __brkpt();
 
 The following pragmas can be used to manage the severity of errors that are triggered when a specific diagnostic message is raised.
 
-```cuda
+```c
 #pragma nv_diag_suppress
 #pragma nv_diag_warning
 #pragma nv_diag_error
@@ -3018,13 +3001,13 @@ The following pragmas can be used to manage the severity of errors that are trig
 
 The uses of these pragmas are as follows:
 
-```cuda
+```c
 #pragma nv_diag_xxx <error_number1>, <error_number2> ...
 ```
 
 The affected diagnostic is specified using the error number shown in the warning message. Any diagnostic can be changed to an error, but only warnings can have their severity suppressed or restored after being changed to an error. The `nv_diag_default` pragma returns the severity of a diagnostic to the severity that was in effect before any other pragmas were issued, namely, the normal severity of the message as modified by any command-line options. The following example suppresses the `declared but never referenced` warning of `foo()`:
 
-```cuda
+```c
 #pragma nv_diag_suppress 177 // "declared but never referenced"
 void foo() {
     int i = 0;
@@ -3038,14 +3021,14 @@ void bar() {
 
 The following pragmas may be used to save and restore the current diagnostic pragma state:
 
-```cuda
+```c
 #pragma nv_diagnostic push
 #pragma nv_diagnostic pop
 ```
 
 Examples:
 
-```cuda
+```c
 #pragma nv_diagnostic push
 #pragma nv_diag_suppress 177 // "declared but never referenced"
 void foo() {
@@ -3070,7 +3053,7 @@ C++ warp matrix operations leverage Tensor Cores to accelerate matrix problems o
 
 All following functions and types are defined in the namespace `nvcuda::wmma`. Sub-byte operations are considered preview, i.e. the data structures and APIs for them are subject to change and may not be compatible with future releases. This extra functionality is defined in the `nvcuda::wmma::experimental` namespace.
 
-```cuda
+```c
 template<typename Use, int m, int n, int k, typename T, typename Layout=void> class fragment;
 
 void load_matrix_sync(fragment<...> &a, const T* mptr, unsigned ldm);
@@ -3081,7 +3064,7 @@ void mma_sync(fragment<...> &d, const fragment<...> &a, const fragment<...> &b, 
 ```
 
 `fragment`
-:   An overloaded class containing a section of a matrix distributed across all threads in the warp. The mapping of matrix elements into `fragment` internal storage is unspecified and subject to change in future architectures.
+: An overloaded class containing a section of a matrix distributed across all threads in the warp. The mapping of matrix elements into `fragment` internal storage is unspecified and subject to change in future architectures.
 
 Only certain combinations of template arguments are allowed. The first template parameter specifies how the fragment will participate in the matrix operation. Acceptable values for `Use` are:
 
@@ -3094,16 +3077,16 @@ Only certain combinations of template arguments are allowed. The first template 
   The data type, `T`, may be `double`, `float`, `__half`, `__nv_bfloat16`, `char`, or `unsigned char` for multiplicands and `double`, `float`, `int`, or `__half` for accumulators. As documented in [Element Types and Matrix Sizes](cpp-language-extensions.md#wmma-type-sizes), limited combinations of accumulator and multiplicand types are supported. The Layout parameter must be specified for `matrix_a` and `matrix_b` fragments. `row_major` or `col_major` indicate that elements within a matrix row or column are contiguous in memory, respectively. The `Layout` parameter for an `accumulator` matrix should retain the default value of `void`. A row or column layout is specified only when the accumulator is loaded or stored as described below.
 
 `load_matrix_sync`
-:   Waits until all warp lanes have arrived at load\_matrix\_sync and then loads the matrix fragment a from memory. `mptr` must be a 256-bit aligned pointer pointing to the first element of the matrix in memory. `ldm` describes the stride in elements between consecutive rows (for row major layout) or columns (for column major layout) and must be a multiple of 8 for `__half` element type or multiple of 4 for `float` element type. (i.e., multiple of 16 bytes in both cases). If the fragment is an `accumulator`, the `layout` argument must be specified as either `mem_row_major` or `mem_col_major`. For `matrix_a` and `matrix_b` fragments, the layout is inferred from the fragment’s `layout` parameter. The values of `mptr`, `ldm`, `layout` and all template parameters for `a` must be the same for all threads in the warp. This function must be called by all threads in the warp, or the result is undefined.
+: Waits until all warp lanes have arrived at load_matrix_sync and then loads the matrix fragment a from memory. `mptr` must be a 256-bit aligned pointer pointing to the first element of the matrix in memory. `ldm` describes the stride in elements between consecutive rows (for row major layout) or columns (for column major layout) and must be a multiple of 8 for `__half` element type or multiple of 4 for `float` element type. (i.e., multiple of 16 bytes in both cases). If the fragment is an `accumulator`, the `layout` argument must be specified as either `mem_row_major` or `mem_col_major`. For `matrix_a` and `matrix_b` fragments, the layout is inferred from the fragment’s `layout` parameter. The values of `mptr`, `ldm`, `layout` and all template parameters for `a` must be the same for all threads in the warp. This function must be called by all threads in the warp, or the result is undefined.
 
 `store_matrix_sync`
-:   Waits until all warp lanes have arrived at store\_matrix\_sync and then stores the matrix fragment a to memory. `mptr` must be a 256-bit aligned pointer pointing to the first element of the matrix in memory. `ldm` describes the stride in elements between consecutive rows (for row major layout) or columns (for column major layout) and must be a multiple of 8 for `__half` element type or multiple of 4 for `float` element type. (i.e., multiple of 16 bytes in both cases). The layout of the output matrix must be specified as either `mem_row_major` or `mem_col_major`. The values of `mptr`, `ldm`, `layout` and all template parameters for a must be the same for all threads in the warp.
+: Waits until all warp lanes have arrived at store_matrix_sync and then stores the matrix fragment a to memory. `mptr` must be a 256-bit aligned pointer pointing to the first element of the matrix in memory. `ldm` describes the stride in elements between consecutive rows (for row major layout) or columns (for column major layout) and must be a multiple of 8 for `__half` element type or multiple of 4 for `float` element type. (i.e., multiple of 16 bytes in both cases). The layout of the output matrix must be specified as either `mem_row_major` or `mem_col_major`. The values of `mptr`, `ldm`, `layout` and all template parameters for a must be the same for all threads in the warp.
 
 `fill_fragment`
-:   Fill a matrix fragment with a constant value `v`. Because the mapping of matrix elements to each fragment is unspecified, this function is ordinarily called by all threads in the warp with a common value for `v`.
+: Fill a matrix fragment with a constant value `v`. Because the mapping of matrix elements to each fragment is unspecified, this function is ordinarily called by all threads in the warp with a common value for `v`.
 
 `mma_sync`
-:   Waits until all warp lanes have arrived at mma\_sync, and then performs the warp-synchronous matrix multiply-accumulate operation `D=A*B+C`. The in-place operation, `C=A*B+C`, is also supported. The value of `satf` and template parameters for each matrix fragment must be the same for all threads in the warp. Also, the template parameters `m`, `n` and `k` must match between fragments `A`, `B`, `C` and `D`. This function must be called by all threads in the warp, or the result is undefined.
+: Waits until all warp lanes have arrived at mma_sync, and then performs the warp-synchronous matrix multiply-accumulate operation `D=A*B+C`. The in-place operation, `C=A*B+C`, is also supported. The value of `satf` and template parameters for each matrix fragment must be the same for all threads in the warp. Also, the template parameters `m`, `n` and `k` must match between fragments `A`, `B`, `C` and `D`. This function must be called by all threads in the warp, or the result is undefined.
 
 If `satf` (saturate to finite value) mode is `true`, the following additional numerical properties apply for the destination accumulator:
 
@@ -3113,14 +3096,14 @@ If `satf` (saturate to finite value) mode is `true`, the following additional nu
 
 Because the map of matrix elements into each thread’s `fragment` is unspecified, individual matrix elements must be accessed from memory (shared or global) after calling `store_matrix_sync`. In the special case where all threads in the warp will apply an element-wise operation uniformly to all fragment elements, direct element access can be implemented using the following `fragment` class members.
 
-```cuda
+```c
 enum fragment<Use, m, n, k, T, Layout>::num_elements;
 T fragment<Use, m, n, k, T, Layout>::x[num_elements];
 ```
 
 As an example, the following code scales an `accumulator` matrix tile by half.
 
-```cuda
+```c
 wmma::fragment<wmma::accumulator, 16, 16, 16, float> frag;
 float alpha = 0.5f; // Same value for all threads in warp
 /*...*/
@@ -3133,10 +3116,10 @@ frag.x[t] *= alpha;
 Tensor Cores support alternate types of floating point operations on devices with compute capability 8.0 and higher.
 
 `__nv_bfloat16`
-:   This data format is an alternate fp16 format that has the same range as f32 but reduced precision (7 bits). You can use this data format directly with the `__nv_bfloat16` type available in `cuda_bf16.h`. Matrix fragments with `__nv_bfloat16` data types are required to be composed with accumulators of `float` type. The shapes and operations supported are the same as with `__half`.
+: This data format is an alternate fp16 format that has the same range as f32 but reduced precision (7 bits). You can use this data format directly with the `__nv_bfloat16` type available in `cuda_bf16.h`. Matrix fragments with `__nv_bfloat16` data types are required to be composed with accumulators of `float` type. The shapes and operations supported are the same as with `__half`.
 
 `tf32`
-:   This data format is a special floating-point format supported by Tensor Cores, with the same range as f32 and reduced precision (>=10 bits). The internal layout of this format is implementation-defined. To use this floating-point format with WMMA operations, the input matrices must be manually converted to tf32 precision.
+: This data format is a special floating-point format supported by Tensor Cores, with the same range as f32 and reduced precision (>=10 bits). The internal layout of this format is implementation-defined. To use this floating-point format with WMMA operations, the input matrices must be manually converted to tf32 precision.
 
     To facilitate conversion, a new intrinsic `__float_to_tf32` is provided. While the input and output arguments to the intrinsic are of `float` type, the output will be `tf32` numerically. This new precision is intended to be used with Tensor Cores only, and if mixed with other `float`type operations, the precision and range of the result will be undefined.
 
@@ -3144,7 +3127,7 @@ Tensor Cores support alternate types of floating point operations on devices wit
 
     The elements of the fragment are represented as `float`, hence the mapping from `element_type<T>` to `storage_element_type<T>` is:
 
-    ```cuda
+    ```c
     precision::tf32 -> float
     ```
 
@@ -3156,7 +3139,7 @@ Tensor Cores support double-precision floating point operations on devices with 
 
 Sub-byte WMMA operations provide a way to access the low-precision capabilities of Tensor Cores. They are considered a preview feature i.e. the data structures and APIs for them are subject to change and may not be compatible with future releases. This functionality is available via the `nvcuda::wmma::experimental` namespace:
 
-```cuda
+```c
 namespace experimental {
     namespace precision {
         struct u4; // 4-bit unsigned
@@ -3173,7 +3156,7 @@ namespace experimental {
 
 For 4 bit precision, the APIs available remain the same, but you must specify `experimental::precision::u4` or `experimental::precision::s4` as the fragment data type. Since the elements of the fragment are packed together, `num_storage_elements` will be smaller than `num_elements` for that fragment. The `num_elements` variable for a sub-byte fragment, hence returns the number of elements of sub-byte type `element_type<T>`. This is true for single bit precision as well, in which case, the mapping from `element_type<T>` to `storage_element_type<T>` is as follows:
 
-```cuda
+```c
 experimental::precision::u4 -> unsigned (8 elements in 1 storage element)
 experimental::precision::s4 -> int (8 elements in 1 storage element)
 experimental::precision::b1 -> unsigned (32 elements in 1 storage element)
@@ -3186,14 +3169,14 @@ For sub-byte operations the value of `ldm` in `load_matrix_sync` should be a mul
 
 > [!NOTE]
 >
-> Support for the following variants for MMA instructions is deprecated and will be removed in sm\_90:
+> Support for the following variants for MMA instructions is deprecated and will be removed in sm_90:
 >
 > > - `experimental::precision::u4`
 > > - `experimental::precision::s4`
 > > - `experimental::precision::b1` with `bmmaBitOp` set to `bmmaBitOpXOR`
 
 `bmma_sync`
-:   Waits until all warp lanes have executed bmma\_sync, and then performs the warp-synchronous bit matrix multiply-accumulate operation `D = (A op B) + C`, where `op` consists of a logical operation `bmmaBitOp` followed by the accumulation defined by `bmmaAccumulateOp`. The available operations are:
+: Waits until all warp lanes have executed bmma_sync, and then performs the warp-synchronous bit matrix multiply-accumulate operation `D = (A op B) + C`, where `op` consists of a logical operation `bmmaBitOp` followed by the accumulation defined by `bmmaAccumulateOp`. The available operations are:
 
     `bmmaBitOpXOR`, a 128-bit XOR of a row in `matrix_a` with the 128-bit column of `matrix_b`
 
@@ -3207,14 +3190,14 @@ The special format required by tensor cores may be different for each major and 
 
 Since fragments are architecture-specific, it is unsafe to pass them from function A to function B if the functions have been compiled for different link-compatible architectures and linked together into the same device executable. In this case, the size and layout of the fragment will be specific to one architecture and using WMMA APIs in the other will lead to incorrect results or potentially, corruption.
 
-An example of two link-compatible architectures, where the layout of the fragment differs, is sm\_70 and sm\_75.
+An example of two link-compatible architectures, where the layout of the fragment differs, is sm_70 and sm_75.
 
-```cuda
+```c
 fragA.cu: void foo() { wmma::fragment<...> mat_a; bar(&mat_a); }
 fragB.cu: void bar(wmma::fragment<...> *mat_a) { // operate on mat_a }
 ```
 
-```cuda
+```c
 // sm_70 fragment layout
 $> nvcc -dc -arch=compute_70 -code=sm_70 fragA.cu -o fragA.o
 // sm_75 fragment layout
@@ -3229,55 +3212,55 @@ Note that in the case of weak linkages (for example, a CUDA C++ inline function)
 
 To avoid these sorts of problems, the matrix should always be stored out to memory for transit through external interfaces (e.g. `wmma::store_matrix_sync(dst, …);`) and then it can be safely passed to `bar()` as a pointer type [e.g. `float *dst`].
 
-Note that since sm\_70 can run on sm\_75, the above example sm\_75 code can be changed to sm\_70 and correctly work on sm\_75. However, it is recommended to have sm\_75 native code in your application when linking with other sm\_75 separately compiled binaries.
+Note that since sm_70 can run on sm_75, the above example sm_75 code can be changed to sm_70 and correctly work on sm_75. However, it is recommended to have sm_75 native code in your application when linking with other sm_75 separately compiled binaries.
 
 ### 5.4.11.6. Element Types and Matrix Sizes
 
 Tensor Cores support a variety of element types and matrix sizes. The following table presents the various combinations of `matrix_a`, `matrix_b` and `accumulator` matrix supported:
 
-| Matrix A | Matrix B | Accumulator | Matrix Size (m-n-k) |
-| --- | --- | --- | --- |
-| \_\_half | \_\_half | float | 16x16x16 |
-| \_\_half | \_\_half | float | 32x8x16 |
-| \_\_half | \_\_half | float | 8x32x16 |
-| \_\_half | \_\_half | \_\_half | 16x16x16 |
-| \_\_half | \_\_half | \_\_half | 32x8x16 |
-| \_\_half | \_\_half | \_\_half | 8x32x16 |
-| unsigned char | unsigned char | int | 16x16x16 |
-| unsigned char | unsigned char | int | 32x8x16 |
-| unsigned char | unsigned char | int | 8x32x16 |
-| signed char | signed char | int | 16x16x16 |
-| signed char | signed char | int | 32x8x16 |
-| signed char | signed char | int | 8x32x16 |
+| Matrix A      | Matrix B      | Accumulator | Matrix Size (m-n-k) |
+| ------------- | ------------- | ----------- | ------------------- |
+| \_\_half      | \_\_half      | float       | 16x16x16            |
+| \_\_half      | \_\_half      | float       | 32x8x16             |
+| \_\_half      | \_\_half      | float       | 8x32x16             |
+| \_\_half      | \_\_half      | \_\_half    | 16x16x16            |
+| \_\_half      | \_\_half      | \_\_half    | 32x8x16             |
+| \_\_half      | \_\_half      | \_\_half    | 8x32x16             |
+| unsigned char | unsigned char | int         | 16x16x16            |
+| unsigned char | unsigned char | int         | 32x8x16             |
+| unsigned char | unsigned char | int         | 8x32x16             |
+| signed char   | signed char   | int         | 16x16x16            |
+| signed char   | signed char   | int         | 32x8x16             |
+| signed char   | signed char   | int         | 8x32x16             |
 
 Alternate floating-point support:
 
-| Matrix A | Matrix B | Accumulator | Matrix Size (m-n-k) |
-| --- | --- | --- | --- |
-| \_\_nv\_bfloat16 | \_\_nv\_bfloat16 | float | 16x16x16 |
-| \_\_nv\_bfloat16 | \_\_nv\_bfloat16 | float | 32x8x16 |
-| \_\_nv\_bfloat16 | \_\_nv\_bfloat16 | float | 8x32x16 |
-| precision::tf32 | precision::tf32 | float | 16x16x8 |
+| Matrix A        | Matrix B        | Accumulator | Matrix Size (m-n-k) |
+| --------------- | --------------- | ----------- | ------------------- |
+| \_\_nv_bfloat16 | \_\_nv_bfloat16 | float       | 16x16x16            |
+| \_\_nv_bfloat16 | \_\_nv_bfloat16 | float       | 32x8x16             |
+| \_\_nv_bfloat16 | \_\_nv_bfloat16 | float       | 8x32x16             |
+| precision::tf32 | precision::tf32 | float       | 16x16x8             |
 
 Double Precision Support:
 
 | Matrix A | Matrix B | Accumulator | Matrix Size (m-n-k) |
-| --- | --- | --- | --- |
-| double | double | double | 8x8x4 |
+| -------- | -------- | ----------- | ------------------- |
+| double   | double   | double      | 8x8x4               |
 
 Experimental support for sub-byte operations:
 
-| Matrix A | Matrix B | Accumulator | Matrix Size (m-n-k) |
-| --- | --- | --- | --- |
-| precision::u4 | precision::u4 | int | 8x8x32 |
-| precision::s4 | precision::s4 | int | 8x8x32 |
-| precision::b1 | precision::b1 | int | 8x8x128 |
+| Matrix A      | Matrix B      | Accumulator | Matrix Size (m-n-k) |
+| ------------- | ------------- | ----------- | ------------------- |
+| precision::u4 | precision::u4 | int         | 8x8x32              |
+| precision::s4 | precision::s4 | int         | 8x8x32              |
+| precision::b1 | precision::b1 | int         | 8x8x128             |
 
 ### 5.4.11.7. Example
 
 The following code implements a 16x16x16 matrix multiplication in a single warp.
 
-```cuda
+```c
 #include <mma.h>
 using namespace nvcuda;
 

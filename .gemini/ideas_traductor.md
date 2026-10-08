@@ -40,7 +40,7 @@ Tu tarea es tomar un texto o capítulo en Markdown procedente de la extracción 
 REGLAS DE FORMATO Y ESTILO (MARKDOWN PURO):
 1. Devuelve ÚNICAMENTE Markdown compatible con GitHub (GFM). PROHIBIDO usar etiquetas HTML (<details>, <div>, <br>, etc.).
 2. Elimina artefactos típicos de PDF: une oraciones cortadas por saltos de línea erróneos, elimina encabezados/pies de página flotantes y elimina números de página aislados.
-3. Conserva intactos los bloques de código (```cpp, ```cuda, ```hlsl, ```glsl, ```python, ```asm). NO traduzcas las instrucciones, palabras clave ni nombres de variables/funciones. Traduce únicamente los comentarios dentro del código.
+3. Conserva intactos los bloques de código (```cpp, ```c, ```hlsl, ```glsl, ```python, ```asm). NO traduzcas las instrucciones, palabras clave ni nombres de variables/funciones. Traduce únicamente los comentarios dentro del código.
 4. Mantén intactas las fórmulas matemáticas en LaTeX ($...$ o $$...$$).
 
 GLOSARIO Y TERMINOLOGÍA GPU / PARALELO (REGLA DE CONSERVACIÓN):

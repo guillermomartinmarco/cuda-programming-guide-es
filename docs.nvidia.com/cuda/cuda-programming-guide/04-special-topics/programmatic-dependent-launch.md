@@ -1,9 +1,9 @@
 # 4.5. Programmatic Dependent Launch and Synchronization
 
-The *Programmatic Dependent Launch* mechanism allows for a dependent *secondary* kernel
-to launch before the *primary* kernel it depends on in the same CUDA stream has finished executing.
+The _Programmatic Dependent Launch_ mechanism allows for a dependent _secondary_ kernel
+to launch before the _primary_ kernel it depends on in the same CUDA stream has finished executing.
 Available starting with devices of compute capability 9.0, this technique can provide performance
-benefits when the *secondary* kernel can complete significant work that does not depend on the results of the *primary* kernel.
+benefits when the _secondary_ kernel can complete significant work that does not depend on the results of the _primary_ kernel.
 
 ## 4.5.1. Background
 
@@ -12,7 +12,7 @@ A typical GPU activity timeline is shown in [Figure 42](programmatic-dependent-l
 
 ![GPU activity timeline](../_images/gpu-activity.png)
 
-**Figure 42.** *GPU activity timeline*
+**Figure 42.** _GPU activity timeline_
 
 Here, `secondary_kernel` is launched after `primary_kernel` finishes its execution.
 Serialized execution is usually necessary because `secondary_kernel` depends on result data
@@ -20,12 +20,12 @@ produced by `primary_kernel`. If `secondary_kernel` has no dependency on `primar
 both of them can be launched concurrently by using [CUDA Streams](../02-basics/asynchronous-execution.md#cuda-streams).
 Even if `secondary_kernel` is dependent on `primary_kernel`, there is some potential for
 concurrent execution. For example, almost all the kernels have
-some sort of *preamble* section during which tasks such as zeroing buffers or loading
+some sort of _preamble_ section during which tasks such as zeroing buffers or loading
 constant values are performed.
 
 ![Preamble section of ``secondary_kernel``](../_images/secondary-kernel-preamble.png)
 
-**Figure 43.** *Preamble section of `secondary_kernel`*
+**Figure 43.** _Preamble section of `secondary_kernel`_
 
 [Figure 43](programmatic-dependent-launch.md#secondary-kernel-preamble) demonstrates the portion of `secondary_kernel` that could
 be executed concurrently without impacting the application.
@@ -34,12 +34,12 @@ the execution of `primary_kernel`.
 
 ![Concurrent execution of ``primary_kernel`` and ``secondary_kernel``](../_images/preamble-overlap.png)
 
-**Figure 44.** *Concurrent execution of `primary_kernel` and `secondary_kernel`*
+**Figure 44.** _Concurrent execution of `primary_kernel` and `secondary_kernel`_
 
 The concurrent launch and execution of `secondary_kernel` shown in [Figure 44](programmatic-dependent-launch.md#preamble-overlap) is
-achievable using *Programmatic Dependent Launch*.
+achievable using _Programmatic Dependent Launch_.
 
-*Programmatic Dependent Launch* introduces changes to the CUDA kernel launch APIs as explained in following section.
+_Programmatic Dependent Launch_ introduces changes to the CUDA kernel launch APIs as explained in following section.
 These APIs require at least compute capability 9.0 to provide overlapping execution.
 
 ## 4.5.2. API Description
@@ -88,7 +88,7 @@ If the primary kernel doesn’t execute the trigger, it implicitly occurs after
 all thread blocks in the primary kernel exit.
 
 In either case, the secondary thread blocks might launch
-before data written by the primary kernel is visible. As such, when the secondary kernel is configured with *Programmatic Dependent Launch*,
+before data written by the primary kernel is visible. As such, when the secondary kernel is configured with _Programmatic Dependent Launch_,
 it must always use `cudaGridDependencySynchronize`
 or other means to verify that the result data from the primary is available.
 
@@ -106,39 +106,8 @@ either `cudaGraphKernelNodePortLaunchCompletion` or `cudaGraphKernelNodePortProg
 
 The resulting graph equivalents for stream capture are as follows:
 
-<table>
-<thead>
-<tr><th>Stream code (abbreviated)</th>
-<th>Resulting graph edge</th>
-</tr>
-</thead>
-<tbody>
-<tr><td><pre><code>cudaLaunchAttribute attribute;
-attribute.id = cudaLaunchAttributeProgrammaticStreamSerialization;
-attribute.val.programmaticStreamSerializationAllowed = 1;</code></pre>
-</td>
-<td><pre><code>cudaGraphEdgeData edgeData;
-edgeData.type = cudaGraphDependencyTypeProgrammatic;
-edgeData.from_port = cudaGraphKernelNodePortProgrammatic;</code></pre>
-</td>
-</tr>
-<tr><td><pre><code>cudaLaunchAttribute attribute;
-attribute.id = cudaLaunchAttributeProgrammaticEvent;
-attribute.val.programmaticEvent.triggerAtBlockStart = 0;</code></pre>
-</td>
-<td><pre><code>cudaGraphEdgeData edgeData;
-edgeData.type = cudaGraphDependencyTypeProgrammatic;
-edgeData.from_port = cudaGraphKernelNodePortProgrammatic;</code></pre>
-</td>
-</tr>
-<tr><td><pre><code>cudaLaunchAttribute attribute;
-attribute.id = cudaLaunchAttributeProgrammaticEvent;
-attribute.val.programmaticEvent.triggerAtBlockStart = 1;</code></pre>
-</td>
-<td><pre><code>cudaGraphEdgeData edgeData;
-edgeData.type = cudaGraphDependencyTypeProgrammatic;
-edgeData.from_port = cudaGraphKernelNodePortLaunchCompletion;</code></pre>
-</td>
-</tr>
-</tbody>
-</table>
+| Stream code (abbreviated)                                                                                                                                                 | Resulting graph edge                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cudaLaunchAttribute attribute;`<br/>`attribute.id = cudaLaunchAttributeProgrammaticStreamSerialization;`<br/>`attribute.val.programmaticStreamSerializationAllowed = 1;` | `cudaGraphEdgeData edgeData;`<br/>`edgeData.type = cudaGraphDependencyTypeProgrammatic;`<br/>`edgeData.from_port = cudaGraphKernelNodePortProgrammatic;`     |
+| `cudaLaunchAttribute attribute;`<br/>`attribute.id = cudaLaunchAttributeProgrammaticEvent;`<br/>`attribute.val.programmaticEvent.triggerAtBlockStart = 0;`                | `cudaGraphEdgeData edgeData;`<br/>`edgeData.type = cudaGraphDependencyTypeProgrammatic;`<br/>`edgeData.from_port = cudaGraphKernelNodePortProgrammatic;`     |
+| `cudaLaunchAttribute attribute;`<br/>`attribute.id = cudaLaunchAttributeProgrammaticEvent;`<br/>`attribute.val.programmaticEvent.triggerAtBlockStart = 1;`                | `cudaGraphEdgeData edgeData;`<br/>`edgeData.type = cudaGraphDependencyTypeProgrammatic;`<br/>`edgeData.from_port = cudaGraphKernelNodePortLaunchCompletion;` |

@@ -8,11 +8,11 @@ Lazy loading reduces program initialization time by waiting to load CUDA modules
 
 Table 17 Select Lazy Loading Changes by CUDA Version
 
-| CUDA Version | Change |
-| --- | --- |
-| 12.3 | Lazy loading performance improved. Now enabled by default for Windows. |
-| 12.2 | Lazy loading enabled by default for Linux. |
-| 11.7 | Lazy loading first introduced, disabled by default. |
+| CUDA Version | Change                                                                 |
+| ------------ | ---------------------------------------------------------------------- |
+| 12.3         | Lazy loading performance improved. Now enabled by default for Windows. |
+| 12.2         | Lazy loading enabled by default for Linux.                             |
+| 11.7         | Lazy loading first introduced, disabled by default.                    |
 
 ## 4.8.3. Requirements for Lazy Loading
 

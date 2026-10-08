@@ -54,7 +54,7 @@ and Driver APIs; both interfaces use the same underlying log buffer.
 
 The Driver API callback type and registration functions are:
 
-```cuda
+```c
 typedef void (CUDA_CB *CUlogsCallback)(
     void *data, CUlogLevel logLevel, char *message, size_t length);
 
@@ -69,7 +69,7 @@ CUresult CUDAAPI cuLogsUnregisterCallback(
 
 The corresponding Runtime API callback type and functions are:
 
-```cuda
+```c
 typedef void (CUDART_CB *cudaLogsCallback_t)(
     void *data, cudaLogLevel logLevel, char *message, size_t length);
 
@@ -106,7 +106,7 @@ generated messages.
 
 The Driver API functions are:
 
-```cuda
+```c
 CUresult CUDAAPI cuLogsCurrent(
     CUlogIterator *iterator_out, unsigned int flags);
 
@@ -124,7 +124,7 @@ CUresult CUDAAPI cuLogsDumpToMemory(
 
 The corresponding Runtime API functions are:
 
-```cuda
+```c
 cudaError_t CUDARTAPI cudaLogsCurrent(
     cudaLogIterator *iterator_out, unsigned int flags);
 
@@ -146,7 +146,7 @@ use and must be zero.
 The following Runtime API example marks the current end of the log and later
 dumps only messages generated after that point:
 
-```cuda
+```c
 #include <cstdio>
 #include <cuda_runtime_api.h>
 

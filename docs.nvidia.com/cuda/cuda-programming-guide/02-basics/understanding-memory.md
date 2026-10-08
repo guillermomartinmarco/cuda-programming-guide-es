@@ -81,7 +81,7 @@ Table 3 Overview of Unified Memory Paradigms
 
 The following code example demonstrates querying the device attributes and determining the unified memory paradigm, following the logic of [Figure 21](understanding-memory.md#unified-memory-flow-chart), for each GPU in a system.
 
-```cuda
+```c
 void queryDevices()
 {
     int numDevices = 0;
@@ -210,7 +210,7 @@ On systems with [HMM](understanding-memory.md#memory-heterogeneous-memory-manage
 
 The code examples which follow will illustrate the following array copy kernel operating directly on mapped host memory.
 
-```cuda
+```c
 __global__ void copyKernel(float* a, float* b)
 {
         int idx = threadIdx.x + blockDim.x * blockIdx.x;
@@ -226,7 +226,7 @@ Host memory allocated with `cudaMallocHost` or `cudaHostAlloc` is automatically 
 
 **cudaMallocHost**
 
-```cuda
+```c
 void usingMallocHost() {
   float* a = nullptr;
   float* b = nullptr;
@@ -250,7 +250,7 @@ void usingMallocHost() {
 
 **cudaHostAlloc**
 
-```cuda
+```c
 void usingCudaHostAlloc() {
   float* a = nullptr;
   float* b = nullptr;
@@ -276,7 +276,7 @@ void usingCudaHostAlloc() {
 
 When ATS and HMM are not available, allocations made by system allocators can still be mapped for access directly from GPU kernels using `cudaHostRegister`. Unlike memory created with CUDA APIs, however, the memory cannot be accessed from the kernel using the host pointer. A pointer in the device’s memory region must be obtained using `cudaHostGetDevicePointer()`, and that pointer must be used for accesses in kernel code.
 
-```cuda
+```c
 void usingRegister() {
   float* a = nullptr;
   float* b = nullptr;

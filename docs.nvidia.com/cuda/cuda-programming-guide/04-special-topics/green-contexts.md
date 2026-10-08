@@ -12,7 +12,7 @@ constraints, or provide a quick way to test the effect of using fewer SMs withou
 Green context support first became available via the [CUDA Driver API](https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__GREEN__CONTEXTS.html#group__CUDA__GREEN__CONTEXTS).
 Starting from CUDA 13.1, contexts are exposed in the CUDA runtime via the execution context (EC) abstraction.
 Currently, an execution context can correspond to either the primary context (the context runtime API users have always implicitly interacted with) or a green context.
-This section will use the terms *execution context* and *green context* interchangeably when referring to a green context.
+This section will use the terms _execution context_ and _green context_ interchangeably when referring to a green context.
 
 With the runtime exposure of green contexts, using the CUDA runtime API directly is strongly recommended. This section will also solely use the CUDA runtime API.
 
@@ -38,7 +38,7 @@ The first graph illustrates this scenario where critical work B gets delayed. Th
 
 ![Green Contexts Motivation](../_images/green_contexts_motivation.png)
 
-**Figure 45.** *Motivation: GCs’ static resource partitioning enables latency-sensitive work B to start and complete sooner*
+**Figure 45.** _Motivation: GCs’ static resource partitioning enables latency-sensitive work B to start and complete sooner_
 
 Using green contexts, one could partition the GPU’s SMs, so that green context A, targeted by kernel A, has access to some SMs of the GPU, while green context B, targeted by kernel B, has access to the remaining SMs.
 In this setting, kernel A can only use the SMs provisioned for green context A, irrespective of its launch configuration. As a result, when critical kernel B gets launched, it is guaranteed that there will be available SMs for it to start executing immediately, barring any other resource constraints. As the second graph in [Figure 45](green-contexts.md#id2) illustrates, even though the duration of kernel A may increase, latency-sensitive work B will no longer be delayed due to unavailable SMs. The figure shows that green context A is provisioned with an SM count equivalent to 80% SMs of the GPU for illustration purposes.
@@ -215,20 +215,20 @@ The different resource type structs have fields that are set either explicitly b
 It is recommended to zero-initialize all device resource structs.
 
 - An SM-type device resource (`cudaDevSmResource`) has the following relevant fields:
-
   - `unsigned int smCount`: number of SMs available in this resource
   - `unsigned int minSmPartitionSize`: minimum SM count required to partition this resource
   - `unsigned int smCoscheduledAlignment`: number of SMs in the resource guaranteed to be co-scheduled on the same GPU processing cluster, which is relevant for thread block clusters. `smCount` is a multiple of this value when `flags` is zero.
   - `unsigned int flags`: supported flags are 0 (default), `cudaDevSmResourceGroupBackfill`, and `cudaDevSmResourceGroupLocalityDomainId` (see `cudaDevSmResourceGroup` flags).
 
   The above fields will be set via either the appropriate split API (`cudaDevSmResourceSplitByCount` or `cudaDevSmResourceSplit`) used to create this SM-type resource or will be populated by the `cudaDeviceGetDevResource` API which retrieves the SM resources of a given GPU device. These fields should never be set directly by the user. See next section for more details.
-- A workqueue configuration device resource (`cudaDevWorkqueueConfigResource`) has the following relevant fields:
 
+- A workqueue configuration device resource (`cudaDevWorkqueueConfigResource`) has the following relevant fields:
   - `int device`: the device on which the workqueue resources are available
   - `unsigned int wqConcurrencyLimit`: the number of stream-ordered workloads expected to avoid false dependencies
   - `enum cudaDevWorkqueueConfigScope sharingScope`: the sharing scope for the workqueue resources. Supported values are: `cudaDevWorkqueueConfigScopeDeviceCtx` (default) and `cudaDevWorkqueueConfigScopeGreenCtxBalanced`. With the default option, all workqueue resources are shared across all contexts, while with the balanced option the driver tries to use non-overlapping workqueue resources across green contexts wherever possible, using the user-specified `wqConcurrencyLimit` as a hint.
 
   These fields need to be set by the user. There is no CUDA API similar to the split APIs that generates a workqueue configuration resource, with the exception of the workqueue configuration resource populated by the `cudaDeviceGetDevResource` API. That API can retrieve the workqueue configuration resources of a given GPU device.
+
 - Finally, a pre-existing workqueue resource (`cudaDevResourceTypeWorkqueue`) has no fields that can be set by the user. As with the other resource types, `cudaDevGetDevResource` can retrieve the pre-existing workqueue resource of a given GPU device.
 
 ## 4.6.4. Green Context Creation Example
@@ -300,8 +300,8 @@ When the starting point is a GPU device, the `wqConcurrencyLimit` will match the
 
 The second step in green context creation is to statically split the available `cudaDevResource` SM resources into one or more partitions, with potentially
 some SMs left over in a remaining partition. This partitioning is possible using the `cudaDevSmResourceSplitByCount()` or the `cudaDevSmResourceSplit()` API.
-The `cudaDevSmResourceSplitByCount()` API can only create one or more *homogeneous* partitions, plus a potential *remaining* partition,
-while the `cudaDevSmResourceSplit()` API can also create *heterogeneous* partitions, plus the potential *remaining* one.
+The `cudaDevSmResourceSplitByCount()` API can only create one or more _homogeneous_ partitions, plus a potential _remaining_ partition,
+while the `cudaDevSmResourceSplit()` API can also create _heterogeneous_ partitions, plus the potential _remaining_ one.
 The subsequent sections describe the functionality of both APIs in detail. Both APIs are only applicable to SM-type device resources.
 
 **cudaDevSmResourceSplitByCount API**
@@ -318,7 +318,7 @@ These adjustments may occur due to some granularity and alignment requirements, 
 
 ![SM Resource Split using cudaDevSmResourceSplitByCount API](../_images/green_contexts_resource_split_by_count.png)
 
-**Figure 46.** *SM resource split using the cudaDevSmResourceSplitByCount API*
+**Figure 46.** _SM resource split using the cudaDevSmResourceSplitByCount API_
 
 [Table 30](../05-appendices/compute-capabilities.md#compute-capabilities-table-device-and-streaming-multiprocessor-sm-information-per-compute-capability) lists the minimum SM partition size and the SM co-scheduled
 alignment for all the currently supported compute capabilities, for the default `useFlags=0` case.
@@ -329,13 +329,13 @@ where the minimum number of SMs per partition is 8 and the SM count has to be a 
 
 Table 14 Split functionality
 
-| Requested |  |  | Actual (for GH200 with 132 SMs) |  |  |
-| --- | --- | --- | --- | --- | --- |
-| `*nbGroups` | minCount | useFlags | `*nbGroups with N SMs` | Remaining SMs | Reason |
-| 2 | 72 | 0 | 1 group of 72 SMs | 60 | cannot exceed 132 SMs |
-| 6 | 11 | 0 | 6 groups of 16 SMs | 36 | multiple of 8 requirement |
-| 6 | 11 | `CU_DEV_SM_RESOURCE_SPLIT_IGNORE_SM_COSCHEDULING` | 6 groups with 12 SMs each | 60 | lowered to multiple of 2 req. |
-| 2 | 1 | 0 | 2 groups with 8 SMs each | 116 | min. 8 SMs requirement |
+| Requested   |          |                                                   | Actual (for GH200 with 132 SMs) |               |                               |
+| ----------- | -------- | ------------------------------------------------- | ------------------------------- | ------------- | ----------------------------- |
+| `*nbGroups` | minCount | useFlags                                          | `*nbGroups with N SMs`          | Remaining SMs | Reason                        |
+| 2           | 72       | 0                                                 | 1 group of 72 SMs               | 60            | cannot exceed 132 SMs         |
+| 6           | 11       | 0                                                 | 6 groups of 16 SMs              | 36            | multiple of 8 requirement     |
+| 6           | 11       | `CU_DEV_SM_RESOURCE_SPLIT_IGNORE_SM_COSCHEDULING` | 6 groups with 12 SMs each       | 60            | lowered to multiple of 2 req. |
+| 2           | 1        | 0                                                 | 2 groups with 8 SMs each        | 116           | min. 8 SMs requirement        |
 
 Here is a code snippet requesting to split the available SM resources into five groups of 8 SMs each:
 
@@ -389,7 +389,7 @@ In a successful split, as shown in [Figure 47](green-contexts.md#resource-split)
 
 ![SM Resource Split using cudaDevSmResourceSplit API](../_images/green_contexts_resource_split.png)
 
-**Figure 47.** *SM resource split using the cudaDevSmResourceSplit API*
+**Figure 47.** _SM resource split using the cudaDevSmResourceSplit API_
 
 When requesting a heterogeneous split, one needs to specify the SM count (`smCount` field of relevant `groupParams` entry) for each resource in `result`. This SM count should always be a multiple of two.
 For the scenario in the previous image, `groupParams[0].smCount` would be `X`, `groupParams[1].smCount` `Y`, etc.
@@ -476,29 +476,29 @@ Notes:
 
 1. `cudaDevSmResourceSplit` API’s return value depends on `result`:
 
-> - `result != nullptr`: the API will return `cudaSuccess` only when the split is successful and `nbGroups` valid `cudaDevResource` groups, meeting the specified requirements were created; otherwise, it will return an error. As different types of errors may return the same error code (e.g., `cudaErrorInvalidResourceConfiguration`), it is recommended to use the `CUDA_LOG_FILE` environment variable to get more informative error descriptions during development.
-> - `result == nullptr`: the API may return `cudaSuccess` even if the resulting `smCount` of a group is zero, a case which would have returned an error with a non-nullptr `result`. Think of this mode as a dry-run test you can use while exploring what is supported, especially in discovery mode.
+   > - `result != nullptr`: the API will return `cudaSuccess` only when the split is successful and `nbGroups` valid `cudaDevResource` groups, meeting the specified requirements were created; otherwise, it will return an error. As different types of errors may return the same error code (e.g., `cudaErrorInvalidResourceConfiguration`), it is recommended to use the `CUDA_LOG_FILE` environment variable to get more informative error descriptions during development.
+   > - `result == nullptr`: the API may return `cudaSuccess` even if the resulting `smCount` of a group is zero, a case which would have returned an error with a non-nullptr `result`. Think of this mode as a dry-run test you can use while exploring what is supported, especially in discovery mode.
 
 2. On a successful call with result != nullptr, the resulting `result[i]` device resource with i in `[0, nbGroups)` will be of type `cudaDevResourceTypeSm` and have a `result[i].sm.smCount` that will either be the non-zero user-specified `groupParams[i].smCount` value or the discovered one. In both cases, the `result[i].sm.smCount` will meet all the following constraints:
 
-> - be a `multiple of 2` and
-> - be in the `[2, input.sm.smCount]` range and
-> - be a multiple of `groupParams[i].coscheduledSmCount` when `cudaDevSmResourceGroupBackfill` is not set, or be greater than or equal to it when backfill is set.
+   > - be a `multiple of 2` and
+   > - be in the `[2, input.sm.smCount]` range and
+   > - be a multiple of `groupParams[i].coscheduledSmCount` when `cudaDevSmResourceGroupBackfill` is not set, or be greater than or equal to it when backfill is set.
 
 3. Specifying zero for any of the `coscheduledSmCount` and `preferredCoscheduledSmCount` fields indicates that the default values for these fields should be used; these can vary per GPU. These default values are both equal to the `smCoscheduledAlignment` of the SM resource retrieved via the `cudaDeviceGetDevResource` API for the given device (and not any SM resource). To review these default values, one can examine their updated values in the relevant `groupParams` entry after a successful `cudaDevSmResourceSplit` call with them initially set to 0; see below.
 
-> ```cpp
-> int gpu_device_index = 0;
-> cudaDevResource initial_GPU_SM_resources {};
-> CUDA_CHECK(cudaDeviceGetDevResource(gpu_device_index, &initial_GPU_SM_resources, cudaDevResourceTypeSm));
-> std::cout << "Default value will be equal to " << initial_GPU_SM_resources.sm.smCoscheduledAlignment << std::endl;
->
-> int default_split_flags = 0;
-> cudaDevSmResourceGroupParams group_params_tmp = {.smCount=0, .coscheduledSmCount=0, .preferredCoscheduledSmCount=0, .flags=0};
-> CUDA_CHECK(cudaDevSmResourceSplit(nullptr, 1, &initial_GPU_SM_resources, nullptr /*remainder*/, default_split_flags, &group_params_tmp));
-> std::cout << "coscheduledSmcount default value: " << group_params.coscheduledSmCount << std::endl;
-> std::cout << "preferredCoscheduledSmcount default value: " << group_params.preferredCoscheduledSmCount << std::endl;
-> ```
+   > ```cpp
+   > int gpu_device_index = 0;
+   > cudaDevResource initial_GPU_SM_resources {};
+   > CUDA_CHECK(cudaDeviceGetDevResource(gpu_device_index, &initial_GPU_SM_resources, cudaDevResourceTypeSm));
+   > std::cout << "Default value will be equal to " << initial_GPU_SM_resources.sm.smCoscheduledAlignment << std::endl;
+   >
+   > int default_split_flags = 0;
+   > cudaDevSmResourceGroupParams group_params_tmp = {.smCount=0, .coscheduledSmCount=0, .preferredCoscheduledSmCount=0, .flags=0};
+   > CUDA_CHECK(cudaDevSmResourceSplit(nullptr, 1, &initial_GPU_SM_resources, nullptr /*remainder*/, default_split_flags, &group_params_tmp));
+   > std::cout << "coscheduledSmcount default value: " << group_params.coscheduledSmCount << std::endl;
+   > std::cout << "preferredCoscheduledSmcount default value: " << group_params.preferredCoscheduledSmCount << std::endl;
+   > ```
 
 4. The remainder group, if present, will not have any constraints on its SM count or co-scheduling requirements. It will be up to the user to explore that.
 
@@ -664,8 +664,8 @@ for the 8-SM group)</p>
 
 - Controls SM count for the corresponding group in result.
 - **Values**: 0 (discovery mode) or valid non-zero value (non-discovery mode)
-
   - Valid non-zero `smCount` value requirements: `(multiple of 2) and in [2, input->sm.smCount] and ((flags == 0) ? multiple of actual coscheduledSmCount : greater than or equal to coscheduledSmCount)`
+
 - **Use cases**: use discovery mode to explore what’s possible when SM count is not known/fixed; use non-discovery mode to request a specific number of SMs.
 - Note: in discovery mode, actual SM count, after successful split call with non-nullptr result, will meet valid non-zero value requirements
 
@@ -673,8 +673,8 @@ for the 8-SM group)</p>
 
 - Controls number of SMs grouped together (“co-scheduled”) to enable launch of different clusters on compute capability 9.0+. It can thus impact the number of SMs in a resulting group and the cluster sizes they can support.
 - **Values**: 0 (default for current architecture) or valid non-zero value
-
   - Valid non-zero value requirements: `(multiple of 2)` up to max limit
+
 - **Use cases**: Use default or a manually chosen value for clusters, keeping in mind the max. portable cluster size on a given architecture. If your code does not use clusters, you can use the minimum supported value of 2 or the default value.
 - Note: when the default value is used, the actual `coscheduledSmCount`, after a successful split call, will also meet valid non-zero value requirements. If flags is not zero, the resulting smCount will be >= coscheduledSmCount. Think of coscheduledSmCount as providing some guaranteed underlying “structure” to valid resulting groups (i.e., that group can run at least a single cluster of coscheduledSmCount size in the worst case). This type of structure guarantee does not apply to the remaining group; there it is up to the user to explore what cluster sizes can be launched.
 
@@ -682,8 +682,8 @@ for the 8-SM group)</p>
 
 - Acts as a hint to the driver to try to merge groups of actual `coscheduledSmCount` SMs into larger groups of `preferredCoscheduledSmCount` if possible. Doing so can allow code to make use of preferred cluster dimensions feature available on devices with compute capability (CC) 10.0 and on). See [cudaLaunchAttributeValue::preferredClusterDim](https://docs.nvidia.com/cuda/cuda-runtime-api/unioncudaLaunchAttributeValue.html#unioncudaLaunchAttributeValue_17862864bbc2343700bae285345d188ca).
 - **Values**: 0 (default for current architecture) or valid non-zero value
-
   - Valid non-zero value requirements: `(multiple of actual coscheduledSmCount)`
+
 - **Use cases**: use a manually chosen value greater than 2 if you use preferred clusters and are on a device of compute capability 10.0 (Blackwell) or later. If you don’t use clusters, choose the same value as `coscheduledSmCount`: either select the minimum supported value of 2 or use 0 for both
 - Note: when the default value is used, the actual `preferredCoscheduledSmCount`, after a successful split call, will also meet valid non-zero value requirement.
 
@@ -779,13 +779,13 @@ execution context for each resource type.
 An application can have more than one green context, in which case some of the steps above should be repeated.
 For most use cases, these green contexts will each have a separate non-overlapping set of provisioned SMs.
 For example, for the case of five homogeneous `cudaDevResource` groups (`actual_split_result` array), one green context’s descriptor may encapsulate
-actual\_split\_result[2] to [4] resources, while the descriptor of another green context may encapsulate actual\_split\_result[0] to [1].
+actual_split_result[2] to [4] resources, while the descriptor of another green context may encapsulate actual_split_result[0] to [1].
 In this case, a specific SM will be provisioned for only one of the two green contexts of the application.
 
 But SM oversubscription is also possible and may be used in some cases.
-For example, it may be acceptable to have the second green context’s descriptor encapsulate actual\_split\_result[0] to [2].
-In this case, all the SMs of actual\_split\_resource[2] `cudaDevResource` will be oversubscribed, i.e., provisioned for both green contexts,
-while resources actual\_split\_resource[0] to [1] and actual\_split\_resource[3] to [4] may only be used by one of the two green contexts.
+For example, it may be acceptable to have the second green context’s descriptor encapsulate actual_split_result[0] to [2].
+In this case, all the SMs of actual_split_resource[2] `cudaDevResource` will be oversubscribed, i.e., provisioned for both green contexts,
+while resources actual_split_resource[0] to [1] and actual_split_resource[3] to [4] may only be used by one of the two green contexts.
 SM oversubscription should be judiciously used on a per-case basis.
 
 ## 4.6.5. Green Contexts - Launching work
@@ -823,7 +823,7 @@ For example, to add a kernel node, the user should use the polymorphic `cudaGrap
 Please note that it is possible for different graph nodes in a graph to belong to different execution contexts.
 
 For verification purposes, one could use Nsight Systems in node tracing mode (`--cuda-graph-trace node`) to observe the green context(s) specific graph nodes will execute on.
-Note that in the default *graph* tracing mode, the entire graph will appear under the green context of the stream it was launched on, but, as previously explained, this does not provide any information about the execution context(s) of the various graph nodes.
+Note that in the default _graph_ tracing mode, the entire graph will appear under the green context of the stream it was launched on, but, as previously explained, this does not provide any information about the execution context(s) of the various graph nodes.
 
 To verify programmatically, one could potentially use the CUDA driver API `cuGraphKernelNodeGetParams(graph_node, &node_params)` and compare the `node_params.ctx` context handle field with the expected context handle for that graph node. Using the driver API is possible given `CUgraphNode` and `cudaGraphNode_t` can be used interchangeably, but the user would need to include the relevant `cuda.h` header
 and link with the driver directly (`-lcuda`).
@@ -890,7 +890,7 @@ no box is marked green (provisioned for that GC) across both green contexts.
 
 ![Green Contexts Resources in Nsight Compute](../_images/green_contexts_ncu_mask.png)
 
-**Figure 48.** *Green contexts resources section from Nsight Compute*
+**Figure 48.** _Green contexts resources section from Nsight Compute_
 
 The Launch Statistics section also explicitly lists the number of SMs provisioned for this green context, which can thus be used by this kernel.
 Please note that these are the SMs a given kernel can have access to during its execution, and not the actual number of SMs that kernel ran on. The same applies to the resources overview shown earlier.
@@ -928,8 +928,8 @@ Finally, an explicitly created execution context can be destroyed via the `cudaE
 This section illustrates how green contexts can enable critical work to start and complete sooner.
 Similar to the scenario used in [Section 4.6.1](green-contexts.md#green-contexts-motivation), the application has two kernels that will run on two different non-blocking CUDA streams.
 The timeline, from the CPU side, is as follows.
-A long running kernel (delay\_kernel\_us), which takes multiple waves on the full GPU, is launched first on CUDA stream strm1. Then after a brief wait time (less than the kernel duration),
-a shorter but critical kernel (critical\_kernel) is launched on stream strm2.
+A long running kernel (delay_kernel_us), which takes multiple waves on the full GPU, is launched first on CUDA stream strm1. Then after a brief wait time (less than the kernel duration),
+a shorter but critical kernel (critical_kernel) is launched on stream strm2.
 The GPU durations and time from CPU launch to completion for both kernels are measured.
 
 As a proxy for a long running kernel, a delay kernel is used where every thread block runs for a fixed number of microseconds and the number of thread blocks exceeds the GPU’s available SMs.
@@ -944,7 +944,7 @@ As highlighted on the image, the critical kernel waits for 0.9ms (in this case) 
 
 ![Nsight Systems timeline without green contexts](../_images/green_contexts_nsys_example_no_GCs_with_prio.png)
 
-**Figure 49.** *Nsight Systems timeline without green contexts*
+**Figure 49.** _Nsight Systems timeline without green contexts_
 
 To leverage the green contexts feature, two green contexts are created, each provisioned with a distinct non-overlapping set of SMs.
 The exact SM split in this case for an H100 with 132 SMs was chosen, for illustration purposes, as 16 SMs for the critical kernel (Green Context 3) and 112 SMs for the long running kernel (Green Context 2).
@@ -957,6 +957,6 @@ That is barring any other limitations, as parallel execution, as mentioned earli
 
 ![Nsight Systems timeline with green contexts](../_images/green_contexts_nsys_example_w_GCs.png)
 
-**Figure 50.** *Nsight Systems timeline with green contexts*
+**Figure 50.** _Nsight Systems timeline with green contexts_
 
 In all cases, the exact SM split should be decided on a per case basis after experimentation.

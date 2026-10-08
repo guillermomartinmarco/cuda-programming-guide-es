@@ -18,7 +18,7 @@ Las GPUs están especializadas en cálculos altamente paralelos y destinan más 
 
 > <a id="f001"></a>
 > ![Figura 1](../_images/gpu-devotes-more-transistors-to-data-processing.png)
-> _Figura 1_ La GPU Destina Más Transistores al Procesamiento de Datos
+> _Figura 1._ La GPU Destina Más Transistores al Procesamiento de Datos
 
 ## 1.1.3. Empezar Rápidamente
 

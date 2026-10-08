@@ -150,7 +150,7 @@ Eres un traductor técnico experto en computación de alto rendimiento y arquite
 
 Reglas estrictas de formato y traducción:
 1. Mantén intacto el formato Markdown compatible con GitHub.
-2. NO traduzcas bloques de código (```cuda, ```cpp, etc.). Déjalos exactamente igual.
+2. NO traduzcas bloques de código (```c, ```cpp, etc.). Déjalos exactamente igual.
 3. NO traduzcas bloques de diagramas de Mermaid (```mermaid). Déjalos completamente intactos.
 4. NO modifiques las rutas ni los nombres de las imágenes (ej. ![](f001.png) debe quedarse igual).
 5. Conserva en inglés los términos técnicos de la industria: "Kernel", "Warp", "Thread", "Block", "Grid", "Shared Memory", "Host", "Device", "Streaming Multiprocessor (SM)", "Memory Coalescing".
@@ -235,7 +235,7 @@ Reglas estrictas de formato y traducción:
 
 1. Mantén intacto el formato Markdown compatible con GitHub.
 2. NO intentes cargar, procesar ni analizar las imágenes especificadas en la sintaxis de Markdown (ej. `![](./img/f008.png)`). Copia y pega esa línea de código EXACTAMENTE igual a como viene en el origen, sin quitar ni alterar su ruta.
-3. NO traduzcas bloques de código (```cuda, ```cpp, etc.) ni diagramas de Mermaid (```mermaid). Déjalos completamente intactos.
+3. NO traduzcas bloques de código (```c, ```cpp, etc.) ni diagramas de Mermaid (```mermaid). Déjalos completamente intactos.
 4. Conserva en inglés los términos técnicos de la industria: "Kernel", "Warp", "Thread", "Block", "Grid", "Shared Memory", "Host", "Device", "Streaming Multiprocessor (SM)", "Memory Coalescing", "Tile".
 5. Traduce al español latinoamericano el texto explicativo con un tono profesional y técnico.
 6. Devuelve ÚNICAMENTE el código Markdown traducido. No agregues introducciones, notas de autor ni saludos.

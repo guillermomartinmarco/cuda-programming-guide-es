@@ -8,7 +8,7 @@ access GPU memory across the NVLink fabric by mapping remote physical memory
 into a local virtual address space. Once a peer allocation is mapped and given
 access rights, kernels access it like local memory using loads and stores
 (plus `multimem` instructions for multicast mappings). That model is both
-*address-centric* and *memory-centric*: the unit of sharing is a
+_address-centric_ and _memory-centric_: the unit of sharing is a
 virtual-to-physical mapping, and every byte a kernel touches on a peer must be
 reachable through an address that the issuing process has reserved and mapped.
 
@@ -30,7 +30,7 @@ Virtual addresses also name only memory. A mapping is defined in terms of
 physical memory, so a resource on the fabric that is not memory cannot be
 reached through a mapping at all.
 
-Compute fabric transport provides a complementary, *resource-centric* model
+Compute fabric transport provides a complementary, _resource-centric_ model
 for GPUs connected by the NVLink fabric. Instead of importing a peer’s
 memory into a local address space, an application creates a **logical
 endpoint**: a named transport object that represents a resource reachable over
@@ -142,9 +142,9 @@ place of a peer virtual address.
 
 **Logical Endpoint Clique:**
 A logical endpoint clique is a dynamic group of GPUs that are mutually reachable over Compute Fabric Transport operations at a required level of capability.
-The *clique type* describes the desired level of capability.
+The _clique type_ describes the desired level of capability.
 There are two logical endpoint clique types: `CU_CLIQUE_TYPE_UNICAST_LOGICAL_ENDPOINT` and `CU_CLIQUE_TYPE_MULTICAST_LOGICAL_ENDPOINT`.
-The *clique id* is a 32-bit value naming the dynamic group of GPUs.
+The _clique id_ is a 32-bit value naming the dynamic group of GPUs.
 Attempting to import a logical endpoint onto a device that is not a member of the same clique as the exporter device will fail.
 Attempting to create a multicast logical endpoint by adding devices that don’t belong to the same clique will fail.
 A single device can be a member of several cliques.
@@ -175,15 +175,15 @@ offset rather than by a peer virtual address, and the remote allocation does
 not need to be mapped into the issuing process’s virtual address space.
 
 **Reduction and Pull-Reduction Operations:**
-A reduction operation (*red*) combines data from the issuing GPU into a target
+A reduction operation (_red_) combines data from the issuing GPU into a target
 logical endpoint using a reduction operator. A pull-reduction operation
-(*pull\_red*) reads from a target multicast logical endpoint, combines values
+(_pull_red_) reads from a target multicast logical endpoint, combines values
 across the multicast team’s replicas with a reduction operator, and returns the
 result to the issuing GPU. It is the fabric counterpart of
 `multimem.ld_reduce`.
 
 **Atomic Operations:**
-An atomic operation (*atom*) performs an atomic read-modify-write on a target
+An atomic operation (_atom_) performs an atomic read-modify-write on a target
 logical endpoint. It reads the original value, overwrites it with a new value,
 and returns the original value. In contrast, a reduction operation does not
 return the original value. Operators for computing the new value include
@@ -194,7 +194,7 @@ only if the target holds the expected compare value.
 **Counted Operation:**
 A counted operation is a fabric operation that increments a target counter
 by the number of bytes written to the destination as data arrives. The receiver
-waits for the counter to reach an *expected byte count* before consuming the
+waits for the counter to reach an _expected byte count_ before consuming the
 data. The receiver does not know which bytes have been written until this
 expected byte count is reached. Once the counter reaches the expected byte
 count, the receiver can safely consume the data. The counter must be aligned to
@@ -204,7 +204,7 @@ applications must query device support (`CU_DEVICE_ATTRIBUTE_LOGICAL_ENDPOINT_CO
 before using this capability.
 
 **Completion Status and Error Reporting:**
-A fabric operation is tracked by a *completion object*, which signals when the
+A fabric operation is tracked by a _completion object_, which signals when the
 operation has completed and records the operation’s status. Waiting on that
 object indicates whether the tracked operations completed successfully or
 whether a fabric error occurred. When a failure is reported, the application
@@ -375,7 +375,7 @@ Otherwise, the devices cannot reach each other over the network with that partic
 
 First, we query how many cliques this device is a member of:
 
-```cuda
+```c
   size_t cliqueCount = 0; // not modified if there are errors
   cuDeviceGetCliqueCount(&cliqueCount, cuDevice);
 ```
@@ -383,7 +383,7 @@ First, we query how many cliques this device is a member of:
 Then, we query the clique information for all cliques this device is a member of and find the clique id of the clique we will be using.
 In this example we will be using the clique with type `CU_CLIQUE_TYPE_UNICAST_LOGICAL_ENDPOINT`.
 
-```cuda
+```c
   std::vector<CUcliqueInfo> cliqueInfos(cliqueCount);
   cuDeviceGetCliqueInfo(cliqueInfos.data(), &cliqueCount, cuDevice);
   unsigned int localCliqueId = 0;
@@ -399,7 +399,7 @@ In this example we will be using the clique with type `CU_CLIQUE_TYPE_UNICAST_LO
 
 Verify that all participating devices have the same clique id for that clique type.
 
-```cuda
+```c
   std::vector<unsigned int> allCliqueIds(numRanks);
   MPI_Allgather(&localCliqueId, sizeof(unsigned int), MPI_BYTE,
                           allCliqueIds.data(), sizeof(unsigned int), MPI_BYTE, MPI_COMM_WORLD);
@@ -421,7 +421,7 @@ import. The endpoints associated with the range may have different properties.
 For example, an application may reserve one id per GPU plus one id for a multicast endpoint. The example
 reserves one id per rank:
 
-```cuda
+```c
   CUlogicalEndpointId leId = 0;
   cuLogicalEndpointIdReserve(&leId, (uint32_t)numRanks);
 ```
@@ -435,7 +435,7 @@ that will hold its bound memory. Set the endpoint type, the requested IPC
 handle types (`ipcHandleTypes`), and any flags, opting in to counted
 operations only when requested:
 
-```cuda
+```c
   CUlogicalEndpointProp endpointProp {};
   endpointProp.type = CU_LOGICAL_ENDPOINT_TYPE_UNICAST;
   endpointProp.unicast = {.device = cuDevice};
@@ -453,7 +453,7 @@ imports peer endpoints typically reserves one id per participant so that a
 peer is addressed as the base id plus its rank. Each rank creates its own
 endpoint at `leId + myRank`:
 
-```cuda
+```c
   cuLogicalEndpointCreate(leId + myRank, &endpointProp);
 ```
 
@@ -497,7 +497,7 @@ reservations.
 
 An endpoint may be associated with several ids at once. For instance, it can be
 associated with the owner’s id through `cuLogicalEndpointCreate` and with
-additional ids through `cuLogicalEndpointImport`. Such ids are *aliases* for
+additional ids through `cuLogicalEndpointImport`. Such ids are _aliases_ for
 the same endpoint, and an operation issued against any of them reaches the same
 destination.
 
@@ -573,7 +573,7 @@ receive neighbor while collecting the send neighbor’s handle. It imports that
 handle as `leId + sendRank`, the id it later uses to issue fabric operations
 against the imported endpoint’s bound memory:
 
-```cuda
+```c
   // Export our own endpoint to a fabric IPC handle, hand it to the peers that
   // need it, and import each peer's handle to a locally reserved id.
   CUlogicalEndpointFabricHandle localHandle;
@@ -592,8 +592,8 @@ against the imported endpoint’s bound memory:
 the request is accepted. Using a
 logical endpoint id with an API that requires a fully constructed endpoint
 before `cuLogicalEndpointQuery` reports readiness is undefined behavior.
-`cuLogicalEndpointQuery` is itself non-blocking: it returns 0 if *any* id in
-the queried range is not yet ready, and a non-zero value once *all* ids in the given
+`cuLogicalEndpointQuery` is itself non-blocking: it returns 0 if _any_ id in
+the queried range is not yet ready, and a non-zero value once _all_ ids in the given
 range are ready, so it is typically called in a polling loop.
 
 Before querying readiness, reserve the logical endpoint id and associate it
@@ -651,7 +651,7 @@ offset, the size, and (for `cuLogicalEndpointBindMem`) the
 `memOffset` must all be multiples of `bindAlignment`, and the bound range
 must lie within the endpoint’s size (see [Section 4.18.6.1](compute-fabric-transport.md#cft-limits-alignment)).
 
-```cuda
+```c
   // Bind the whole backing allocation at endpoint offset 0, by allocation handle.
   cuLogicalEndpointBindMem(leId + myRank, cuDevice, 0, exportHandle, 0, exportSize, 0);
   // No rank may issue an operation until every destination has been bound.
@@ -677,7 +677,7 @@ behavior.
 
 ## 4.18.9. Fabric Operations
 
-Threads access endpoint resources by executing *fabric operations* that accept a
+Threads access endpoint resources by executing _fabric operations_ that accept a
 compute fabric transport handle — a logical endpoint id and offset pair. Fabric
 operations are asynchronous, that is, programs must explicitly wait on their completion to observe their effects.
 Fabric operations are prefixed with a `try_` to indicate that they may fail.
@@ -690,13 +690,13 @@ Fabric operations allow applications to handle errors at the program thread leve
 Device code issues fabric operations through the following
 `cuda::ptx` instructions:
 
-| Instruction | Operation |
-| --- | --- |
-| `cuda::ptx::fabric_try_put` | Write to a compute fabric transport handle. |
-| `cuda::ptx::fabric_try_get` | Read from a compute fabric transport handle. |
-| `cuda::ptx::fabric_try_red` | Reduction into a compute fabric transport handle. |
-| `cuda::ptx::fabric_try_pullred` | Pull-reduction from a compute fabric transport handle. |
-| `cuda::ptx::fabric_try_atom` | Atomic read-modify-write on a compute fabric transport handle. |
+| Instruction                     | Operation                                                      |
+| ------------------------------- | -------------------------------------------------------------- |
+| `cuda::ptx::fabric_try_put`     | Write to a compute fabric transport handle.                    |
+| `cuda::ptx::fabric_try_get`     | Read from a compute fabric transport handle.                   |
+| `cuda::ptx::fabric_try_red`     | Reduction into a compute fabric transport handle.              |
+| `cuda::ptx::fabric_try_pullred` | Pull-reduction from a compute fabric transport handle.         |
+| `cuda::ptx::fabric_try_atom`    | Atomic read-modify-write on a compute fabric transport handle. |
 
 The operations above - with the exception of `try_atom` - move data in 16-byte units, so both ends of a transfer must be
 16-byte aligned: the source pointer and the destination offset into the endpoint must
@@ -710,7 +710,7 @@ The put reads shared memory via the async-proxy, so the issuing thread calls
 The put takes the destination handle, the source buffer base address, a byte
 count, and the `mbarrier` that will track completion:
 
-```cuda
+```c
     // Make the staged shared-memory source visible to the async proxy before the put reads it.
     cuda::ptx::fence_proxy_async(cuda::ptx::space_shared);
     cuda::ptx::fabric_try_put(cuda::ptx::space_shared, cuda::ptx::sem_relaxed,
@@ -750,7 +750,7 @@ does this with `cuda::ptx::fabric_try_put_counted` — the plain put’s
 `.counted::bytes` variant — passing a second destination offset, the endpoint
 offset of the counter:
 
-```cuda
+```c
     // Make the staged shared-memory source visible to the async proxy before the put reads it.
     cuda::ptx::fence_proxy_async(cuda::ptx::space_shared);
     cuda::ptx::fabric_try_put_counted(cuda::ptx::space_shared, cuda::ptx::sem_relaxed,
@@ -772,9 +772,9 @@ are operation-specific, as described above.
 
 **Memory ordering.** The example issues its fabric puts with `relaxed`
 ordering at `sys` scope. A fabric put spans several proxies: it accesses the
-remote data (and, for a counted put, the counter) through the *fabric-proxy*,
-reads its `.shared::cta` source through the *async-proxy*, and updates the
-completion `mbarrier` through the *generic-proxy*. Because the mbarrier is
+remote data (and, for a counted put, the counter) through the _fabric-proxy_,
+reads its `.shared::cta` source through the _async-proxy_, and updates the
+completion `mbarrier` through the _generic-proxy_. Because the mbarrier is
 updated through the generic-proxy, completion is observed just by waiting at
 the barrier with block-scope operations. However, unlike
 `cuda::ptx::cp_async_bulk` operations, observing completion of a fabric
@@ -840,8 +840,8 @@ The same release/acquire proxy-fence is also required when one thread
 publishes data with fabric operations and another thread on the endpoint
 owner’s device consumes the bound destination through pointers. In the
 following schematic message-passing example, the sender writes the data and
-signaling flag with fabric operations through the *fabric-proxy*. The receiver
-polls the flag and reads the data through pointers using the *generic-proxy*.
+signaling flag with fabric operations through the _fabric-proxy_. The receiver
+polls the flag and reads the data through pointers using the _generic-proxy_.
 `dataPtr` and `flagPtr` address the destination memory bound to the
 receiver-owned endpoint.
 Initially, the destination data and flag are both 0. `smemSrcData` and
@@ -942,7 +942,7 @@ the same `mbarrier` signals completion and records status. Initialize this
 only arrival and transaction counts and cannot carry that status, so it cannot
 be used with the reporting mechanism:
 
-```cuda
+```c
     cuda::ptx::mbarrier_init(cuda::ptx::layout_v1, &putBar, 1);
 ```
 
@@ -970,7 +970,7 @@ outstanding at grid exit is undefined behavior.
 
 The following sequence submits that put and waits for its completion:
 
-```cuda
+```c
     cuda::ptx::fabric_submit();
     cuda::ptx::mbarrier_arrive_expect_tx(cuda::ptx::sem_relaxed, cuda::ptx::scope_cta,
                                          cuda::ptx::space_shared, &putBar,
@@ -992,13 +992,13 @@ The following sequence submits that put and waits for its completion:
     }
 ```
 
-The `phase_type::primary` form of `cuda::ptx::mbarrier_try_wait_parity` has *report predicate* and *report value* destination operands alongside its *completion predicate*.
-If the *completion predicate* is false, the *report predicate* and *report value* contain unspecified values.
-When the `try_wait` observes phase completion — that is, when the *completion predicate* is true — the *report predicate* and *report value* together contain additional information about the operations tracked by that barrier phase.
-If all operations tracked by the barrier phase were fabric operations, a false *report predicate* indicates that all fabric operations succeeded.
-Otherwise, if the *report predicate* is true, the *report value* may contain more information about the failures, and the program may use `cudaFabricOpErrorStatusCount` and `cudaFabricOpErrorStatusGet` to inspect this information.
+The `phase_type::primary` form of `cuda::ptx::mbarrier_try_wait_parity` has _report predicate_ and _report value_ destination operands alongside its _completion predicate_.
+If the _completion predicate_ is false, the _report predicate_ and _report value_ contain unspecified values.
+When the `try_wait` observes phase completion — that is, when the _completion predicate_ is true — the _report predicate_ and _report value_ together contain additional information about the operations tracked by that barrier phase.
+If all operations tracked by the barrier phase were fabric operations, a false _report predicate_ indicates that all fabric operations succeeded.
+Otherwise, if the _report predicate_ is true, the _report value_ may contain more information about the failures, and the program may use `cudaFabricOpErrorStatusCount` and `cudaFabricOpErrorStatusGet` to inspect this information.
 
-```cuda
+```c
 inline __device__ void reportFabricError(uint8_t *reportValue, uint64_t offset) {
   const unsigned long long off = offset;
   unsigned int errCount = 0;
@@ -1066,7 +1066,7 @@ matters is the ordering, not the mechanism that enforces it: any inter-process
 synchronization that establishes this ordering before bindings are removed is
 sufficient.
 
-```cuda
+```c
   // ---- Clean up endpoints and free the backing allocation. ----
   // Once every rank's stream has synchronized, all fabric puts
   // have completed and no rank will issue another operation. Making that global

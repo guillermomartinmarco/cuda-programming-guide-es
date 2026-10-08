@@ -15,7 +15,7 @@ Some CUDA features can benefit from additional attributes and hints provided wit
 
 The complete list of supported attributes and their meaning is captured in the [CUDA Runtime API Reference Documentation](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html#group__CUDART__TYPES_1gfc5ed48085f05863b1aeebb14934b056).
 
-## 3.1.2. Launching Clusters:
+## 3.1.2. Launching Clusters
 
 [Thread block clusters](../01-introduction/programming-model.md#programming-model-thread-block-clusters), introduced in previous sections, are an optional level of thread block organization available in compute capability 9.0 and higher which enable applications to guarantee that thread blocks of a cluster are simultaneously executed on single GPC. This enables larger groups of threads than those that fit in a single SM to exchange data and synchronize with each other.
 
@@ -121,10 +121,10 @@ with the host.
 
 Table 4 Summary of explicit synchronization options with the host
 
-|  | Wait for specific stream | Wait for specific event | Wait for everything on the device |
-| --- | --- | --- | --- |
-| Non-blocking (would need a polling loop) | cudaStreamQuery() | cudaEventQuery() | N/A |
-| Blocking | cudaStreamSynchronize() | cudaEventSynchronize() | cudaDeviceSynchronize() |
+|                                          | Wait for specific stream | Wait for specific event | Wait for everything on the device |
+| ---------------------------------------- | ------------------------ | ----------------------- | --------------------------------- |
+| Non-blocking (would need a polling loop) | cudaStreamQuery()        | cudaEventQuery()        | N/A                               |
+| Blocking                                 | cudaStreamSynchronize()  | cudaEventSynchronize()  | cudaDeviceSynchronize()           |
 
 For synchronization, i.e., to express dependencies, between CUDA streams, use of non-timing CUDA events is recommended, as described in [CUDA Events](../02-basics/asynchronous-execution.md#cuda-events).
 A user can call `cudaStreamWaitEvent()` to force future submitted operations on a specific stream to wait for the completion of a previously recorded event (e.g., on another stream).
@@ -193,7 +193,7 @@ since this is very much dependent on the specific kernels in question it is diff
 
 PDL has three main components.
 
-1. The first kernel (the so called *primary kernel*) needs to call a special function to indicate that it is done with the everything that the subsequent dependent kernels (also called *secondary kernel*) will need. This is done by calling the function `cudaTriggerProgrammaticLaunchCompletion()`.
+1. The first kernel (the so called _primary kernel_) needs to call a special function to indicate that it is done with the everything that the subsequent dependent kernels (also called _secondary kernel_) will need. This is done by calling the function `cudaTriggerProgrammaticLaunchCompletion()`.
 2. In turn, the dependent secondary kernel needs to indicate that it has reached the portion of the its work which is independent of the primary kernel and that it is now waiting on the primary kernel to finish the work on which it depends. This is done with the function `cudaGridDependencySynchronize()`.
 3. THe second kernel needs to be launched with a special attribute cudaLaunchAttributeProgrammaticStreamSerialization with its programmaticStreamSerializationAllowed field set to ‘1’.
 
@@ -287,10 +287,10 @@ cudaMemcpyBatchAsync(&dsts[0], &srcs[0], &sizes[0], batch_size,
     &attrs, &attrsIdxs, 1 /*numAttrs*/, nullptr /*failIdx*/, stream);
 ```
 
-The first few parameters to the `cudaMemcpyBatchAsync()` function seem immediately sensible. The are comprised of arrays containing the source and destination pointers, as well as the transfer sizes. Each array has to have``batch\_size`` elements. The new information comes from the attributes. The function needs a pointer to an array of attributes, and a corresponding array of attribute indices. In principle it is also possible to pass an array of `size_t` and in this array the indices of an failed transfers can be recorded, however it is safe to pass a `nullptr` here, in this case the indices of failures will simply not be recorded.
+The first few parameters to the `cudaMemcpyBatchAsync()` function seem immediately sensible. The are comprised of arrays containing the source and destination pointers, as well as the transfer sizes. Each array has to have`batch\_size` elements. The new information comes from the attributes. The function needs a pointer to an array of attributes, and a corresponding array of attribute indices. In principle it is also possible to pass an array of `size_t` and in this array the indices of an failed transfers can be recorded, however it is safe to pass a `nullptr` here, in this case the indices of failures will simply not be recorded.
 
 Turning to the attributes, in this instance the transfers are homogeneous. So we use only one attribute, which will apply to
-all the transfers. This is controlled by the attrIndex parameter. In principle this can be an array. Element *i* of the array contains the index of the first transfer to which the *i*-th element of the attribute array applies. In this case, attrIndex is treated as a single element array, with the value ‘0’ meaning that `attribute[0]` will apply to all transfers with index 0 and up, in other words all the transfers.
+all the transfers. This is controlled by the attrIndex parameter. In principle this can be an array. Element _i_ of the array contains the index of the first transfer to which the _i_-th element of the attribute array applies. In this case, attrIndex is treated as a single element array, with the value ‘0’ meaning that `attribute[0]` will apply to all transfers with index 0 and up, in other words all the transfers.
 
 Finally, we note that we have set the `srcAccessOrder` attribute to `cudaMemcpySrcAccessOrderStream`. This means that the source data will be accessed in regular stream order. In other words, the memcpy will block until previous kernels dealing with the data from any of these source and destination pointers are completed.
 
@@ -331,13 +331,13 @@ cudaMemcpyBatchAsync(&dsts[0], &srcs[0], &sizes[0], batch_size,
 ```
 
 Here we have two kinds of transfers: `batch_size-10` transfer from pinned host memory to pinned device memory,
-and 10 transfers from a host array to pinned device memory. Further, the buffer array is not only on the host but is only in existence in the current scope – its address is what is known as an *ephemeral pointer*. This pointer may not be valid after the API call completes (it is asynchronous). To perform the copies with such ephemeral pointers, the srcAccessOrder in the attribute must be set to cudaMemcpySrcAccessOrderDuringApiCall.
+and 10 transfers from a host array to pinned device memory. Further, the buffer array is not only on the host but is only in existence in the current scope – its address is what is known as an _ephemeral pointer_. This pointer may not be valid after the API call completes (it is asynchronous). To perform the copies with such ephemeral pointers, the srcAccessOrder in the attribute must be set to cudaMemcpySrcAccessOrderDuringApiCall.
 
 We now have two attributes, the first one applies to all transfers with indices starting at 0, and less than `batch_size-10`. The second one applies to all transfers with indices starting at `batch_size-10` and less than `batch_size`.
 
 If instead of allocating the buffer array from the stack, we had allocated it from the heap using malloc the data would not be ephemeral any more. It would be valid until the pointer was explicitly freed. In such a case the best option for how to stage the copies would depend on whether the system had hardware managed memory or coherent GPU access to host memory via address translation in which case it would be best to use stream ordering, or whether it did not in which case staging the transfers immediately would make most sense. In this situation, one should use the value `cudaMemcpyAccessOrderAny` for the `srcAccessOrder` of the attribute.
 
-The `cudaMemcpyBatchAsync` function also allows the programmer to provide hints about the source and destination locations. This is done by setting the `srcLocation` and `dstLocation` fields of the `cudaMemcpyAttributes` structure. The ``` srcLocation``and ``dstLocation ``` fields are both of type `cudaMemLocation` which is a structure that contains the type of the location and the ID of the location. This is the same `cudaMemLocation` structure that can be used to give prefetching hints to the runtime when using `cudaMemPrefetchAsync()`. We illustrate how to set up the hints for a transfer from the device, to a specific NUMA node of the host in the code example below:
+The `cudaMemcpyBatchAsync` function also allows the programmer to provide hints about the source and destination locations. This is done by setting the `srcLocation` and `dstLocation` fields of the `cudaMemcpyAttributes` structure. The `srcLocation``and ``dstLocation` fields are both of type `cudaMemLocation` which is a structure that contains the type of the location and the ID of the location. This is the same `cudaMemLocation` structure that can be used to give prefetching hints to the runtime when using `cudaMemPrefetchAsync()`. We illustrate how to set up the hints for a transfer from the device, to a specific NUMA node of the host in the code example below:
 
 Listing 6 Example of Setting Source and Destination Location Hints
 
@@ -414,5 +414,5 @@ In this default mode, a similar effect to eager module loading could be achieved
 by adding “warm-up” calls of the various kernels during the application’s initialization phase, to force module loading to happen sooner.
 
 Please refer to [CUDA Environment Variables](../05-appendices/environment-variables.md#cuda-environment-variables) for more details about the various CUDA environment variables.
-It is recommended that you set the environment variables to new values *before* you launch the application; attempting to set them within your application
+It is recommended that you set the environment variables to new values _before_ you launch the application; attempting to set them within your application
 may have no effect.

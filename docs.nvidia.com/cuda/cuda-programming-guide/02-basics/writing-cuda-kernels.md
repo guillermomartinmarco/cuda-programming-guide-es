@@ -70,7 +70,7 @@ A simple example illustrating the use of global memory is the kernel shown below
 
 **C++**
 
-```cuda
+```c
 __global__ void vecAdd(float* A, float* B, float* C, int vectorLength)
 {
     int workIndex = threadIdx.x + blockIdx.x*blockDim.x;
@@ -98,7 +98,7 @@ Since shared memory is accessible by all threads in a thread block, care must be
 
 **C++**
 
-```cuda
+```c
 // assuming blockDim.x is 128
 __global__ void example_syncthreads(int* input_data, int* output_data)
 {
@@ -467,7 +467,7 @@ The most straightforward way to achieve coalesced memory access is for consecuti
 
 **C++**
 
-```cuda
+```c
 __global__ void vecAdd(float* A, float* B, float* C, int vectorLength)
 {
     int workIndex = threadIdx.x + blockIdx.x*blockDim.x;
@@ -580,7 +580,7 @@ In the previous example [Matrix Transpose Example Using Global Memory](writing-c
 
 **C++**
 
-```cuda
+```c
 #define THREADS_PER_BLOCK_X 32
 #define THREADS_PER_BLOCK_Y 32
 

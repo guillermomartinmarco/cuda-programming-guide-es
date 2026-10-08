@@ -24,6 +24,8 @@ Stream-Ordered Memory Allocator:
 > - Allows, the driver to perform optimizations based on its awareness of the
 >   allocator and other stream management APIs.
 
+<!---->
+
 > [!NOTE]
 >
 > Nsight Compute and the Next-Gen CUDA debugger is aware of the allocator
@@ -501,7 +503,7 @@ The release threshold is the amount of memory in bytes a pool should hold onto
 before trying to release memory back to the OS. When more than the release
 threshold bytes of memory are held by the memory pool, the allocator will try
 to release memory back to the OS on the next call to stream, event or device
-synchronize. Setting the release threshold to UINT64\_MAX will prevent the
+synchronize. Setting the release threshold to UINT64_MAX will prevent the
 driver from attempting to shrink the pool after every synchronization.
 
 ```cpp

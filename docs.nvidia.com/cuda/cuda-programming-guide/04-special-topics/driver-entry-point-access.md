@@ -8,7 +8,7 @@ These APIs provide functionality similar to their counterparts, dlsym on POSIX p
 
 - Retrieve the address of a driver function using the `CUDA Driver API.`
 - Retrieve the address of a driver function using the `CUDA Runtime API.`
-- Request *per-thread default stream* version of a CUDA driver function. For more details, see [Retrieve Per-thread Default Stream Versions](driver-entry-point-access.md#retrieve-per-thread-default-stream-versions).
+- Request _per-thread default stream_ version of a CUDA driver function. For more details, see [Retrieve Per-thread Default Stream Versions](driver-entry-point-access.md#retrieve-per-thread-default-stream-versions).
 - Access new CUDA features on older toolkits but with a newer driver.
 
 ## 4.22.2. Driver Function Typedefs
@@ -17,16 +17,16 @@ To help retrieve the CUDA Driver API entry points, the CUDA Toolkit provides acc
 
 Table 27 Typedefs header files for CUDA driver APIs
 
-| API header file | API Typedef header file |
-| --- | --- |
-| `cuda.h` | `cudaTypedefs.h` |
-| `cudaGL.h` | `cudaGLTypedefs.h` |
+| API header file  | API Typedef header file  |
+| ---------------- | ------------------------ |
+| `cuda.h`         | `cudaTypedefs.h`         |
+| `cudaGL.h`       | `cudaGLTypedefs.h`       |
 | `cudaProfiler.h` | `cudaProfilerTypedefs.h` |
-| `cudaVDPAU.h` | `cudaVDPAUTypedefs.h` |
-| `cudaEGL.h` | `cudaEGLTypedefs.h` |
-| `cudaD3D9.h` | `cudaD3D9Typedefs.h` |
-| `cudaD3D10.h` | `cudaD3D10Typedefs.h` |
-| `cudaD3D11.h` | `cudaD3D11Typedefs.h` |
+| `cudaVDPAU.h`    | `cudaVDPAUTypedefs.h`    |
+| `cudaEGL.h`      | `cudaEGLTypedefs.h`      |
+| `cudaD3D9.h`     | `cudaD3D9Typedefs.h`     |
+| `cudaD3D10.h`    | `cudaD3D10Typedefs.h`    |
+| `cudaD3D11.h`    | `cudaD3D11Typedefs.h`    |
 
 The above headers do not define actual function pointers themselves; they define the typedefs for function pointers. For example, `cudaTypedefs.h` has the below typedefs for the driver API `cuMemAlloc`:
 
@@ -108,12 +108,12 @@ if (cudaVersion >= 11020) {
 
 ### 4.22.3.3. Retrieve Per-thread Default Stream Versions
 
-Some CUDA driver APIs can be configured to have *default stream* or *per-thread default stream* semantics. Driver APIs having *per-thread default stream* semantics are suffixed with *\_ptsz* or *\_ptds* in their name. For example, `cuLaunchKernel` has a *per-thread default stream* variant named `cuLaunchKernel_ptsz`. With the Driver Entry Point Access APIs, users can request for the *per-thread default stream* version of the driver API `cuLaunchKernel` instead of the *default stream* version. Configuring the CUDA driver APIs for *default stream* or *per-thread default stream* semantics affects the synchronization behavior. More details can be found [here](https://docs.nvidia.com/cuda/cuda-driver-api/stream-sync-behavior.html#stream-sync-behavior__default-stream).
+Some CUDA driver APIs can be configured to have _default stream_ or _per-thread default stream_ semantics. Driver APIs having _per-thread default stream_ semantics are suffixed with _\_ptsz_ or _\_ptds_ in their name. For example, `cuLaunchKernel` has a _per-thread default stream_ variant named `cuLaunchKernel_ptsz`. With the Driver Entry Point Access APIs, users can request for the _per-thread default stream_ version of the driver API `cuLaunchKernel` instead of the _default stream_ version. Configuring the CUDA driver APIs for _default stream_ or _per-thread default stream_ semantics affects the synchronization behavior. More details can be found here: <https://docs.nvidia.com/cuda/cuda-driver-api/stream-sync-behavior.html#stream-sync-behavior__default-stream>.
 
-The *default stream* or *per-thread default stream* versions of a driver API can be obtained by one of the following ways:
+The _default stream_ or _per-thread default stream_ versions of a driver API can be obtained by one of the following ways:
 
-- Use the compilation flag `--default-stream per-thread` or define the macro `CUDA_API_PER_THREAD_DEFAULT_STREAM` to get *per-thread default stream* behavior.
-- Force *default stream* or *per-thread default stream* behavior using the flags `CU_GET_PROC_ADDRESS_LEGACY_STREAM/cudaEnableLegacyStream` or `CU_GET_PROC_ADDRESS_PER_THREAD_DEFAULT_STREAM/cudaEnablePerThreadDefaultStream` respectively.
+- Use the compilation flag `--default-stream per-thread` or define the macro `CUDA_API_PER_THREAD_DEFAULT_STREAM` to get _per-thread default stream_ behavior.
+- Force _default stream_ or _per-thread default stream_ behavior using the flags `CU_GET_PROC_ADDRESS_LEGACY_STREAM/cudaEnableLegacyStream` or `CU_GET_PROC_ADDRESS_PER_THREAD_DEFAULT_STREAM/cudaEnablePerThreadDefaultStream` respectively.
 
 ### 4.22.3.4. Access New CUDA features
 
