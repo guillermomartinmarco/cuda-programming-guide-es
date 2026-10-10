@@ -8,3 +8,9 @@ docs.nvidia.com/**
 !docs.nvidia.com/**/
 !docs.nvidia.com/**/*.md
 !docs.nvidia.com/**/_images/*
+
+# Ignora las carpetas builds de cmake
+build*/
+
+# Ignora archivo temporal de logs
+.logs

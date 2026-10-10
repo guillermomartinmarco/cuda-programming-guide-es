@@ -4,7 +4,7 @@ Este capítulo introduce algunos de los conceptos básicos del modelo de program
 
 Esta guía de programación se centra en la API de tiempo de ejecución de CUDA. La API de tiempo de ejecución de CUDA es la forma más utilizada de utilizar CUDA en C++, y se basa en la API de controlador de nivel inferior de CUDA.
 
-[API de tiempo de ejecución de CUDA y API del controlador de CUDA](../01-introduction/cuda-platform.md#cuda-platform-driver-and-runtime) analiza las diferencias entre las APIs, y [API del controlador de CUDA](../03-advanced/driver-api.md#driver-api) trata sobre cómo escribir código que combine las APIs.
+La [API del entorno de ejecución de CUDA y API del controlador de CUDA](../01-introduction/cuda-platform[es].md#1321-api-del-entorno-de-ejecución-de-cuda-y-api-del-controlador-de-cuda) analiza las diferencias entre las APIs, y [API del controlador de CUDA](../03-advanced/driver-api.md) trata sobre cómo escribir código que combine las APIs.
 
 Esta guía asume que el Toolkit de CUDA y los controladores de NVIDIA están instalados, y que está presente una GPU de NVIDIA compatible. Consulte [La guía rápida de CUDA](https://docs.nvidia.com/cuda/cuda-quick-start-guide/index.html) para obtener instrucciones sobre la instalación de los componentes de CUDA necesarios.
 
@@ -12,18 +12,18 @@ Esta guía asume que el Toolkit de CUDA y los controladores de NVIDIA están ins
 
 El código de GPU escrito en C++ se compila utilizando el compilador NVIDIA Cuda, `nvcc`. `nvcc` es un motor de compilación que simplifica el proceso de compilación de código C++ o PTX: proporciona opciones sencillas y familiares de la línea de comandos y las ejecuta invocando la colección de herramientas que implementan las diferentes etapas de compilación.
 
-Esta guía mostrará las líneas de comandos de `nvcc` que se pueden utilizar en cualquier sistema Linux con el Toolkit CUDA instalado, en una línea de comandos de Windows o PowerShell, o en el Subsistema de Windows para Linux con el Toolkit CUDA. El capítulo [sobre nvcc](nvcc.md#nvcc) de esta guía cubre los casos de uso comunes de `nvcc`, y la documentación completa se proporciona en el [manual de usuario de nvcc](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html).
+Esta guía mostrará las líneas de comandos de `nvcc` que se pueden utilizar en cualquier sistema Linux con el Toolkit CUDA instalado, en una línea de comandos de Windows o PowerShell, o en el Subsistema de Windows para Linux con el Toolkit CUDA. El capítulo [sobre nvcc](nvcc.md) de esta guía cubre los casos de uso comunes de `nvcc`, y la documentación completa se proporciona en el [manual de usuario de nvcc](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html).
 
 ## 2.1.2. Núcleos
 
-Como se mencionó en la introducción al [Modelo de Programación CUDA](../01-introduction/programming-model.md#programming-model), las funciones que se ejecutan en la GPU y que pueden ser invocadas desde el host se denominan núcleos. Los núcleos están diseñados para ser ejecutados por múltiples hilos en paralelo simultáneamente.
+Como se mencionó en la introducción al [Modelo de Programación CUDA](../01-introduction/programming-model[es].md), las funciones que se ejecutan en la GPU y que pueden ser invocadas desde el host se denominan núcleos o kernels. Los núcleos están diseñados para ser ejecutados por múltiples hilos en paralelo simultáneamente.
 
 ### 2.1.2.1. Especificando los núcleos
 
 El código para un núcleo se especifica utilizando el especificador `__global__`. Esto indica al compilador que esta función se compilará para la GPU de una manera que permita su invocación desde un lanzamiento de núcleo. Un lanzamiento de núcleo es una operación que inicia la ejecución de un núcleo, normalmente desde la CPU. Los núcleos son funciones con un tipo de retorno `void`.
 
 ```c
-// Kernel definition
+// Defición de un Kernel
 __global__ void vecAdd(float* A, float* B, float* C)
 {
 
@@ -32,13 +32,13 @@ __global__ void vecAdd(float* A, float* B, float* C)
 
 ### 2.1.2.2. Lanzamiento de núcleos
 
-El número de hilos que ejecutarán el núcleo en paralelo se especifica como parte del lanzamiento del núcleo. Esto se denomina configuración de ejecución. Diferentes invocaciones del mismo núcleo pueden utilizar diferentes configuraciones de ejecución, como un número diferente de hilos o bloques de hilos.
+El número de hilos que ejecutará el núcleo en paralelo se especifica como parte del lanzamiento del núcleo. Esto se denomina configuración de ejecución. Diferentes invocaciones del mismo núcleo pueden utilizar diferentes configuraciones de ejecución, como un número diferente de hilos o bloques de hilos.
 
-Existen dos formas de lanzar núcleos desde código de CPU, la notación de triple chevron ([notación de triple chevron](intro-to-cuda-cpp.md#intro-cpp-launching-kernels-triple-chevron)) y `cudaLaunchKernelEx`. La notación de triple chevron, que es la forma más común de lanzar núcleos, se introduce aquí. Se muestra y se analiza en detalle un ejemplo de lanzamiento de un núcleo utilizando `cudaLaunchKernelEx` en la sección [Sección 3.1.1](../03-advanced/advanced-host-programming.md#advanced-host-cudalaunchkernelex).
+Existen dos formas de lanzar núcleos desde código de CPU, la notación de triple chevron ([notación de triple chevron](#21221-notación-con-tres-flechas)) y `cudaLaunchKernelEx`. La notación de triple chevron, que es la forma más común de lanzar núcleos, se introduce aquí. Se muestra y se analiza en detalle un ejemplo de lanzamiento de un núcleo utilizando `cudaLaunchKernelEx` en la sección [Sección 3.1.1](../03-advanced/advanced-host-programming.md#311-cudalaunchkernelex).
 
 #### 2.1.2.2.1. Notación con tres flechas
 
-La notación con tres flechas es una [extensión del lenguaje CUDA C++](../05-appendices/cpp-language-extensions.md#execution-configuration) que se utiliza para lanzar kernels. Se llama "notación con tres flechas" porque utiliza tres caracteres de flecha para encapsular la configuración de ejecución para el lanzamiento del kernel, es decir, `<<< >>>`. Los parámetros de configuración de ejecución se especifican como una lista separada por comas dentro de las flechas, de forma similar a los parámetros de una llamada a función. A continuación, se muestra la sintaxis para el lanzamiento del kernel `vecAdd`.
+La notación con tres flechas es una [extensión del lenguaje CUDA C++](../05-appendices/cpp-language-extensions.md#543-kernel-configuration) que se utiliza para lanzar kernels. Se llama "notación con tres flechas" porque utiliza tres caracteres de flecha para encapsular la configuración de ejecución para el lanzamiento del kernel, es decir, `<<< >>>`. Los parámetros de configuración de ejecución se especifican como una lista separada por comas dentro de las flechas, de forma similar a los parámetros de una llamada a función. A continuación, se muestra la sintaxis para el lanzamiento del kernel `vecAdd`.
 
 ```c
  __global__ void vecAdd(float* A, float* B, float* C)
@@ -49,7 +49,7 @@ La notación con tres flechas es una [extensión del lenguaje CUDA C++](../05-ap
 int main()
 {
     ...
-    // Kernel invocation
+    // Invocación del Kernel
     vecAdd<<<1, 256>>>(A, B, C);
     ...
 }
@@ -57,11 +57,11 @@ int main()
 
 Los dos primeros parámetros de la notación con tres flechas son las dimensiones de la cuadrícula y las dimensiones del bloque de hilos, respectivamente. Cuando se utilizan bloques o cuadrículas de hilos unidimensionales, se pueden utilizar enteros para especificar las dimensiones.
 
-El código anterior lanza un único bloque de hilos que contiene 256 hilos. Cada hilo ejecutará exactamente el mismo código del kernel. En [Intrínsecos de índice de hilos y cuadrículas](intro-to-cuda-cpp.md#intro-cpp-thread-indexing), mostraremos cómo cada hilo puede utilizar su índice dentro del bloque y la cuadrícula para modificar los datos en los que opera.
+El código anterior lanza un único bloque de hilos que contiene 256 hilos. Cada hilo ejecutará exactamente el mismo código del kernel. En [Intrínsecos de índice de hilos y cuadrículas](#2123-intrínsecos-para-el-índice-de-hilos-y-la-cuadrícula), mostraremos cómo cada hilo puede utilizar su índice dentro del bloque y la cuadrícula para modificar los datos en los que opera.
 
 Existe un límite en el número de hilos por bloque, ya que todos los hilos de un bloque residen en el mismo multiprocesador de flujo (SM) y deben compartir los recursos del SM. En las GPU actuales, un bloque de hilos puede contener hasta 1024 hilos. Si los recursos lo permiten, se pueden programar varios bloques de hilos en un SM simultáneamente.
 
-Los lanzamientos de kernels son asíncronos con respecto al hilo del host. Es decir, el kernel se configurará para la ejecución en la GPU, pero el código del host no esperará a que el kernel complete (o incluso inicie) la ejecución en la GPU antes de continuar. Se debe utilizar algún tipo de sincronización entre la GPU y la CPU para determinar que el kernel ha finalizado. La versión más básica, que sincroniza completamente toda la GPU, se muestra en [Sincronizar CPU y GPU](intro-to-cuda-cpp.md#intro-synchronizing-the-gpu). Métodos de sincronización más sofisticados se cubren en [Ejecución asíncrona](asynchronous-execution.md#asynchronous-execution).
+Los lanzamientos de kernels son asíncronos con respecto al hilo del host. Es decir, el kernel se configurará para la ejecución en la GPU, pero el código del host no esperará a que el kernel complete (o incluso inicie) la ejecución en la GPU antes de continuar. Se debe utilizar algún tipo de sincronización entre la GPU y la CPU para determinar que el kernel ha finalizado. La versión más básica, que sincroniza completamente toda la GPU, se muestra en [Sincronizar CPU y GPU](#214-sincronización-de-cpu-y-gpu). Métodos de sincronización más sofisticados se cubren en [Ejecución asíncrona](./asynchronous-execution.md).
 
 Cuando se utilizan cuadrículas o bloques de hilos bidimensionales o tridimensionales, se utiliza el tipo de CUDA `dim3` como parámetros de las dimensiones de la cuadrícula y el bloque de hilos. El fragmento de código a continuación muestra un lanzamiento de kernel del kernel `MatAdd` utilizando una cuadrícula de bloques de hilos de 16 x 16, y cada bloque de hilos es de 8 x 8.
 
@@ -157,7 +157,7 @@ La elección de 256 hilos por bloque aquí es arbitraria, pero a menudo es una b
 
 ## 2.1.3. Memoria en el cálculo en GPU
 
-Para poder utilizar el kernel `vecAdd` mostrado anteriormente, los arrays `A`, `B` y `C` deben estar en memoria y accesibles para la GPU. Existen varias formas diferentes de hacerlo, y dos de ellas se ilustrarán aquí. Otros métodos se tratarán en secciones posteriores sobre [memoria unificada](understanding-memory.md#memory-unified-memory). Los espacios de memoria disponibles para el código que se ejecuta en la GPU se introdujeron en [Memoria de la GPU](../01-introduction/programming-model.md#programming-model-memory) y se detallan en [Espacios de memoria de dispositivos de la GPU](writing-cuda-kernels.md#writing-cuda-kernels-gpu-device-memory-spaces).
+Para poder utilizar el kernel `vecAdd` mostrado anteriormente, los arrays `A`, `B` y `C` deben estar en memoria y accesibles para la GPU. Existen varias formas diferentes de hacerlo, y dos de ellas se ilustrarán aquí. Otros métodos se tratarán en secciones posteriores sobre [memoria unificada](./understanding-memory.md#262-unified-memory). Los espacios de memoria disponibles para el código que se ejecuta en la GPU se introdujeron en [Memoria de la GPU](../01-introduction/programming-model[es].md#123-memoria-de-la-gpu) y se detallan en [Espacios de memoria de dispositivos de la GPU](./writing-cuda-kernels.md#233-gpu-device-memory-spaces).
 
 ### 2.1.3.1. Memoria unificada
 
@@ -213,7 +213,7 @@ void unifiedMemExample(int vectorLength)
 }
 ```
 
-La memoria unificada está soportada en todos los sistemas operativos y GPUs compatibles con CUDA, aunque el mecanismo subyacente y el rendimiento pueden variar según la arquitectura del sistema. [Memoria unificada](understanding-memory.md#memory-unified-memory) proporciona más detalles. En algunos sistemas Linux (por ejemplo, aquellos con [servicios de traducción de direcciones](understanding-memory.md#memory-unified-address-translation-services) o [gestión de memoria heterogénea](understanding-memory.md#memory-heterogeneous-memory-management)), toda la memoria del sistema se convierte automáticamente en memoria unificada, y no es necesario utilizar `cudaMallocManaged` o el especificador `__managed__`.
+La memoria unificada está soportada en todos los sistemas operativos y GPUs compatibles con CUDA, aunque el mecanismo subyacente y el rendimiento pueden variar según la arquitectura del sistema. [Memoria unificada](./understanding-memory.md#262-unified-memory) proporciona más detalles. En algunos sistemas Linux (por ejemplo, aquellos con [servicios de traducción de direcciones](understanding-memory.md#memory-unified-address-translation-services) o [gestión de memoria heterogénea](./understanding-memory.md#26221-full-unified-memory-with-hardware-coherency)), toda la memoria del sistema se convierte automáticamente en memoria unificada, y no es necesario utilizar `cudaMallocManaged` o el especificador `__managed__`.
 
 ### 2.1.3.2. Gestión explícita de la memoria
 
@@ -297,21 +297,21 @@ La API de CUDA `cudaMemcpy` se utiliza para copiar datos de un búfer que reside
 
 En este ejemplo, se pasa `cudaMemcpyDefault` como el último argumento de `cudaMemcpy`. Esto hace que CUDA utilice el valor de los punteros de origen y destino para determinar el tipo de copia que se debe realizar.
 
-La API `cudaMemcpy` es sincrónica. Es decir, no devuelve hasta que la copia se haya completado. Las copias asíncronas se introducen en [Lanzamiento de transferencias de memoria en flujos de CUDA](asynchronous-execution.md#async-execution-memory-transfers).
+La API `cudaMemcpy` es sincrónica. Es decir, no devuelve hasta que la copia se haya completado. Las copias asíncronas se introducen en [Lanzamiento de transferencias de memoria en flujos de CUDA](./asynchronous-execution.md#2523-launching-memory-transfers-in-cuda-streams).
 
-El código utiliza `cudaMallocHost` para asignar memoria en la CPU. Esto asigna memoria [con bloqueo de página](understanding-memory.md#memory-page-locked-host-memory) en el host, lo que puede mejorar el rendimiento de la copia y es necesario para las [transferencias de memoria asíncronas](asynchronous-execution.md#async-execution-memory-transfers). En general, es una buena práctica utilizar memoria con bloqueo de página para los búferes de la CPU que se utilizarán en las transferencias de datos a y desde las GPUs. El rendimiento puede degradarse en algunos sistemas si se bloquea demasiada memoria del host. La mejor práctica es bloquear de página solo los búferes que se utilizarán para enviar o recibir datos desde la GPU.
+El código utiliza `cudaMallocHost` para asignar memoria en la CPU. Esto asigna memoria [con bloqueo de página](./understanding-memory.md#263-page-locked-host-memory) en el host, lo que puede mejorar el rendimiento de la copia y es necesario para las [transferencias de memoria asíncronas](./asynchronous-execution.md#2523-launching-memory-transfers-in-cuda-streams). En general, es una buena práctica utilizar memoria con bloqueo de página para los búferes de la CPU que se utilizarán en las transferencias de datos a y desde las GPUs. El rendimiento puede degradarse en algunos sistemas si se bloquea demasiada memoria del host. La mejor práctica es bloquear de página solo los búferes que se utilizarán para enviar o recibir datos desde la GPU.
 
 ### 2.1.3.3. Gestión de la memoria y rendimiento de las aplicaciones
 
 Como se puede observar en el ejemplo anterior, la gestión de la memoria explícita es más detallada, requiriendo que el programador especifique las copias entre el host y el dispositivo. Esta es la ventaja y la desventaja de la gestión de la memoria explícita: permite un mayor control sobre cuándo se copian los datos entre el host y los dispositivos, dónde reside la memoria y exactamente qué memoria se asigna en cada ubicación. La gestión de la memoria explícita puede proporcionar oportunidades de mejora del rendimiento al controlar las transferencias de memoria y superponerlas con otras computaciones.
 
-Cuando se utiliza la memoria unificada, existen las APIs de CUDA (que se tratarán en [Consejos y pre-cargado de memoria](understanding-memory.md#memory-mem-advise-prefetch)), que proporcionan indicaciones al controlador de NVIDIA que gestiona la memoria, lo que puede permitir algunos de los beneficios de rendimiento de utilizar la gestión de la memoria explícita cuando se utiliza la memoria unificada.
+Cuando se utiliza la memoria unificada, existen las APIs de CUDA (que se tratarán en [Consejos y pre-cargado de memoria](./understanding-memory.md#2624-memory-advise-and-prefetch)), que proporcionan indicaciones al controlador de NVIDIA que gestiona la memoria, lo que puede permitir algunos de los beneficios de rendimiento de utilizar la gestión de la memoria explícita cuando se utiliza la memoria unificada.
 
 ## 2.1.4. Sincronización de CPU y GPU
 
-Como se mencionó en [Lanzamiento de núcleos](intro-to-cuda-cpp.md#intro-cpp-launching-kernels), los lanzamientos de núcleos son asíncronos con respecto al hilo de la CPU que los llamó. Esto significa que el flujo de control del hilo de la CPU continuará ejecutándose antes de que el núcleo haya finalizado, e incluso posiblemente antes de que se haya iniciado. Para garantizar que un núcleo haya completado la ejecución antes de continuar en el código del host, es necesario un mecanismo de sincronización.
+Como se mencionó en [Lanzamiento de núcleos](#2122-lanzamiento-de-núcleos), los lanzamientos de núcleos son asíncronos con respecto al hilo de la CPU que los llamó. Esto significa que el flujo de control del hilo de la CPU continuará ejecutándose antes de que el núcleo haya finalizado, e incluso posiblemente antes de que se haya iniciado. Para garantizar que un núcleo haya completado la ejecución antes de continuar en el código del host, es necesario un mecanismo de sincronización.
 
-La forma más sencilla de sincronizar la GPU y un hilo del host es utilizando `cudaDeviceSynchronize`, que bloquea el hilo del host hasta que se haya completado todo el trabajo anterior en la GPU. En los ejemplos de este capítulo, esto es suficiente porque solo se están ejecutando operaciones individuales en la GPU. En aplicaciones más grandes, puede haber múltiples [flujos](asynchronous-execution.md#cuda-streams) ejecutando trabajo en la GPU, y `cudaDeviceSynchronize` esperará a que se complete el trabajo en todos los flujos. En estas aplicaciones, se recomienda utilizar las APIs de [Sincronización de Flujos](asynchronous-execution.md#async-execution-stream-synchronization) para sincronizar solo con un flujo específico o [Eventos CUDA](asynchronous-execution.md#cuda-events). Estos se tratarán en detalle en el capítulo de [Ejecución Asíncrona](asynchronous-execution.md#asynchronous-execution).
+La forma más sencilla de sincronizar la GPU y un hilo del host es utilizando `cudaDeviceSynchronize`, que bloquea el hilo del host hasta que se haya completado todo el trabajo anterior en la GPU. En los ejemplos de este capítulo, esto es suficiente porque solo se están ejecutando operaciones individuales en la GPU. En aplicaciones más grandes, puede haber múltiples [flujos](./asynchronous-execution.md#252-cuda-streams) ejecutando trabajo en la GPU, y `cudaDeviceSynchronize` esperará a que se complete el trabajo en todos los flujos. En estas aplicaciones, se recomienda utilizar las APIs de [Sincronización de Flujos](./asynchronous-execution.md#2524-stream-synchronization) para sincronizar solo con un flujo específico o [Eventos CUDA](./asynchronous-execution.md#253-cuda-events). Estos se tratarán en detalle en el capítulo de [Ejecución Asíncrona](./asynchronous-execution.md).
 
 ## 2.1.5. Uniendo todo
 
@@ -575,23 +575,23 @@ $ ./vecAdd_explicitMemory 4096
 Explicit Memory: CPU and GPU answers match
 ```
 
-En estos ejemplos, todos los hilos realizan tareas independientes y no necesitan coordinarse ni sincronizarse entre sí. Con frecuencia, los hilos necesitarán cooperar y comunicarse con otros hilos para llevar a cabo sus tareas. Los hilos dentro de un bloque pueden compartir datos a través de [memoria compartida](writing-cuda-kernels.md#writing-cuda-kernels-shared-memory) y sincronizarse para coordinar el acceso a la memoria.
+En estos ejemplos, todos los hilos realizan tareas independientes y no necesitan coordinarse ni sincronizarse entre sí. Con frecuencia, los hilos necesitarán cooperar y comunicarse con otros hilos para llevar a cabo sus tareas. Los hilos dentro de un bloque pueden compartir datos a través de [memoria compartida](./writing-cuda-kernels.md#2332-shared-memory) y sincronizarse para coordinar el acceso a la memoria.
 
 El mecanismo más básico para la sincronización a nivel de bloque es la función intrínseca `__syncthreads()`, que actúa como una barrera en la que todos los hilos dentro del bloque deben esperar antes de que se permita que cualquier hilo continúe. [Memoria compartida](writing-cuda-kernels.md#writing-cuda-kernels-shared-memory) proporciona un ejemplo del uso de memoria compartida.
 
 Para una cooperación eficiente, se espera que la memoria compartida sea una memoria de baja latencia cerca de cada núcleo del procesador (similar a una caché L1) y que `__syncthreads()` sea ligero. `__syncthreads()` solo sincroniza los hilos dentro de un único bloque de hilos.
 
-La sincronización entre bloques solo está soportada en ciertas circunstancias. Por ejemplo, [grupos de bloques de hilos](../01-introduction/programming-model.md#programming-model-thread-block-clusters) permiten que los bloques dentro de un grupo se sincronicen, y las [APIs de Grupos cooperativos](../04-special-topics/cooperative-groups.md#cooperative-groups) proporcionan mecanismos para crear dominios de sincronización entre bloques.
+La sincronización entre bloques solo está soportada en ciertas circunstancias. Por ejemplo, [grupos de bloques de hilos](../01-introduction/programming-model[es].md#12211-agrupaciones-de-bloques-de-hilos) permiten que los bloques dentro de un grupo se sincronicen, y las [APIs de Grupos cooperativos](../04-special-topics/cooperative-groups.md) proporcionan mecanismos para crear dominios de sincronización entre bloques.
 
-Normalmente, el mejor rendimiento se logra cuando la sincronización se mantiene dentro de un bloque de hilos. Los bloques de hilos aún pueden trabajar en resultados comunes utilizando [funciones de memoria atómica](writing-cuda-kernels.md#writing-cuda-kernels-atomics), que se cubrirán en las secciones siguientes.
+Normalmente, el mejor rendimiento se logra cuando la sincronización se mantiene dentro de un bloque de hilos. Los bloques de hilos aún pueden trabajar en resultados comunes utilizando [funciones de memoria atómica](./writing-cuda-kernels.md#235-atomics), que se cubrirán en las secciones siguientes.
 
-La sección [3.2.4](../03-advanced/advanced-kernel-programming.md#advanced-kernels-advanced-sync-primitives) cubre las primitivas de sincronización de CUDA que proporcionan un control muy detallado para maximizar el rendimiento y el uso de los recursos.
+La sección [3.2.4](../03-advanced/advanced-kernel-programming.md#324-advanced-synchronization-primitives) cubre las primitivas de sincronización de CUDA que proporcionan un control muy detallado para maximizar el rendimiento y el uso de los recursos.
 
 ## 2.1.6. Inicialización en tiempo de ejecución
 
-El entorno de ejecución de CUDA crea un [contexto de CUDA](../03-advanced/driver-api.md#driver-api-context) para cada dispositivo del sistema. Este contexto es el contexto principal para este dispositivo y se inicializa en la primera función de ejecución que requiere un contexto activo en este dispositivo. El contexto se comparte entre todos los hilos del host de la aplicación. Como parte de la creación del contexto, el código del dispositivo se [compila en tiempo real](../01-introduction/cuda-platform.md#cuda-platform-just-in-time-compilation) si es necesario y se carga en la memoria del dispositivo. Todo esto ocurre de forma transparente. El contexto principal creado por el entorno de ejecución de CUDA puede accederse a través de la API del controlador para la interoperabilidad, como se describe en [Interoperabilidad entre las API del entorno de ejecución y del controlador](../03-advanced/driver-api.md#driver-api-interop-with-runtime).
+El entorno de ejecución de CUDA crea un [contexto de CUDA](../03-advanced/driver-api.md#331-context) para cada dispositivo del sistema. Este contexto es el contexto principal para este dispositivo y se inicializa en la primera función de ejecución que requiere un contexto activo en este dispositivo. El contexto se comparte entre todos los hilos del host de la aplicación. Como parte de la creación del contexto, el código del dispositivo se [compila en tiempo real](../01-introduction/cuda-platform[es].md#1343-compilación-en-tiempo-real) si es necesario y se carga en la memoria del dispositivo. Todo esto ocurre de forma transparente. El contexto principal creado por el entorno de ejecución de CUDA puede accederse a través de la API del controlador para la interoperabilidad, como se describe en [Interoperabilidad entre las API del entorno de ejecución y del controlador](../03-advanced/driver-api.md#334-interoperability-between-runtime-and-driver-apis).
 
-A partir de CUDA 12.0, las llamadas `cudaInitDevice` y `cudaSetDevice` inicializan el entorno de ejecución y el contexto principal [asociado](../03-advanced/driver-api.md#driver-api-context) con el dispositivo especificado. El entorno de ejecución utilizará implícitamente el dispositivo 0 y se auto-inicializará según sea necesario para procesar las solicitudes de la API del entorno de ejecución si ocurren antes de estas llamadas. Esto es importante al programar las llamadas a funciones del entorno de ejecución y al interpretar el código de error de la primera llamada al entorno de ejecución. Antes de CUDA 12.0, `cudaSetDevice` no inicializaba el entorno de ejecución.
+A partir de CUDA 12.0, las llamadas `cudaInitDevice` y `cudaSetDevice` inicializan el entorno de ejecución y el contexto principal [asociado](../03-advanced/driver-api.md#331-context) con el dispositivo especificado. El entorno de ejecución utilizará implícitamente el dispositivo 0 y se auto-inicializará según sea necesario para procesar las solicitudes de la API del entorno de ejecución si ocurren antes de estas llamadas. Esto es importante al programar las llamadas a funciones del entorno de ejecución y al interpretar el código de error de la primera llamada al entorno de ejecución. Antes de CUDA 12.0, `cudaSetDevice` no inicializaba el entorno de ejecución.
 
 `cudaDeviceReset` destruye el contexto principal del dispositivo actual. Si se llaman a las API del entorno de ejecución después de que se haya destruido el contexto principal, se creará un nuevo contexto principal para ese dispositivo.
 
@@ -634,17 +634,17 @@ Si alguna de estas llamadas detecta un error, este se imprimirá en `stderr` uti
 
 > [!NOTE]
 >
-> Es importante tener en cuenta que el estado de error devuelto por cualquier llamada a la API de CUDA también puede indicar un error de una operación asíncrona emitida previamente. La sección "[Manejo de errores asíncronos](asynchronous-execution.md#asynchronous-execution-error-handling)" cubre este tema en más detalle.
+> Es importante tener en cuenta que el estado de error devuelto por cualquier llamada a la API de CUDA también puede indicar un error de una operación asíncrona emitida previamente. La sección "[Manejo de errores asíncronos](./asynchronous-execution.md#2542-asynchronous-error-handling)" cubre este tema en más detalle.
 
 ### 2.1.7.1. Estado de error
 
 El entorno de ejecución de CUDA mantiene un estado `cudaError_t` para cada hilo del host. El valor predeterminado es `cudaSuccess` y se sobrescribe cada vez que se produce un error. La función `cudaGetLastError` devuelve el estado de error actual y luego lo restablece a `cudaSuccess`. Alternativamente, `cudaPeekAtLastError` devuelve el estado de error sin restablecerlo.
 
-Las llamadas a kernel utilizando la notación de [tres chevrons](intro-to-cuda-cpp.md#intro-cpp-launching-kernels-triple-chevron) no devuelven un `cudaError_t`. Es una buena práctica verificar el estado de error inmediatamente después de las llamadas al kernel para detectar errores inmediatos en la llamada al kernel o [errores asíncronos](intro-to-cuda-cpp.md#intro-cpp-error-checking-asynchronous) antes de la llamada al kernel. Un valor de `cudaSuccess` al verificar el estado de error inmediatamente después de una llamada al kernel no significa que el kernel se haya ejecutado correctamente o incluso que haya comenzado la ejecución. Simplemente verifica que los parámetros y la configuración de ejecución pasados al entorno de ejecución no hayan provocado ningún error, y que el estado de error no sea un error anterior o asíncrono antes de que comenzara el kernel.
+Las llamadas a kernel utilizando la notación de [tres chevrons](#21221-notación-con-tres-flechas) no devuelven un `cudaError_t`. Es una buena práctica verificar el estado de error inmediatamente después de las llamadas al kernel para detectar errores inmediatos en la llamada al kernel o [errores asíncronos](#2172-errores-asíncronos) antes de la llamada al kernel. Un valor de `cudaSuccess` al verificar el estado de error inmediatamente después de una llamada al kernel no significa que el kernel se haya ejecutado correctamente o incluso que haya comenzado la ejecución. Simplemente verifica que los parámetros y la configuración de ejecución pasados al entorno de ejecución no hayan provocado ningún error, y que el estado de error no sea un error anterior o asíncrono antes de que comenzara el kernel.
 
 ### 2.1.7.2. Errores asíncronos
 
-Los kernels de CUDA y muchas APIs de tiempo de ejecución son asíncronos. Se analizarán en detalle las APIs de tiempo de ejecución de CUDA asíncronas en [Ejecución asíncrona](asynchronous-execution.md#asynchronous-execution). El estado de error de CUDA se establece y se sobrescribe cada vez que se produce un error. Esto significa que los errores que ocurren durante la ejecución de operaciones asíncronas solo se informarán cuando se examine el estado de error. Como se ha mencionado, esto podría ser una llamada a `cudaGetLastError`, `cudaPeekAtLastError`, o podría ser cualquier API de CUDA que devuelva `cudaError_t`.
+Los kernels de CUDA y muchas APIs de tiempo de ejecución son asíncronos. Se analizarán en detalle las APIs de tiempo de ejecución de CUDA asíncronas en [Ejecución asíncrona](./asynchronous-execution.md). El estado de error de CUDA se establece y se sobrescribe cada vez que se produce un error. Esto significa que los errores que ocurren durante la ejecución de operaciones asíncronas solo se informarán cuando se examine el estado de error. Como se ha mencionado, esto podría ser una llamada a `cudaGetLastError`, `cudaPeekAtLastError`, o podría ser cualquier API de CUDA que devuelva `cudaError_t`.
 
 Cuando las funciones de las APIs de tiempo de ejecución de CUDA devuelven errores, el estado de error no se borra. Esto significa que el código de error de un error asíncrono, como un acceso de memoria inválido por parte de un kernel, se devolverá por cada API de tiempo de ejecución de CUDA hasta que se haya borrado el estado de error llamando a `cudaGetLastError`.
 
@@ -677,7 +677,7 @@ int main()
 }
 ```
 
-Building and running this, the check after the kernel launch detects and reports the error using the macros illustrated in [Section 2.1.7](intro-to-cuda-cpp.md#intro-cpp-error-checking).
+Building and running this, the check after the kernel launch detects and reports the error using the macros illustrated in [Section 2.1.7](#217-verificación-de-errores-en-cuda).
 
 ```bash
 $ nvcc errorLogIllustration.cu -o errlog
@@ -695,26 +695,26 @@ $ cat cudaLog.txt
 [12:46:23.854][137216133754880][CUDA][E] Returning 1 (CUDA_ERROR_INVALID_VALUE) from cuLaunchKernel
 ```
 
-Setting `CUDA_LOG_FILE` to `stdout` or `stderr` will print to standard out and standard error, respectively. Using the `CUDA_LOG_FILE` environment variable, it is possible to capture and identify CUDA errors, even if the application does not implement proper error checking on CUDA return values. This approach can be extremely powerful for debugging, but the environment variable alone does not allow an application to handle and recover from CUDA errors at runtime. The [error log management](../04-special-topics/error-log-management.md#error-log-management) feature of CUDA also allows a callback function to be registered with the driver which will be called whenever an error is detected. This can be used to capture and handle errors at runtime, and also to integrate CUDA error logging seamlessly into an application’s existing logging system.
+Setting `CUDA_LOG_FILE` to `stdout` or `stderr` will print to standard out and standard error, respectively. Using the `CUDA_LOG_FILE` environment variable, it is possible to capture and identify CUDA errors, even if the application does not implement proper error checking on CUDA return values. This approach can be extremely powerful for debugging, but the environment variable alone does not allow an application to handle and recover from CUDA errors at runtime. The [error log management](../04-special-topics/error-log-management.md) feature of CUDA also allows a callback function to be registered with the driver which will be called whenever an error is detected. This can be used to capture and handle errors at runtime, and also to integrate CUDA error logging seamlessly into an application’s existing logging system.
 
-[Sección 4.9](../04-special-topics/error-log-management.md#error-log-management) muestra más ejemplos de la función de gestión de registros de errores de CUDA. La gestión de registros de errores y `CUDA_LOG_FILE` están disponibles con la versión del controlador NVIDIA r570 y posteriores.
+[Sección 4.9](../04-special-topics/error-log-management.md) muestra más ejemplos de la función de gestión de registros de errores de CUDA. La gestión de registros de errores y `CUDA_LOG_FILE` están disponibles con la versión del controlador NVIDIA r570 y posteriores.
 
 ## 2.1.8. Funciones del dispositivo y del anfitrión
 
-El especificador `__global__` se utiliza para indicar el punto de entrada para un kernel. Es decir, una función que se invocará para la ejecución en paralelo en la GPU. En la mayoría de los casos, los kernels se inician desde el anfitrión, pero es posible iniciar un kernel desde dentro de otro kernel utilizando la [paralelización dinámica](../04-special-topics/dynamic-parallelism.md#cuda-dynamic-parallelism).
+El especificador `__global__` se utiliza para indicar el punto de entrada para un kernel. Es decir, una función que se invocará para la ejecución en paralelo en la GPU. En la mayoría de los casos, los kernels se inician desde el anfitrión, pero es posible iniciar un kernel desde dentro de otro kernel utilizando la [paralelización dinámica](../04-special-topics/dynamic-parallelism.md).
 
 El especificador `__device__` indica que una función debe compilarse para la GPU y poder ser llamada desde otras funciones `__device__` o `__global__`. Una función, incluyendo funciones de miembros de clase, funciones functor y lambdas, puede especificarse tanto como `__device__` como `__host__`, como se muestra en el siguiente ejemplo.
 
 ## 2.1.9. Especificadores de variables
 
-Los especificadores de [CUDA](../05-appendices/cpp-language-extensions.md#memory-space-specifiers) pueden utilizarse en las declaraciones de variables estáticas para controlar su ubicación.
+Los especificadores de [CUDA](../05-appendices/cpp-language-extensions.md#5412-memory-space-specifiers) pueden utilizarse en las declaraciones de variables estáticas para controlar su ubicación.
 
-- `__device__` especifica que una variable se almacena en la [memoria global](writing-cuda-kernels.md#writing-cuda-kernels-global-memory)
-- `__constant__` especifica que una variable se almacena en la [memoria constante](writing-cuda-kernels.md#writing-cuda-kernels-constant-memory)
-- `__managed__` especifica que una variable se almacena como [memoria unificada](understanding-memory.md#memory-unified-memory)
-- `__shared__` especifica que una variable se almacena en la [memoria compartida](writing-cuda-kernels.md#writing-cuda-kernels-shared-memory)
+- `__device__` especifica que una variable se almacena en la [memoria global](./writing-cuda-kernels.md#2331-global-memory)
+- `__constant__` especifica que una variable se almacena en la [memoria constante](./writing-cuda-kernels.md#2335-constant-memory)
+- `__managed__` especifica que una variable se almacena como [memoria unificada](./understanding-memory.md#262-unified-memory)
+- `__shared__` especifica que una variable se almacena en la [memoria compartida](./writing-cuda-kernels.md#2332-shared-memory)
 
-Cuando una variable se declara sin ningún especificador dentro de una función `__device__` o `__global__`, se asigna a los registros siempre que sea posible, y a la [memoria local](writing-cuda-kernels.md#writing-cuda-kernels-local-memory) cuando sea necesario. Cualquier variable que se declare sin ningún especificador fuera de una función `__device__` o `__global__` se asignará en la memoria del sistema.
+Cuando una variable se declara sin ningún especificador dentro de una función `__device__` o `__global__`, se asigna a los registros siempre que sea posible, y a la [memoria local](./writing-cuda-kernels.md#2334-local-memory) cuando sea necesario. Cualquier variable que se declare sin ningún especificador fuera de una función `__device__` o `__global__` se asignará en la memoria del sistema.
 
 ### 2.1.9.1. Detección de la compilación del dispositivo
 
@@ -729,13 +729,13 @@ De manera similar a los bloques de hilos, las agrupaciones también se organizan
 El número de bloques de hilos en una agrupación puede ser definido por el usuario, y se admite un máximo de 8 bloques de hilos en una agrupación como un tamaño de agrupación portátil en CUDA.
 Tenga en cuenta que, en el hardware de GPU o en configuraciones MIG que son demasiado pequeñas para admitir 8 multiprocesadores, el tamaño máximo de la agrupación se reducirá en consecuencia. La identificación de estas configuraciones más pequeñas, así como de configuraciones más grandes que admitan un tamaño de agrupación de bloques de hilos superior a 8, es específica de la arquitectura y se puede consultar utilizando la API `cudaOccupancyMaxPotentialClusterSize`.
 
-Todos los bloques de hilos dentro de la agrupación están garantizados para ser programados simultáneamente en un único Grupo de Procesamiento de GPU (GPC) y permiten que los bloques de hilos dentro de la agrupación realicen la sincronización soportada por el hardware utilizando la API `cluster.sync()` de [grupos cooperativos](../04-special-topics/cooperative-groups.md#cooperative-groups). La función de grupo también proporciona funciones de miembro para consultar el tamaño del grupo en términos de número de hilos o número de bloques utilizando las API `num_threads()` y `num_blocks()` respectivamente. El rango de un hilo o bloque dentro del grupo se puede consultar utilizando las API `dim_threads()` y `dim_blocks()` respectivamente.
+Todos los bloques de hilos dentro de la agrupación están garantizados para ser programados simultáneamente en un único Grupo de Procesamiento de GPU (GPC) y permiten que los bloques de hilos dentro de la agrupación realicen la sincronización soportada por el hardware utilizando la API `cluster.sync()` de [grupos cooperativos](../04-special-topics/cooperative-groups.md). La función de grupo también proporciona funciones de miembro para consultar el tamaño del grupo en términos de número de hilos o número de bloques utilizando las API `num_threads()` y `num_blocks()` respectivamente. El rango de un hilo o bloque dentro del grupo se puede consultar utilizando las API `dim_threads()` y `dim_blocks()` respectivamente.
 
-Los bloques de hilos que pertenecen a una agrupación tienen acceso a la memoria compartida distribuida, que es la memoria compartida combinada de todos los bloques de hilos dentro de la agrupación. Los bloques de hilos dentro de una agrupación tienen la capacidad de leer, escribir y realizar operaciones atómicas en cualquier dirección dentro de la memoria compartida distribuida. [Memoria compartida distribuida](writing-cuda-kernels.md#writing-cuda-kernels-distributed-shared-memory) proporciona un ejemplo de cómo realizar histogramas en memoria compartida distribuida.
+Los bloques de hilos que pertenecen a una agrupación tienen acceso a la memoria compartida distribuida, que es la memoria compartida combinada de todos los bloques de hilos dentro de la agrupación. Los bloques de hilos dentro de una agrupación tienen la capacidad de leer, escribir y realizar operaciones atómicas en cualquier dirección dentro de la memoria compartida distribuida. [Memoria compartida distribuida](./writing-cuda-kernels.md#2338-distributed-shared-memory) proporciona un ejemplo de cómo realizar histogramas en memoria compartida distribuida.
 
 > [!NOTE]
 >
-> En un kernel lanzado utilizando el soporte de agrupación, la variable `gridDim` todavía denota el tamaño en términos de número de bloques de hilos, con fines de compatibilidad. El rango de un bloque en una agrupación se puede encontrar utilizando la API [Grupos Cooperativos](../04-special-topics/cooperative-groups.md#cooperative-groups).
+> En un kernel lanzado utilizando el soporte de agrupación, la variable `gridDim` todavía denota el tamaño en términos de número de bloques de hilos, con fines de compatibilidad. El rango de un bloque en una agrupación se puede encontrar utilizando la API [Grupos Cooperativos](../04-special-topics/cooperative-groups.md).
 
 ### 2.1.10.1. Lanzamiento con grupos utilizando la notación de tres flechas
 

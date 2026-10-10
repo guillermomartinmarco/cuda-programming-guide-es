@@ -13,5 +13,8 @@
       "envManager": "ms-python.python:venv",
       "packageManager": "ms-python.python:pip"
     }
-  ]
+  ],
+  "cmake.sourceDirectory": "C:/P/B/CUDA Programming Guide/work/2.1.2.3(1)",
+  "C_Cpp.default.compilerPath": "c:\\Users\\f78570c\\AppData\\Local\\portable\\msvc\\msvc-14.44.17.14_sdk-26100\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+  "C_Cpp.default.includePath": []
 }

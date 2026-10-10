@@ -4,4 +4,9 @@
 			"path": "."
 		}
 	],
+	"settings": {
+		"C_Cpp.default.includePath": [
+			"C:\\S\\miniconda3\\Library\\include"
+		]
+	},
 }

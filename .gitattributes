@@ -1,0 +1,2 @@
+# Los scripts de shell siempre con LF, si no fallan en Linux/Jetson
+*.sh text eol=lf
