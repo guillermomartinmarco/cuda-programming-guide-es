@@ -111,7 +111,7 @@ int main()
 }
 ```
 
-En este ejemplo, se utilizan 4 bloques de hilos de 256 hilos para sumar un vector de 1024 elementos. En el primer bloque de hilos, `blockIdx.x` será 0, por lo que el índice de trabajo de cada hilo será simplemente su `threadIdx.x`. En el segundo bloque de hilos, `blockIdx.x` será 1, por lo que `blockDim.x * blockIdx.x` será igual a `blockDim.x`, que es 256 en este caso. El índice de trabajo para cada hilo en el segundo bloque de hilos será su `threadIdx.x + 256`. En el tercer bloque de hilos, el índice de trabajo será `threadIdx.x + 512`.
+En este ejemplo, se utilizan 4 bloques de hilos de 256 hilos para sumar un vector de 1024 elementos. En el primer bloque de hilos, `blockIdx.x` será 0, por lo que el índice `workIndex` de cada hilo será simplemente su `threadIdx.x`. En el segundo bloque de hilos, `blockIdx.x` será 1, por lo que `blockDim.x * blockIdx.x` será igual a `blockDim.x`, que es 256 en este caso. El índice `workIndex` para cada hilo en el segundo bloque de hilos será su `threadIdx.x + 256`. En el tercer bloque de hilos, el índice `workIndex` será `threadIdx.x + 512`.
 
 Este cálculo del `workIndex` es muy común para paralelizaciones unidimensionales. Al expandirse a dos o tres dimensiones, a menudo se sigue el mismo patrón en cada una de esas dimensiones.
 
@@ -122,12 +122,12 @@ El ejemplo anterior asume que la longitud del vector es un múltiplo del tamaño
 ```c
 __global__ void vecAdd(float* A, float* B, float* C, int vectorLength)
 {
-     // calculate which element this thread is responsible for computing
+     // Calcular de qué elemento se encarga cada hilo
      int workIndex = threadIdx.x + blockDim.x * blockIdx.x;
 
      if(workIndex < vectorLength)
      {
-         // Perform computation
+         // Ejecutar el cálculo
          C[workIndex] = A[workIndex] + B[workIndex];
      }
 }
@@ -138,7 +138,7 @@ Con el código del kernel anterior, se pueden lanzar más hilos de los necesario
 El número de bloques de hilos que se necesitan se puede calcular como el entero superior del número de hilos necesarios, la longitud del vector en este caso, dividido por el número de hilos por bloque. Es decir, la división entera del número de hilos necesarios entre el número de hilos por bloque, redondeado hacia arriba. Una forma común de expresar esto como una única división entera es la siguiente. Al añadir `threads - 1` antes de la división entera, se comporta como una función de techo, añadiendo otro bloque de hilos solo si la longitud del vector no es divisible por el número de hilos por bloque.
 
 ```c
-// vectorLength is an integer storing number of elements in the vector
+// vectorLength es un entero que almacena la cantidad de elementos en el vector
 int threads = 256;
 int blocks = (vectorLength + threads-1)/threads;
 vecAdd<<<blocks, threads>>>(devA, devB, devC, vectorLength);
@@ -147,7 +147,7 @@ vecAdd<<<blocks, threads>>>(devA, devB, devC, vectorLength);
 La biblioteca [CUDA Core Compute Library (CCCL)](https://nvidia.github.io/cccl/unstable/) proporciona una utilidad conveniente, `cuda::ceil_div`, para realizar esta división con redondeo, y así calcular el número de bloques necesarios para lanzar un kernel. Esta utilidad está disponible incluyendo el encabezado `<cuda/cmath>`.
 
 ```c
-// vectorLength is an integer storing number of elements in the vector
+// vectorLength es un entero que almacena la cantidad de elementos en el vector
 int threads = 256;
 int blocks = cuda::ceil_div(vectorLength, threads);
 vecAdd<<<blocks, threads>>>(devA, devB, devC, vectorLength);
@@ -168,43 +168,43 @@ El código a continuación muestra una función completa para lanzar el kernel `
 ```c
 void unifiedMemExample(int vectorLength)
 {
-    // Pointers to memory vectors
+    // Punteros a vectores de memoria
     float* A = nullptr;
     float* B = nullptr;
     float* C = nullptr;
     float* comparisonResult = (float*)malloc(vectorLength*sizeof(float));
 
-    // Use unified memory to allocate buffers
+    // Usa memoria unificada para asignar búferes
     cudaMallocManaged(&A, vectorLength*sizeof(float));
     cudaMallocManaged(&B, vectorLength*sizeof(float));
     cudaMallocManaged(&C, vectorLength*sizeof(float));
 
-    // Initialize vectors on the host
+    // Inicializar vectores en el host
     initArray(A, vectorLength);
     initArray(B, vectorLength);
 
-    // Launch the kernel. Unified memory will make sure A, B, and C are
-    // accessible to the GPU
+    // Inicia el kernel. La memoria unificada garantizará
+    // que la GPU pueda acceder a A, B y C.
     int threads = 256;
     int blocks = cuda::ceil_div(vectorLength, threads);
     vecAdd<<<blocks, threads>>>(A, B, C, vectorLength);
-    // Wait for the kernel to complete execution
+    // Esperar a que el kernel termine de ejecutarse
     cudaDeviceSynchronize();
 
-    // Perform computation serially on CPU for comparison
+    // Realizar el cálculo en serie en la CPU para compararlo
     serialVecAdd(A, B, comparisonResult, vectorLength);
 
-    // Confirm that CPU and GPU got the same answer
+    // Verifica que la CPU y la GPU hayan obtenido el mismo resultado
     if(vectorApproximatelyEqual(C, comparisonResult, vectorLength))
     {
-        printf("Unified Memory: CPU and GPU answers match\n");
+        printf("Memoria unificada: las respuestas de la CPU y la GPU coinciden\n");
     }
     else
     {
-        printf("Unified Memory: Error - CPU and GPU answers do not match\n");
+        printf("Memoria unificada: Error: las respuestas de la CPU y la GPU no coinciden\n");
     }
 
-    // Clean Up
+    // Limpieza
     cudaFree(A);
     cudaFree(B);
     cudaFree(C);
@@ -222,63 +222,64 @@ La gestión explícita de la asignación de memoria y la migración de datos ent
 ```c
 void explicitMemExample(int vectorLength)
 {
-    // Pointers for host memory
+    // Punteros a la memoria del host
     float* A = nullptr;
     float* B = nullptr;
     float* C = nullptr;
     float* comparisonResult = (float*)malloc(vectorLength*sizeof(float));
 
-    // Pointers for device memory
+    // Punteros para la memoria del dispositivo
     float* devA = nullptr;
     float* devB = nullptr;
     float* devC = nullptr;
 
-    //Allocate Host Memory using cudaMallocHost API. This is best practice
-    // when buffers will be used for copies between CPU and GPU memory
+    // Asigna memoria del host mediante la API `cudaMallocHost`.
+    // Esta es la mejor práctica cuando se utilizarán búferes para
+    // realizar copias entre la memoria de la CPU y la de la GPU
     cudaMallocHost(&A, vectorLength*sizeof(float));
     cudaMallocHost(&B, vectorLength*sizeof(float));
     cudaMallocHost(&C, vectorLength*sizeof(float));
 
-    // Initialize vectors on the host
+    // Inicializar vectores en el host
     initArray(A, vectorLength);
     initArray(B, vectorLength);
 
-    // start-allocate-and-copy
-    // Allocate memory on the GPU
+    // Inicio: asignar-y-copiar
+    // Asignar memoria en la GPU
     cudaMalloc(&devA, vectorLength*sizeof(float));
     cudaMalloc(&devB, vectorLength*sizeof(float));
     cudaMalloc(&devC, vectorLength*sizeof(float));
 
-    // Copy data to the GPU
+    // Copiar datos a la GPU
     cudaMemcpy(devA, A, vectorLength*sizeof(float), cudaMemcpyDefault);
     cudaMemcpy(devB, B, vectorLength*sizeof(float), cudaMemcpyDefault);
     cudaMemset(devC, 0, vectorLength*sizeof(float));
-    // end-allocate-and-copy
+    // Fin: asignar-y-copiar
 
-    // Launch the kernel
+    // Lanzar el kernel
     int threads = 256;
     int blocks = cuda::ceil_div(vectorLength, threads);
     vecAdd<<<blocks, threads>>>(devA, devB, devC, vectorLength);
-    // wait for kernel execution to complete
+    // esperar a que termine la ejecución del kernel
     cudaDeviceSynchronize();
 
-    // Copy results back to host
+    // Copiar los resultados de vuelta al host
     cudaMemcpy(C, devC, vectorLength*sizeof(float), cudaMemcpyDefault);
 
-    // Perform computation serially on CPU for comparison
+    // Realizar el cálculo en serie en la CPU para compararlo
     serialVecAdd(A, B, comparisonResult, vectorLength);
 
-    // Confirm that CPU and GPU got the same answer
+    // Verifica que la CPU y la GPU hayan obtenido el mismo resultado
     if(vectorApproximatelyEqual(C, comparisonResult, vectorLength))
     {
-        printf("Explicit Memory: CPU and GPU answers match\n");
+        printf("Memoria explícita: las respuestas de la CPU y la GPU coinciden\n");
     }
     else
     {
-        printf("Explicit Memory: Error - CPU and GPU answers to not match\n");
+        printf("Memoria explícita: Error: los resultados de la CPU y la GPU no coinciden\n");
     }
 
-    // clean up
+    // Limpieza
     cudaFree(devA);
     cudaFree(devB);
     cudaFree(devC);
@@ -650,10 +651,11 @@ Cuando las funciones de las APIs de tiempo de ejecución de CUDA devuelven error
 
 ```c
     vecAdd<<<blocks, threads>>>(devA, devB, devC);
-    // check error state after kernel launch
+    // verificar el estado de error después del inicio del kernel
     CUDA_CHECK(cudaGetLastError());
-    // wait for kernel execution to complete
-    // The CUDA_CHECK will report errors that occurred during execution of the kernel
+    // Esperar a que finalice la ejecución del kernel
+    // CUDA_CHECK informará de los errores que se hayan
+    // producido durante la ejecución del kernel
     CUDA_CHECK(cudaDeviceSynchronize());
 ```
 
@@ -671,13 +673,13 @@ __global__ void k()
 
 int main()
 {
-        k<<<8192, 4096>>>(); // Invalid block size
+        k<<<8192, 4096>>>(); // Tamaño de bloque no válido
         CUDA_CHECK(cudaGetLastError());
         return 0;
 }
 ```
 
-Building and running this, the check after the kernel launch detects and reports the error using the macros illustrated in [Section 2.1.7](#217-verificación-de-errores-en-cuda).
+Al compilarlo y ejecutarlo, la verificación que se realiza después del inicio del kernel detecta y reporta el error utilizando las macros que se muestran en [la sección 2.1.7](#217-verificación-de-errores-en-cuda).
 
 ```bash
 $ nvcc errorLogIllustration.cu -o errlog
@@ -695,9 +697,9 @@ $ cat cudaLog.txt
 [12:46:23.854][137216133754880][CUDA][E] Returning 1 (CUDA_ERROR_INVALID_VALUE) from cuLaunchKernel
 ```
 
-Setting `CUDA_LOG_FILE` to `stdout` or `stderr` will print to standard out and standard error, respectively. Using the `CUDA_LOG_FILE` environment variable, it is possible to capture and identify CUDA errors, even if the application does not implement proper error checking on CUDA return values. This approach can be extremely powerful for debugging, but the environment variable alone does not allow an application to handle and recover from CUDA errors at runtime. The [error log management](../04-special-topics/error-log-management.md) feature of CUDA also allows a callback function to be registered with the driver which will be called whenever an error is detected. This can be used to capture and handle errors at runtime, and also to integrate CUDA error logging seamlessly into an application’s existing logging system.
+Si se configura `CUDA_LOG_FILE` en `stdout` o `stderr`, los mensajes se imprimirán en la salida estándar y en el error estándar, respectivamente. Mediante la variable de entorno `CUDA_LOG_FILE`, es posible capturar e identificar errores de CUDA, incluso si la aplicación no implementa una verificación adecuada de los valores de retorno de CUDA. Este enfoque puede ser extremadamente poderoso para la depuración, pero la variable de entorno por sí sola no permite que una aplicación maneje y se recupere de los errores de CUDA en tiempo de ejecución. La función de [gestión de registros de errores](../04-special-topics/error-log-management.md) de CUDA también permite registrar una función de devolución de llamada con el controlador, la cual se activará cada vez que se detecte un error. Esto se puede utilizar para capturar y manejar errores en tiempo de ejecución, así como para integrar el registro de errores de CUDA de manera fluida en el sistema de registro existente de una aplicación.
 
-[Sección 4.9](../04-special-topics/error-log-management.md) muestra más ejemplos de la función de gestión de registros de errores de CUDA. La gestión de registros de errores y `CUDA_LOG_FILE` están disponibles con la versión del controlador NVIDIA r570 y posteriores.
+La [Sección 4.9](../04-special-topics/error-log-management.md) muestra más ejemplos de la función de gestión de registros de errores de CUDA. La gestión de registros de errores y `CUDA_LOG_FILE` están disponibles con la versión del controlador NVIDIA r570 y posteriores.
 
 ## 2.1.8. Funciones del dispositivo y del anfitrión
 
@@ -742,8 +744,9 @@ Los bloques de hilos que pertenecen a una agrupación tienen acceso a la memoria
 Un grupo de hilos puede habilitarse en un kernel utilizando un atributo del kernel en tiempo de compilación, mediante `__cluster_dims__(X,Y,Z)`, o utilizando la API de lanzamiento de kernel de CUDA `cudaLaunchKernelEx`. El ejemplo a continuación muestra cómo lanzar un grupo utilizando un atributo del kernel en tiempo de compilación. El tamaño del grupo, según el atributo del kernel, se fija en tiempo de compilación, y luego se puede lanzar el kernel utilizando la sintaxis clásica `<<< , >>>`. Si un kernel utiliza un tamaño de grupo definido en tiempo de compilación, el tamaño del grupo no puede modificarse al lanzar el kernel.
 
 ```cpp
-// Kernel definition
-// Compile time cluster size 2 in X-dimension and 1 in Y and Z dimension
+// Definición del núcleo
+// Tamaño del clúster en tiempo de compilación:
+// 2 en la dimensión X y 1 en las dimensiones Y y Z
 __global__ void __cluster_dims__(2, 1, 1) cluster_kernel(float *input, float* output)
 {
 
@@ -752,13 +755,14 @@ __global__ void __cluster_dims__(2, 1, 1) cluster_kernel(float *input, float* ou
 int main()
 {
     float *input, *output;
-    // Kernel invocation with compile time cluster size
+    // Llamada al núcleo con el tamaño del
+    // clúster definido en tiempo de compilación
     dim3 threadsPerBlock(16, 16);
     dim3 numBlocks(N / threadsPerBlock.x, N / threadsPerBlock.y);
 
-    // The grid dimension is not affected by cluster launch, and is still enumerated
-    // using number of blocks.
-    // The grid dimension must be a multiple of cluster size.
+    // La dimensión de la cuadrícula no se ve afectada por el inicio
+    // del clúster y sigue enumerándose según el número de bloques.
+    // La dimensión de la cuadrícula debe ser un múltiplo del tamaño del clúster.
     cluster_kernel<<<numBlocks, threadsPerBlock>>>(input, output);
 }
 ```
